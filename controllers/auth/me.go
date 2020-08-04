@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/vpassanisi/Project-S/models"
 
 	"github.com/gofiber/fiber"
 )
@@ -19,7 +18,7 @@ func Me(c *fiber.Ctx) {
 	cookie := c.Cookies("token")
 
 	if cookie == "" {
-		c.Status(401).JSON(models.RespondM{
+		c.Status(401).JSON(respondM{
 			Success: false,
 			Message: "You are not logged in",
 		})
@@ -35,7 +34,7 @@ func Me(c *fiber.Ctx) {
 	})
 	// parse error aborts and returns
 	if parseErr != nil {
-		c.Status(401).JSON(models.RespondM{
+		c.Status(401).JSON(respondM{
 			Success: false,
 			Message: "Invalid token",
 		})
@@ -44,12 +43,12 @@ func Me(c *fiber.Ctx) {
 
 	// if token is valid and claims are mapped set the users id to the context map with key "id" else abort
 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		c.Status(200).JSON(models.RespondM{
+		c.Status(200).JSON(respondM{
 			Success: true,
 			Message: "You are logged in",
 		})
 	} else {
-		c.Status(401).JSON(models.RespondM{
+		c.Status(401).JSON(respondM{
 			Success: false,
 			Message: "Claims not ok or token is not valid",
 		})

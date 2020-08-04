@@ -6,8 +6,12 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber"
-	"github.com/vpassanisi/Project-S/models"
 )
+
+type respondM struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
 
 var claims jwt.MapClaims
 var ok bool
@@ -16,7 +20,7 @@ func Protected(c *fiber.Ctx) {
 	cookie := c.Cookies("token")
 
 	if cookie == "" {
-		c.Status(401).JSON(models.RespondM{
+		c.Status(401).JSON(respondM{
 			Success: false,
 			Message: "You must be logged in to access this endpoint",
 		})
@@ -32,7 +36,7 @@ func Protected(c *fiber.Ctx) {
 	})
 	// parse error aborts and returns
 	if parseErr != nil {
-		c.Status(401).JSON(models.RespondM{
+		c.Status(401).JSON(respondM{
 			Success: false,
 			Message: "Invalid token",
 		})
@@ -43,7 +47,7 @@ func Protected(c *fiber.Ctx) {
 	if claims, ok = token.Claims.(jwt.MapClaims); ok && token.Valid {
 		c.Next()
 	} else {
-		c.Status(401).JSON(models.RespondM{
+		c.Status(401).JSON(respondM{
 			Success: false,
 			Message: "Claims not ok or token is not valid",
 		})

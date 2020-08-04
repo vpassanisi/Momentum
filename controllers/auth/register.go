@@ -8,17 +8,9 @@ import (
 
 	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/config"
-	"github.com/vpassanisi/Project-S/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-func respond(str string, c *fiber.Ctx) {
-	c.Status(406).JSON(models.RespondM{
-		Success: false,
-		Message: str,
-	})
-}
 
 // Register //
 // @desc adds a new user to db
@@ -26,24 +18,13 @@ func respond(str string, c *fiber.Ctx) {
 // @access Public
 func Register(c *fiber.Ctx) {
 
-	user := models.User{}
+	user := user{}
 	if err := c.BodyParser(&user); err != nil {
 		log.Fatal(err)
 	}
 
-	if user.Name == "" {
-		respond("Please provide a name", c)
-		return
-	} else if user.Email == "" {
-		respond("Please provide an email", c)
-		return
-	} else if user.Password == "" {
-		respond("Please provide a password", c)
-		return
-	}
-
-	user.Encrypt(user.Password)
-	user.SetCreatedAt()
+	user.encrypt(user.Password)
+	user.CreatedAt = time.Now().Unix()
 
 	collection := config.GetCollection("Users")
 
@@ -51,13 +32,13 @@ func Register(c *fiber.Ctx) {
 	if insertErr != nil {
 		err := insertErr.(mongo.WriteException)
 		if err.WriteErrors[0].Code == 11000 {
-			c.Status(400).JSON(models.RespondM{
+			c.Status(400).JSON(respondM{
 				Success: false,
 				Message: "That email already exists",
 			})
 		} else {
 			fmt.Println(err.WriteErrors[0])
-			c.Status(400).JSON(models.RespondM{
+			c.Status(400).JSON(respondM{
 				Success: false,
 				Message: "There was an error adding the new document to the database",
 			})
@@ -65,9 +46,9 @@ func Register(c *fiber.Ctx) {
 		return
 	}
 
-	token, getSignedErr := user.GetSignedJWT(insertOneResult.InsertedID.(primitive.ObjectID).Hex())
+	token, getSignedErr := getSignedJWT(insertOneResult.InsertedID.(primitive.ObjectID).Hex())
 	if getSignedErr != nil {
-		c.Status(400).JSON(models.RespondM{
+		c.Status(400).JSON(respondM{
 			Success: false,
 			Message: "There was an error getting a token",
 		})
@@ -91,9 +72,9 @@ func Register(c *fiber.Ctx) {
 	}
 	c.Cookie(&cookie)
 
-	c.Status(200).JSON(models.RespondU{
+	c.Status(200).JSON(respondU{
 		Success: true,
-		Data: models.UserResponse{
+		Data: userSimple{
 			Name:      user.Name,
 			Email:     user.Email,
 			CreatedAt: user.CreatedAt,

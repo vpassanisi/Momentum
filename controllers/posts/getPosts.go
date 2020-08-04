@@ -6,7 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/vpassanisi/Project-S/config"
-	"github.com/vpassanisi/Project-S/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -15,11 +14,11 @@ import (
 
 func GetPosts(c *fiber.Ctx) {
 
-	posts := []models.PostFull{}
-	sub := models.SubFull{}
+	posts := []postFull{}
+	sub := subFull{}
 	subID, objErr := primitive.ObjectIDFromHex(c.Params("sub"))
 	if objErr != nil {
-		c.Status(400).JSON(models.RespondM{
+		c.Status(400).JSON(respondM{
 			Success: false,
 			Message: "Bad id",
 		})
@@ -34,14 +33,14 @@ func GetPosts(c *fiber.Ctx) {
 	if findOneErr != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
 		if findOneErr == mongo.ErrNoDocuments {
-			c.Status(404).JSON(models.RespondM{
+			c.Status(404).JSON(respondM{
 				Success: false,
 				Message: "Nothing matched that id",
 			})
 			return
 		}
 
-		c.Status(500).JSON(models.RespondM{
+		c.Status(500).JSON(respondM{
 			Success: false,
 			Message: "There was a problem with the query",
 		})
@@ -53,7 +52,7 @@ func GetPosts(c *fiber.Ctx) {
 		"sub": subID,
 	})
 	if findErr != nil {
-		c.Status(500).JSON(models.RespondM{
+		c.Status(500).JSON(respondM{
 			Success: false,
 			Message: "There was an error during query",
 		})
@@ -65,16 +64,16 @@ func GetPosts(c *fiber.Ctx) {
 	// loop through cursor and put todos in the todos slice of todos
 	cursorErr := cursor.All(c.Context(), &posts)
 	if cursorErr != nil {
-		c.Status(500).JSON(models.RespondM{
+		c.Status(500).JSON(respondM{
 			Success: false,
 			Message: "There was an error during cursor loop",
 		})
 		return
 	}
 
-	c.Status(200).JSON(models.RespondGetPosts{
+	c.Status(200).JSON(respondGP{
 		Success: true,
-		Data: models.GetPosts{
+		Data: getPosts{
 			Sub:   sub,
 			Posts: posts,
 		},

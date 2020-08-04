@@ -1,4 +1,4 @@
-package models
+package auth
 
 import (
 	"fmt"
@@ -11,41 +11,38 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type User struct {
+type user struct {
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	CreatedAt int64  `json:"createdAt"`
 }
 
-type UserFull struct {
-	ID        primitive.ObjectID `bson:"_id"`
+type userResult struct {
+	_id       primitive.ObjectID `bson:"_id" json:"_id"`
 	Name      string             `json:"name"`
 	Email     string             `json:"email"`
 	Password  string             `json:"password"`
 	CreatedAt int64              `json:"createdAt"`
 }
 
-type UserResponse struct {
+type userSimple struct {
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	CreatedAt int64  `json:"createdAt"`
 }
 
-func (user *User) SetCreatedAt() {
-	user.CreatedAt = time.Now().Unix()
+type respondM struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
-func (user *User) Encrypt(password string) {
-	hash, bcryptErr := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if bcryptErr != nil {
-		log.Fatal(bcryptErr)
-	}
-
-	user.Password = string(hash)
+type respondU struct {
+	Success bool       `json:"success"`
+	Data    userSimple `json:"data"`
 }
 
-func (user *User) GetSignedJWT(id string) (string, error) {
+func getSignedJWT(id string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -60,4 +57,13 @@ func (user *User) GetSignedJWT(id string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func (user *user) encrypt(password string) {
+	hash, bcryptErr := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if bcryptErr != nil {
+		log.Fatal(bcryptErr)
+	}
+
+	user.Password = string(hash)
 }

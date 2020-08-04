@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber"
-	"github.com/vpassanisi/Project-S/models"
 )
 
 // Logout //
@@ -31,7 +30,7 @@ func Logout(c *fiber.Ctx) {
 	}
 	c.Cookie(&cookie)
 
-	c.Status(200).JSON(models.RespondM{
+	c.Status(200).JSON(respondM{
 		Success: true,
 		Message: "You have been logged out",
 	})
