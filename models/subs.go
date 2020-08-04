@@ -7,24 +7,24 @@ import (
 )
 
 type SubFull struct {
-	ID          primitive.ObjectID `json:"_id"`
+	ID          primitive.ObjectID `json:"_id" bson:"_id"`
 	Name        string             `json:"name"`
 	Description string             `json:"description"`
 	Founder     primitive.ObjectID `json:"founder"`
-	CreatedAt   int64              `json:"createdat`
+	CreatedAt   int64              `json:"createdAt"`
 }
 
 type Sub struct {
 	Name        string             `json:"name"`
 	Description string             `json:"description"`
-	Founder     primitive.ObjectID `json:"founder"`
-	CreatedAt   int64              `json:"createdat`
+	Founder     primitive.ObjectID `json:"founder" bson:"_id"`
+	CreatedAt   int64              `json:"createdAt"`
 }
 
 type SubResponse struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	CreatedAt   int64  `json:"createdat`
+	CreatedAt   int64  `json:"createdAt"`
 }
 
 func (sub *Sub) SetCreatedAt() {

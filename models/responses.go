@@ -14,3 +14,13 @@ type RespondS struct {
 	Success bool        `json:"success"`
 	Data    SubResponse `json:"data"`
 }
+
+type RespondP struct {
+	Success bool         `json:"success"`
+	Data    PostResponse `json:"data"`
+}
+
+type RespondGetPosts struct {
+	Success bool     `json:"success"`
+	Data    GetPosts `json:"data"`
+}
