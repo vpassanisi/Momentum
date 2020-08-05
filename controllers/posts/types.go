@@ -35,6 +35,7 @@ type subFull struct {
 	Name        string             `json:"name"`
 	Description string             `json:"description"`
 	Founder     primitive.ObjectID `json:"founder"`
+	Banner      string             `json:"banner"`
 	CreatedAt   int64              `json:"createdAt"`
 }
 

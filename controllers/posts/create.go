@@ -13,6 +13,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Create //
+// @desc creates a new post and adds it to the database
+// @route POST /api/v1/posts/:sub
+// @access Private
 func Create(c *fiber.Ctx) {
 
 	claims := arbiter.GetClaims()
@@ -23,6 +27,7 @@ func Create(c *fiber.Ctx) {
 			Success: false,
 			Message: "Bad cookie",
 		})
+		return
 	}
 
 	sub, subErr := primitive.ObjectIDFromHex(c.Params("sub"))
@@ -31,6 +36,7 @@ func Create(c *fiber.Ctx) {
 			Success: false,
 			Message: "Bad sub id",
 		})
+		return
 	}
 
 	post := post{

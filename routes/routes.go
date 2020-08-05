@@ -22,6 +22,8 @@ func BuildRoutes(app *fiber.App, client *mongo.Client) {
 
 	Subs := v1.Group("/subs")
 	Subs.Post("/", arbiter.Protected, subs.Create)
+	Subs.Put("/:id", arbiter.Protected, subs.Update)
+	Subs.Get("/", subs.GetSubs)
 
 	Posts := v1.Group("/posts")
 	Posts.Post("/:sub", arbiter.Protected, posts.Create)

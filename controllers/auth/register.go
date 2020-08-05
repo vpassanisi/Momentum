@@ -6,9 +6,10 @@ import (
 	"os"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/config"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -46,7 +47,7 @@ func Register(c *fiber.Ctx) {
 		return
 	}
 
-	token, getSignedErr := getSignedJWT(insertOneResult.InsertedID.(primitive.ObjectID).Hex())
+	token, getSignedErr := getSignedJWT(insertOneResult.InsertedID.(primitive.ObjectID))
 	if getSignedErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,

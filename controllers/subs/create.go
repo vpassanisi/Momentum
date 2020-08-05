@@ -40,7 +40,7 @@ func Create(c *fiber.Ctx) {
 
 	subsCollection := config.GetCollection("Subs")
 
-	_, insertErr := subsCollection.InsertOne(c.Context(), sub)
+	result, insertErr := subsCollection.InsertOne(c.Context(), sub)
 	if insertErr != nil {
 		err := insertErr.(mongo.WriteException)
 		if err.WriteErrors[0].Code == 11000 {
@@ -61,6 +61,7 @@ func Create(c *fiber.Ctx) {
 	c.Status(200).JSON(respondS{
 		Success: true,
 		Data: subSimple{
+			ID:          result.InsertedID.(primitive.ObjectID),
 			Name:        sub.Name,
 			Description: sub.Description,
 			CreatedAt:   sub.CreatedAt,

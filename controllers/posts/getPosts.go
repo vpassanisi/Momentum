@@ -3,8 +3,6 @@ package posts
 import (
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/vpassanisi/Project-S/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,23 +10,27 @@ import (
 	"github.com/gofiber/fiber"
 )
 
+// GetPosts //
+// @desc gets all posts in a sub and sorts them based on query params
+// @route GET /api/v1/posts/:sub
+// @access Public
 func GetPosts(c *fiber.Ctx) {
 
 	posts := []postFull{}
 	sub := subFull{}
-	subID, objErr := primitive.ObjectIDFromHex(c.Params("sub"))
-	if objErr != nil {
-		c.Status(400).JSON(respondM{
-			Success: false,
-			Message: "Bad id",
-		})
-	}
+	// subID, objErr := primitive.ObjectIDFromHex(c.Params("sub"))
+	// if objErr != nil {
+	// 	c.Status(400).JSON(respondM{
+	// 		Success: false,
+	// 		Message: "Bad id",
+	// 	})
+	// }
 
 	postsCollection := config.GetCollection("Posts")
 	subsCollection := config.GetCollection("Subs")
 
 	findOneErr := subsCollection.FindOne(c.Context(), bson.M{
-		"_id": subID,
+		"name": c.Params("sub"),
 	}).Decode(&sub)
 	if findOneErr != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
@@ -47,9 +49,8 @@ func GetPosts(c *fiber.Ctx) {
 		return
 	}
 
-	// query db and filter by user id
 	cursor, findErr := postsCollection.Find(c.Context(), bson.M{
-		"sub": subID,
+		"sub": sub.ID,
 	})
 	if findErr != nil {
 		c.Status(500).JSON(respondM{

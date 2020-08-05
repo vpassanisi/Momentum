@@ -50,7 +50,7 @@ func Login(c *fiber.Ctx) {
 		return
 	}
 
-	token, getSignedErr := getSignedJWT(result._id.Hex())
+	token, getSignedErr := getSignedJWT(result.ID)
 	// jwt errror, should be rare but needs to return
 	if getSignedErr != nil {
 		c.Status(400).JSON(respondM{

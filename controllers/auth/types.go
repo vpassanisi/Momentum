@@ -19,7 +19,7 @@ type user struct {
 }
 
 type userResult struct {
-	_id       primitive.ObjectID `bson:"_id" json:"_id"`
+	ID        primitive.ObjectID `bson:"_id" json:"_id"`
 	Name      string             `json:"name"`
 	Email     string             `json:"email"`
 	Password  string             `json:"password"`
@@ -42,12 +42,12 @@ type respondU struct {
 	Data    userSimple `json:"data"`
 }
 
-func getSignedJWT(id string) (string, error) {
+func getSignedJWT(id primitive.ObjectID) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
 
-	claims["id"] = id
+	claims["id"] = id.Hex()
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
