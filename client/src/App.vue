@@ -1,5 +1,16 @@
 <template>
-  <div>
+  <main>
+    <Navbar />
     <router-view />
-  </div>
+  </main>
 </template>
+
+<script>
+import Navbar from "@/layout/Navbar.vue";
+export default {
+  name: "App",
+  components: {
+    Navbar
+  }
+};
+</script>
