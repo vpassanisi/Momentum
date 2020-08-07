@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import Sub from "@/views/Sub.vue";
+import Comments from "@/views/Comments.vue";
 
 Vue.use(VueRouter);
 
@@ -15,6 +16,11 @@ const routes: Array<RouteConfig> = [
     path: "/s/:sub",
     name: "Sub",
     component: Sub,
+  },
+  {
+    path: "/s/:sub/:id",
+    name: "Comments",
+    component: Comments,
   },
   // {
   //   path: "/about",
