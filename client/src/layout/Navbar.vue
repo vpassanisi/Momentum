@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="fixed top-0 left-0 w-full flex flex-row items-center justify-center bg-white dark:bg-dark-gray-900 transition-height duration-500 ease-in-out"
+    class="fixed top-0 left-0 w-full flex flex-row items-center justify-center bg-white dark:bg-dark-gray-900 transition-height duration-500 ease-in-out border-b border-gray-500"
     v-bind:class="[scroll === 0 ? 'h-20' : 'h-10']"
   >
     <div class="flex flex-row justify-between items-center w-90p h-full">

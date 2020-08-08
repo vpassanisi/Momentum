@@ -23,6 +23,6 @@ export default Vue.extend({
     About,
     Post,
   },
-  computed: mapState("currentSub", ["sub", "posts"]),
+  computed: mapState("subState", ["sub", "posts"]),
 });
 </script>

@@ -1,8 +1,8 @@
 <template>
-  <section>
-    <Banner v-if="sub" :img="sub.banner" />
-    <Header v-if="sub" :name="sub.name" />
-    <Content v-if="sub" />
+  <section v-if="sub">
+    <Banner :img="sub.banner" />
+    <Header :name="sub.name" />
+    <Content />
   </section>
 </template>
 
@@ -20,9 +20,9 @@ export default Vue.extend({
     Header,
     Content,
   },
-  computed: mapState("currentSub", ["sub"]),
+  computed: mapState("subState", ["sub"]),
   methods: {
-    ...mapActions("currentSub", ["getPosts"]),
+    ...mapActions("subState", ["getPosts"]),
   },
   mounted: function () {
     this.getPosts(this.$route.params.sub);

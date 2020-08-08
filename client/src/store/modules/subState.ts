@@ -52,6 +52,23 @@ const module = {
       }
       commit("endLoading");
     },
+    getSubByName: async ({ commit }, sub: string) => {
+      commit("startLoading");
+      try {
+        const req = await fetch(`/api/v1/subs/?name=${sub}`, {
+          method: "GET",
+        });
+
+        const json = await req.json();
+
+        if (json.success) {
+          commit("setSub", json.data[0]);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      commit("endLoading");
+    },
   } as ActionTree<CurrentSubState, null>,
   mutations: {
     startLoading: (state) => (state.isLoading = true),

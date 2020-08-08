@@ -3,6 +3,7 @@ const materialPalette = require("./materialPalette.js");
 module.exports = {
   corePlugins: {
     backgroundOpacity: false,
+    borderOpacity: false,
   },
   purge: [
     "./src/**/*.html",
@@ -27,7 +28,7 @@ module.exports = {
     backgroundColor: ["dark", "hover"],
     textColor: ["dark"],
     placeholderColor: ["dark-placeholder"],
-    borderColor: ["dark"],
+    borderColor: ["dark", "hover"],
   },
   plugins: [require("tailwindcss-dark-mode")()],
 };

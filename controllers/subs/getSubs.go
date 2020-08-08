@@ -42,6 +42,10 @@ func GetSubs(c *fiber.Ctx) {
 		filter["_id"] = id
 	}
 
+	if c.Query("name") != "" {
+		filter["name"] = c.Query("name")
+	}
+
 	subsCollection := config.GetCollection("Subs")
 
 	opts := options.Find().SetSort(bson.D{{key, order}})

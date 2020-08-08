@@ -2,7 +2,7 @@ import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import Sub from "@/views/Sub.vue";
-import Comments from "@/views/Comments.vue";
+import Thread from "@/views/Thread.vue";
 
 Vue.use(VueRouter);
 
@@ -20,7 +20,7 @@ const routes: Array<RouteConfig> = [
   {
     path: "/s/:sub/:id",
     name: "Comments",
-    component: Comments,
+    component: Thread,
   },
   // {
   //   path: "/about",
