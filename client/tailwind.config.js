@@ -25,7 +25,7 @@ module.exports = {
     },
   },
   variants: {
-    backgroundColor: ["dark", "hover"],
+    backgroundColor: ["dark", "hover", "focus"],
     textColor: ["dark"],
     placeholderColor: ["dark-placeholder"],
     borderColor: ["dark", "hover", "focus"],

@@ -1,5 +1,15 @@
 import { MutationTree, ActionTree } from "vuex";
 
+interface NewPost {
+  title: string;
+  body: string;
+}
+
+interface CreatePostObj {
+  subId: string;
+  post: NewPost;
+}
+
 interface Comment {
   _id: string;
   body: string;
@@ -37,16 +47,33 @@ const module = {
     getPost: async ({ commit }, post: string) => {
       commit("startLoading");
       try {
-        const req = await fetch(`/api/v1/comments/${post}`, {
+        const res = await fetch(`/api/v1/comments/${post}`, {
           method: "GET",
         });
 
-        const json = await req.json();
+        const json = await res.json();
 
         if (json.success) {
           commit("setPost", json.data.post);
           commit("setComments", json.data.comments);
         }
+      } catch (error) {
+        console.log(error);
+      }
+      commit("endLoading");
+    },
+    createPost: async ({ commit }, obj: CreatePostObj) => {
+      commit("startLoading");
+      try {
+        const res = await fetch(`/api/v1/posts/${obj.subId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(obj.post),
+        });
+
+        const json = await res.json();
+
+        console.log(json);
       } catch (error) {
         console.log(error);
       }
