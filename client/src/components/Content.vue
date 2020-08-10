@@ -5,7 +5,7 @@
         <Post v-for="postData in posts" :key="postData._id" :postData="postData" />
       </div>
       <div class="h-32 w-1/3 pl-4">
-        <About :description="sub.description" :createdAt="sub.createdAt" />
+        <About />
       </div>
     </div>
   </section>

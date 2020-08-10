@@ -13,6 +13,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@types/prosemirror-inputrules": "^1.0.2",
+    "@types/prosemirror-model": "^1.7.2",
+    "@types/prosemirror-view": "^1.15.0",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
@@ -38,6 +41,8 @@
     "postcss-cli": "^7.1.1",
     "tailwindcss": "^1.6.2",
     "tailwindcss-dark-mode": "^1.1.6",
+    "tiptap": "^1.29.4",
+    "tiptap-extensions": "^1.32.1",
     "typescript": "~3.9.3",
     "vue-template-compiler": "^2.6.11"
   }

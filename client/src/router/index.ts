@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import Sub from "@/views/Sub.vue";
 import Thread from "@/views/Thread.vue";
+import CreatePost from "@/views/CreatePost.vue";
 
 Vue.use(VueRouter);
 
@@ -18,7 +19,12 @@ const routes: Array<RouteConfig> = [
     component: Sub,
   },
   {
-    path: "/s/:sub/:id",
+    path: "/s/:sub/create",
+    name: "Create Post",
+    component: CreatePost,
+  },
+  {
+    path: "/s/:sub/comments/:id",
     name: "Comments",
     component: Thread,
   },

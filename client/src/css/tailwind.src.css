@@ -5,3 +5,18 @@
 .w-90p {
   width: 90%;
 }
+
+.tiptap_placeholder::before {
+  float: left;
+  height: 0;
+  content: attr(data-empty-text);
+}
+
+.mode-dark .dark\:focus\:border-gray-400:focus,
+.mode-dark.dark\:focus\:border-gray-400:focus {
+  border-color: #bdbdbd;
+}
+
+.min-h-64 {
+  min-height: 16rem;
+}

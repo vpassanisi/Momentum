@@ -28,7 +28,7 @@ module.exports = {
     backgroundColor: ["dark", "hover"],
     textColor: ["dark"],
     placeholderColor: ["dark-placeholder"],
-    borderColor: ["dark", "hover"],
+    borderColor: ["dark", "hover", "focus"],
   },
   plugins: [require("tailwindcss-dark-mode")()],
 };

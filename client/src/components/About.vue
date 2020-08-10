@@ -6,21 +6,23 @@
     <div
       class="bg-white dark:bg-dark-gray-800 p-4 rounded-b border-l border-r border-b border-gray-400 dark:border-gray-700"
     >
-      {{description}}
+      {{ sub.description }}
       <div class="border-b border-gray-400 dark:border-gray-700 my-4" />
-      Created: {{createdAt}}
+      Created: {{ sub.createdAt }}
+      <router-link
+        class="flex text-white items-center justify-center mt-4 rounded p-2 w-full bg-blue-900"
+        :to="{ path: `/s/${$route.params.sub}/create` }"
+      >Create Post</router-link>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import { mapState } from "vuex";
 
 export default Vue.extend({
   name: "About",
-  props: {
-    description: String,
-    createdAt: Number,
-  },
+  computed: mapState("subState", ["sub", "posts"]),
 });
 </script>
