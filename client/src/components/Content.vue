@@ -1,12 +1,14 @@
 <template>
   <section class="flex justify-center pt-8">
-    <div class="flex flex-row w-90p max-w-screen-lg">
-      <div class="h-32 w-2/3 pr-4">
-        <Post v-for="postData in posts" :key="postData._id" :postData="postData" />
+    <div class="grid gap-6 grid-cols-1 md:grid-cols-3 w-90p max-w-screen-lg">
+      <div class="md:col-span-2">
+        <Post
+          v-for="postData in posts"
+          :key="postData._id"
+          :postData="postData"
+        />
       </div>
-      <div class="h-32 w-1/3 pl-4">
-        <About />
-      </div>
+      <About class="order-first md:order-last" />
     </div>
   </section>
 </template>
@@ -23,6 +25,6 @@ export default Vue.extend({
     About,
     Post,
   },
-  computed: mapState("subState", ["sub", "posts"]),
+  computed: mapState("SubState", ["sub", "posts"]),
 });
 </script>

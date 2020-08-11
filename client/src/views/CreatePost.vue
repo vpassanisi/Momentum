@@ -203,8 +203,7 @@ import {
   History,
 } from "tiptap-extensions";
 
-// TODO: make the login system :(
-// TODO: sub, post, comment routes and methods have confusing names. posts functions should all be in one pipeling.  rename them to make them consistent!
+// TODO: login modal styling, image is squished. create post method
 export default Vue.extend({
   name: "CreatePost",
   components: {
@@ -220,7 +219,7 @@ export default Vue.extend({
         editorProps: {
           attributes: {
             class:
-              "p-4 border border-gray-400 dark:border-gray-700 rounded-b focus:outline-none focus:border-gray-700 dark:focus:border-gray-400 min-h-64",
+              "p-4 border border-gray-400 dark:border-gray-700 rounded-b focus:outline-none focus:border-gray-700 dark:focus:border-gray-400 min-h-64 position-inherit",
           },
         },
         extensions: [
@@ -253,12 +252,12 @@ export default Vue.extend({
     this.postEditor.destroy();
   },
   computed: {
-    ...mapState("subState", ["sub"]),
-    ...mapState("darkMode", ["isDarkMode"]),
+    ...mapState("SubState", ["sub"]),
+    ...mapState("DarkMode", ["isDarkMode"]),
   },
   methods: {
-    ...mapActions("subState", ["getSubByName"]),
-    ...mapActions("postState", ["createPost"]),
+    ...mapActions("SubState", ["getSubByName"]),
+    ...mapActions("PostState", ["createPost"]),
     handlePost() {
       this.createPost({
         subId: this.sub._id,

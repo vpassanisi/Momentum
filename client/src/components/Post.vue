@@ -28,7 +28,7 @@ export default Vue.extend({
   props: {
     postData: Object as PropType<Post>,
   },
-  computed: mapState("darkMode", ["isDarkMode"]),
+  computed: mapState("DarkMode", ["isDarkMode"]),
   methods: {
     handleClick() {
       this.$router.push(`/${this.postData._id}`);

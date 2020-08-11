@@ -20,12 +20,12 @@ export default Vue.extend({
     Header,
     Content,
   },
-  computed: mapState("subState", ["sub"]),
+  computed: mapState("SubState", ["sub"]),
   methods: {
-    ...mapActions("subState", ["getPosts"]),
+    ...mapActions("SubState", ["getPostsBySubName"]),
   },
-  mounted: function () {
-    this.getPosts(this.$route.params.sub);
+  mounted: function() {
+    this.getPostsBySubName(this.$route.params.sub);
   },
 });
 </script>

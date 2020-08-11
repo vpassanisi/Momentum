@@ -44,7 +44,7 @@ const module = {
     error: null,
   },
   actions: {
-    getPost: async ({ commit }, post: string) => {
+    getPostById: async ({ commit }, post: string) => {
       commit("startLoading");
       try {
         const res = await fetch(`/api/v1/comments/${post}`, {

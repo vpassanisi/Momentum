@@ -2,7 +2,7 @@ const materialPalette = require("./materialPalette.js");
 
 module.exports = {
   corePlugins: {
-    backgroundOpacity: false,
+    // backgroundOpacity: false,
     borderOpacity: false,
   },
   purge: [
@@ -21,6 +21,7 @@ module.exports = {
     extend: {
       transitionProperty: {
         height: "height",
+        button: "background-color, margin",
       },
     },
   },

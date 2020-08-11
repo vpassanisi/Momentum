@@ -44,6 +44,7 @@
     "tiptap": "^1.29.4",
     "tiptap-extensions": "^1.32.1",
     "typescript": "~3.9.3",
+    "vue-mq": "^1.0.1",
     "vue-template-compiler": "^2.6.11"
   }
 }

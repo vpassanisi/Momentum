@@ -1,17 +1,15 @@
 <template>
   <div v-if="post !== null && sub !== null" class="flex justify-center mt-32">
-    <div class="flex flex-row justify-center w-90p max-w-screen-lg">
+    <div class="grid gap-6 grid-cols-1 md:grid-cols-3 w-90p max-w-screen-lg">
       <div
-        class="w-2/3 mr-4 p-4 rounded bg-white dark:bg-dark-gray-800 shadow border border-gray-400 dark:border-gray-700"
+        class="md:col-span-2 p-4 rounded bg-white dark:bg-dark-gray-800 shadow border border-gray-400 dark:border-gray-700"
       >
-        <div class="text-xl font-medium">{{post.title}}</div>
-        <div class>{{post.body}}</div>
+        <div class="text-xl font-medium">{{ post.title }}</div>
+        <div class>{{ post.body }}</div>
         <div class="border-b border-gray-400 dark:border-gray-700 my-4" />
         <Comment v-for="com in comments" :key="com._id" :comment="com" />
       </div>
-      <div class="w-1/3 ml-4">
-        <About :description="sub.description" :createdAt="sub.createdAt" />
-      </div>
+      <About class="order-last" />
     </div>
   </div>
 </template>
@@ -29,15 +27,15 @@ export default Vue.extend({
     Comment,
   },
   computed: {
-    ...mapState("postState", ["post", "comments"]),
-    ...mapState("subState", ["sub", "posts"]),
+    ...mapState("PostState", ["post", "comments"]),
+    ...mapState("SubState", ["sub", "posts"]),
   },
   methods: {
-    ...mapActions("postState", ["getPost"]),
-    ...mapActions("subState", ["getSubByName"]),
+    ...mapActions("PostState", ["getPostById"]),
+    ...mapActions("SubState", ["getSubByName"]),
   },
-  mounted: function () {
-    this.getPost(this.$route.params.id);
+  mounted: function() {
+    this.getPostById(this.$route.params.id);
     this.getSubByName(this.$route.params.sub);
   },
 });

@@ -34,7 +34,7 @@ const module = {
     error: null,
   },
   actions: {
-    getPosts: async ({ commit }, sub: string) => {
+    getPostsBySubName: async ({ commit }, sub: string) => {
       commit("startLoading");
       try {
         const req = await fetch(`/api/v1/posts/${sub}`, {

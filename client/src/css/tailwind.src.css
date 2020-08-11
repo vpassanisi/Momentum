@@ -26,6 +26,10 @@ blockquote {
   width: 90%;
 }
 
+.w-50p {
+  width: 50%;
+}
+
 .tiptap_placeholder::before {
   float: left;
   height: 0;
@@ -39,4 +43,53 @@ blockquote {
 
 .min-h-64 {
   min-height: 16rem;
+}
+
+.h-75vh {
+  height: 75vh;
+}
+
+.w-45vw {
+  width: 45vw;
+}
+
+.modal-fade-enter,
+.modal-fade-leave-active {
+  opacity: 0;
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.slide-enter,
+.slide-leave-to {
+  transform: translateX(-45vw);
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.15s ease-in-out;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease-in-out;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-transition-delay: 9999999s;
+}
+
+.position-inherit {
+  position: inherit;
 }

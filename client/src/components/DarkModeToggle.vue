@@ -14,9 +14,9 @@ import { mapState, mapActions } from "vuex";
 
 const Component = Vue.extend({
   name: "DarkModeToggle",
-  computed: mapState("darkMode", ["isDarkMode"]),
+  computed: mapState("DarkMode", ["isDarkMode"]),
   methods: {
-    ...mapActions("darkMode", ["turnOn", "turnOff"]),
+    ...mapActions("DarkMode", ["turnOn", "turnOff"]),
     toggleDarkMode() {
       this.isDarkMode ? this.turnOff() : this.turnOn();
     },
