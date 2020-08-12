@@ -4,6 +4,7 @@ import DarkMode from "./modules/DarkMode";
 import SubState from "./modules/SubState";
 import PostState from "./modules/PostState";
 import AuthState from "./modules/AuthState";
+import MediaQueryState from "./modules/MediaQueryState";
 
 Vue.use(Vuex);
 
@@ -13,5 +14,6 @@ export default new Vuex.Store({
     SubState,
     PostState,
     AuthState,
+    MediaQueryState,
   },
 });

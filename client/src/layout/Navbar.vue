@@ -5,7 +5,7 @@
   >
     <div class="flex flex-row justify-between items-center w-90p h-full">
       <button class="h-full">Project-S</button>
-      <div v-if="$mq === 'lg' || $mq === 'xl'" class="flex flex-row h-full">
+      <div v-if="mq === 'lg' || mq === 'xl'" class="flex flex-row h-full">
         <div v-if="isAuthenticated" class="flex flex-row h-full">
           <button
             class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none"
@@ -86,6 +86,7 @@ export default Vue.extend({
   computed: {
     ...mapState("AuthState", ["isAuthenticated"]),
     ...mapState("DarkMode", ["isDarkMode"]),
+    ...mapState("MediaQueryState", ["mq"]),
   },
   methods: {
     ...mapActions("AuthState", ["logout"]),

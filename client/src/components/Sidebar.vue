@@ -54,7 +54,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { mapActions, mapState } from "vuex";
+import { mapState } from "vuex";
 import DarkModeToggle from "./DarkModeToggle.vue";
 
 export default Vue.extend({

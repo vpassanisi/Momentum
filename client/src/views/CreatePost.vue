@@ -254,6 +254,7 @@ export default Vue.extend({
   computed: {
     ...mapState("SubState", ["sub"]),
     ...mapState("DarkMode", ["isDarkMode"]),
+    ...mapState("AuthState", ["isAuthenticated"]),
   },
   methods: {
     ...mapActions("SubState", ["getSubByName"]),
@@ -270,6 +271,11 @@ export default Vue.extend({
   },
   mounted: function() {
     this.getSubByName(this.$route.params.sub);
+  },
+  watch: {
+    isAuthenticated: function() {
+      this.$router.push(`/s/${this.$route.params.sub}`);
+    },
   },
 });
 </script>
