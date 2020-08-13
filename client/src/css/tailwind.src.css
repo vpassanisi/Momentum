@@ -1,15 +1,15 @@
 @tailwind base;
 
 h1 {
-  @apply text-4xl;
-}
-
-h2 {
   @apply text-2xl;
 }
 
-h3 {
+h2 {
   @apply text-xl;
+}
+
+h3 {
+  @apply text-lg;
 }
 
 blockquote {
@@ -30,6 +30,10 @@ blockquote {
   width: 50%;
 }
 
+.w-5p {
+  width: 5%;
+}
+
 .tiptap_placeholder::before {
   float: left;
   height: 0;
@@ -41,8 +45,21 @@ blockquote {
   border-color: #bdbdbd;
 }
 
+.mode-dark .dark\:hover\:border-gray-300:hover,
+.mode-dark.dark\:hover\:border-gray-300:hover {
+  border-color: #e0e0e0;
+}
+
 .min-h-64 {
   min-height: 16rem;
+}
+
+.min-h-32 {
+  min-height: 8rem;
+}
+
+.min-w-8 {
+  min-width: 2rem;
 }
 
 .h-75vh {
@@ -83,13 +100,11 @@ blockquote {
   transition: opacity 0.15s ease-in-out;
 }
 
-input:-webkit-autofill,
+/* input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-transition-delay: 9999999s;
-}
-
-.position-inherit {
-  position: inherit;
-}
+  -webkit-transition-delay: 9999999s !important;
+  -webkit-transition: background-color 9999s ease-in-out !important;
+  -webkit-text-fill-color: var(--autofill-color) !important;
+} */

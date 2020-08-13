@@ -1,7 +1,7 @@
 <template>
   <section v-if="sub">
     <Banner :img="sub.banner" />
-    <Header :name="sub.name" />
+    <Header :name="sub.name" :icon="sub.icon" />
     <Content />
   </section>
 </template>
@@ -24,8 +24,8 @@ export default Vue.extend({
   methods: {
     ...mapActions("SubState", ["getPostsBySubName"]),
   },
-  mounted: function() {
-    this.getPostsBySubName(this.$route.params.sub);
+  mounted: async function() {
+    await this.getPostsBySubName(this.$route.params.sub);
   },
 });
 </script>

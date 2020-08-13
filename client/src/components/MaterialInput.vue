@@ -3,11 +3,11 @@
     <input
       ref="input"
       :style="
-        `--hoverBorderColor: ${hoverBorderColor}; --borderColor: ${borderColor}; --focusBorderColor: ${focusBorderColor};`
+        `--hoverBorderColor: ${hoverBorderColor}; --borderColor: ${borderColor}; --focusBorderColor: ${focusBorderColor}; --autofillColor: ${autofillColor};`
       "
       placeholder=" "
       :type="type"
-      name="input"
+      :name="name"
       @input="handleInput"
     />
     <label
@@ -28,8 +28,10 @@ export default {
     placeholder: String,
     backgroundColor: String,
     focusBorderColor: String,
+    autofillColor: String,
     type: String,
     value: String,
+    name: String,
   },
   methods: {
     handleInput(e) {
@@ -92,5 +94,14 @@ label {
 
 outline-none:focus {
   outline: 0;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-transition-delay: 9999999s !important;
+  -webkit-transition: background-color 9999s ease-in-out !important;
+  -webkit-text-fill-color: var(--autofillColor) !important;
 }
 </style>

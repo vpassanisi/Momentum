@@ -1,7 +1,8 @@
 <template>
   <span
     class="block bg-no-repeat bg-cover bg-center"
-    v-bind:style="{
+    :style="{
+      backgroundColor: 'var(--primary)',
       backgroundImage: 'url(' + img + ')',
       height: '20rem',
     }"

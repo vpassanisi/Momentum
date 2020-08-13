@@ -7,6 +7,9 @@ interface Sub {
   founder: string;
   banner: string;
   createdatAt: number;
+  colorPrimary: string;
+  colorPrimaryLight: string;
+  colorPrimaryDark: string;
 }
 
 interface Post {
@@ -24,6 +27,23 @@ interface CurrentSubState {
   isLoading: boolean;
   error: string | null;
 }
+
+const setColors = (
+  colorPrimary: string,
+  colorPrimaryLight: string,
+  colorPrimaryDark: string
+) => {
+  const colorsEl = document.getElementById("colors");
+  if (colorsEl && colorPrimary !== "") {
+    colorsEl.style.setProperty("--primary", colorPrimary);
+  }
+  if (colorsEl && colorPrimaryLight !== "") {
+    colorsEl.style.setProperty("--primary-light", colorPrimaryLight);
+  }
+  if (colorsEl && colorPrimaryDark !== "") {
+    colorsEl.style.setProperty("--primary-dark", colorPrimaryDark);
+  }
+};
 
 const module = {
   namespaced: true,
@@ -46,6 +66,11 @@ const module = {
         if (json.success) {
           commit("setPosts", json.data.posts);
           commit("setSub", json.data.sub);
+          setColors(
+            json.data.sub.colorPrimary,
+            json.data.sub.colorPrimaryLight,
+            json.data.sub.colorPrimaryDark
+          );
         }
       } catch (error) {
         console.log(error);
@@ -63,6 +88,11 @@ const module = {
 
         if (json.success) {
           commit("setSub", json.data[0]);
+          setColors(
+            json.data[0].colorPrimary,
+            json.data[0].colorPrimaryLight,
+            json.data[0].colorPrimaryDark
+          );
         }
       } catch (error) {
         console.log(error);

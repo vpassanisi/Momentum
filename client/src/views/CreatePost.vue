@@ -1,9 +1,9 @@
 <template>
   <section class="flex justify-center mt-32">
     <div
-      class="grid gap-6 grid-cols-1 md:grid-cols-2  justify-center w-90p max-w-screen-lg"
+      class="grid gap-6 grid-cols-1 md:grid-cols-3  justify-center w-90p max-w-screen-lg"
     >
-      <div class="">
+      <div class="md:col-span-2">
         <div class="bg-white dark:bg-dark-gray-800 rounded shadow p-4">
           <input
             class="border bg-transparent border-gray-400 dark:border-gray-700 w-full rounded focus:outline-none focus:border-gray-700 placeholder-gray-600 dark:focus:border-gray-400 p-4 mb-4"
@@ -170,14 +170,14 @@
           <editor-content :editor="postEditor" />
           <div class="flex flex-row justify-end mt-4">
             <Button
-              class="rounded bg-gray-400 dark:bg-gray-700 py-2 px-4"
+              class="rounded bg-primary dark:bg-primary-dark py-2 px-4"
               @click="handlePost"
               >POST</Button
             >
           </div>
         </div>
       </div>
-      <div class="">
+      <div>
         <About v-if="sub !== null" />
       </div>
     </div>
@@ -203,7 +203,6 @@ import {
   History,
 } from "tiptap-extensions";
 
-// TODO: login modal styling, image is squished. create post method
 export default Vue.extend({
   name: "CreatePost",
   components: {
@@ -214,7 +213,7 @@ export default Vue.extend({
   data() {
     return {
       title: "",
-      postJSON: {},
+      postJSON: "",
       postEditor: new Editor({
         editorProps: {
           attributes: {
@@ -243,7 +242,7 @@ export default Vue.extend({
           }),
         ],
         onUpdate: ({ getJSON }) => {
-          this.$data.json = getJSON();
+          this.$data.postJSON = JSON.stringify(getJSON());
         },
       }),
     };

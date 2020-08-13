@@ -58,6 +58,23 @@ const module = {
       }
       commit("endLoading");
     },
+    me: async ({ commit }) => {
+      try {
+        const res = await fetch("/api/v1/auth", {
+          method: "GET",
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("meSuccess");
+        } else {
+          commit("meFail");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
   } as ActionTree<AuthState, any>,
   mutations: {
     startLoading: (state) => (state.isLoading = true),
@@ -65,6 +82,8 @@ const module = {
     loginSuccess: (state) => (state.isAuthenticated = true),
     loignFail: (state) => (state.isAuthenticated = false),
     logoutSuccess: (state) => (state.isAuthenticated = false),
+    meSuccess: (state) => (state.isAuthenticated = true),
+    meFail: (state) => (state.isAuthenticated = false),
   } as MutationTree<AuthState>,
 };
 

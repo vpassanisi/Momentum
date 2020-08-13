@@ -41,7 +41,7 @@ func Create(c *fiber.Ctx) {
 		CreatedAt: time.Now().Unix(),
 		User:      user,
 		Post:      post,
-		Points:    1,
+		Points:    0,
 	}
 
 	if err := c.BodyParser(&newComment); err != nil {

@@ -25,54 +25,22 @@
           >
             <i class="material-icons">clear</i>
           </button>
-          <div class="text-2xl mb-4">Log In</div>
-          <!-- <div
-            class="relative"
-            :class="[mq === 'sm' || mq === 'md' ? 'w-full' : 'w-50p']"
-          >
-            <input
-              id="email-input"
-              class="relative border border-gray-400 bg-transparent dark:bg-dark-gray-900 focus:border-blue-700 hover:border-blue-300 transition-colors duration-300 ease-in-out rounded p-2 focus:outline-none w-full"
-              @keydown="handleKeyDown"
-              v-model="email"
-              placeholder=" "
-              type="email"
-              name="email"
-            /><label
-              id="email-label"
-              class="block absolute bg-white dark:bg-dark-gray-900 text-gray-500"
-              >email</label
-            >
-          </div>
-          <div
-            class="relative mt-4"
-            :class="[mq === 'sm' || mq === 'md' ? 'w-full' : 'w-50p']"
-          >
-            <input
-              id="password-input"
-              class="relative border border-gray-400 bg-transparent dark:bg-dark-gray-900 focus:border-blue-700 hover:border-blue-300 transition-colors duration-300 ease-in-out rounded p-2 focus:outline-none w-full"
-              @keydown="handleKeyDown"
-              v-model="password"
-              placeholder=" "
-              type="password"
-              name="password"
-            /><label
-              id="password-label"
-              class="block absolute bg-white dark:bg-dark-gray-900 text-gray-500"
-              >password</label
-            >
-          </div> -->
+          <div class="text-2xl">Log In</div>
           <MaterialInput
+            class="shadow"
             :half="mq === 'sm' || mq === 'md' ? false : true"
             borderColor="#BDBDBD"
             hoverBorderColor="#64B5F6"
             placeholder="email"
             :backgroundColor="isDarkMode ? '#121212' : '#ffffff'"
+            :autofillColor="isDarkMode ? '#ffffff' : '#121212'"
             focusBorderColor="#1976D2"
             type="email"
+            name="email"
             @input="handleEmailInput"
           />
           <MaterialInput
+            class="shadow"
             :half="mq === 'sm' || mq === 'md' ? false : true"
             borderColor="#BDBDBD"
             hoverBorderColor="#64B5F6"
@@ -80,10 +48,11 @@
             :backgroundColor="isDarkMode ? '#121212' : '#ffffff'"
             focusBorderColor="#1976D2"
             type="password"
+            name="password"
             @input="handlePasswordInput"
           />
           <button
-            class="bg-blue-100 dark:bg-blue-700 rounded shadow text-sm py-2 focus:outline-none mt-2"
+            class="bg-blue-100 dark:bg-blue-700 rounded shadow text-sm py-2 focus:outline-none mt-4"
             :class="[mq === 'sm' || mq === 'md' ? 'w-full' : 'w-50p']"
             @click="handleLogin"
           >
@@ -100,7 +69,8 @@ import Vue from "vue";
 import { mapActions, mapState } from "vuex";
 import MaterialInput from "./MaterialInput.vue";
 
-// TODO: login form
+// TODO: custom sub themeing. store hex colors in the sub document and add them to the main element so the whole app can access them in css vars
+// TODO: create comment method, in PostSate??
 export default Vue.extend({
   name: "LoginModal",
   components: {

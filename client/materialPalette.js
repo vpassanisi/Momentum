@@ -322,6 +322,9 @@ const materialPalette = {
   black: "#000000",
   white: "#FFFFFF",
   transparent: "#FF000000",
+  primary: "var(--primary)",
+  "primary-light": "var(--primary-light)",
+  "primary-dark": "var(--primary-dark)",
 };
 
 module.exports = materialPalette;
