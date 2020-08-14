@@ -6,9 +6,13 @@
       >
         <div class="text-xl font-medium">{{ post.title }}</div>
         <editor-content :editor="readOnlyEditor" />
-        <NewCommentEditor :postId="post._id" />
+        <NewCommentEditor :postId="post._id" :parent="post._id" />
         <div class="border-b border-gray-400 dark:border-gray-700 my-4" />
-        <Comment v-for="com in comments" :key="com._id" :comment="com" />
+        <Comment
+          v-for="com in comments[post._id]"
+          :key="com._id"
+          :comment="com"
+        />
       </div>
       <About class="order-last" />
     </div>

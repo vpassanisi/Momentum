@@ -50,6 +50,11 @@ blockquote {
   border-color: #e0e0e0;
 }
 
+.mode-dark .dark\:hover\:bg-gray-600:hover,
+.mode-dark.dark\:hover\:bg-gray-600:hover {
+  background-color: #757575;
+}
+
 .min-h-64 {
   min-height: 16rem;
 }
@@ -58,8 +63,8 @@ blockquote {
   min-height: 8rem;
 }
 
-.min-w-8 {
-  min-width: 2rem;
+.min-w-6 {
+  min-width: 1.5rem;
 }
 
 .h-75vh {
@@ -70,14 +75,24 @@ blockquote {
   width: 45vw;
 }
 
-.modal-fade-enter,
-.modal-fade-leave-active {
+.modal-bg-fade-enter,
+.modal-bg-fade-leave-active {
   opacity: 0;
 }
 
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.3s ease-in-out;
+.modal-bg-fade-enter-active,
+.modal-bg-fade-leave-active {
+  transition: opacity 0.15s ease-in-out;
+}
+
+.modal-content-fade-enter,
+.modal-content-fade-leave-active {
+  opacity: 0;
+}
+
+.modal-content-fade-enter-active,
+.modal-content-fade-leave-active {
+  transition: opacity 0.2s ease-in-out;
 }
 
 .slide-enter,

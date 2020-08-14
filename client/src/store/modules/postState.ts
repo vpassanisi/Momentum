@@ -13,6 +13,7 @@ interface CreatePostObj {
 interface CreateCommentObj {
   postId: string;
   comment: string;
+  parent: string;
 }
 
 interface Comment {
@@ -21,6 +22,7 @@ interface Comment {
   points: number;
   user: string;
   post: string;
+  parent: string;
   createdatAt: number;
 }
 
@@ -33,9 +35,13 @@ interface Post {
   createdAt: number;
 }
 
+interface Comments {
+  [key: string]: Array<Comment>;
+}
+
 interface CurrentPostState {
   post: Post | null;
-  comments: Array<Comment>;
+  comments: Comments;
   isLoading: boolean;
   error: string | null;
 }
@@ -44,7 +50,7 @@ const module = {
   namespaced: true,
   state: {
     post: null,
-    comments: [],
+    comments: {},
     isLoading: false,
     error: null,
   },
@@ -60,10 +66,6 @@ const module = {
 
         if (json.success) {
           commit("setPost", json.data.post);
-          json.data.comments.forEach((val: Comment, i: number) => {
-            val.body = JSON.parse(val.body);
-            json.data.comments[i] = val;
-          });
           commit("setComments", json.data.comments);
         }
       } catch (error) {
@@ -94,13 +96,13 @@ const module = {
         const res = await fetch(`/api/v1/comments/${obj.postId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ body: obj.comment }),
+          body: JSON.stringify({ body: obj.comment, parent: obj.parent }),
         });
 
         const json = await res.json();
 
         if (json.success) {
-          commit("newCommentSuccess", JSON.parse(json.data));
+          commit("newCommentSuccess", json.data);
         } else {
           commit("newCommentFail", "something went wrong");
           console.log(json);
@@ -115,8 +117,14 @@ const module = {
     endLoading: (state) => (state.isLoading = false),
     setComments: (state, comments) => (state.comments = comments),
     setPost: (state, post) => (state.post = post),
-    newCommentSuccess: (state, comment) =>
-      (state.comments = [comment, ...state.comments]),
+    newCommentSuccess: (state, comment: Comment) => {
+      state.comments[comment._id] = [];
+
+      state.comments[comment.parent] = [
+        comment,
+        ...state.comments[comment.parent],
+      ];
+    },
     newCommentFail: (state, error) => (state.error = error),
   } as MutationTree<CurrentPostState>,
 };

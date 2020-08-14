@@ -50,7 +50,7 @@ func Create(c *fiber.Ctx) {
 
 	commentsCollection := config.GetCollection("Comments")
 
-	_, insertErr := commentsCollection.InsertOne(c.Context(), newComment)
+	id, insertErr := commentsCollection.InsertOne(c.Context(), newComment)
 	if insertErr != nil {
 		err := insertErr.(mongo.WriteException)
 		if err.WriteErrors[0].Code == 121 {
@@ -67,14 +67,10 @@ func Create(c *fiber.Ctx) {
 		return
 	}
 
+	newComment.ID = id.InsertedID.(primitive.ObjectID)
+
 	c.Status(200).JSON(respondC{
 		Success: true,
-		Data: comment{
-			Body:      newComment.Body,
-			Points:    newComment.Points,
-			User:      newComment.User,
-			Post:      newComment.Post,
-			CreatedAt: newComment.CreatedAt,
-		},
+		Data:    newComment,
 	})
 }

@@ -110,13 +110,22 @@
             <i class="material-icons">redo</i>
           </button>
         </div>
+        <div class="flex flex-row items-center justify-center">
+          <button
+            class="bg-primary-dark text-white m-1 px-4 py-2 rounded"
+            @click="handleComment"
+          >
+            COMMENT
+          </button>
 
-        <button
-          class="bg-primary-dark text-white m-1 px-4 py-2 rounded"
-          @click="handleComment"
-        >
-          COMMENT
-        </button>
+          <button
+            v-if="closeButton"
+            class="flex m-1 p-2 focus:outline-none"
+            @click="$emit('close')"
+          >
+            <i class="material-icons">close</i>
+          </button>
+        </div>
       </div>
     </editor-menu-bar>
   </div>
@@ -171,6 +180,8 @@ export default Vue.extend({
   name: "NewCommentEditor",
   props: {
     postId: String,
+    parent: String,
+    closeButton: Boolean,
   },
   components: {
     EditorContent,
@@ -217,11 +228,13 @@ export default Vue.extend({
   methods: {
     ...mapActions("EventState", ["openLoginModal"]),
     ...mapActions("PostState", ["newCommentByPost"]),
-    handleComment() {
-      this.newCommentByPost({
+    async handleComment() {
+      await this.newCommentByPost({
         postId: this.postId,
         comment: this.commentJSON,
+        parent: this.parent,
       });
+      this.$emit("close");
     },
   },
 });

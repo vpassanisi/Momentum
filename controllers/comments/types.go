@@ -1,9 +1,20 @@
 package comments
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
-type postFull struct {
-	ID        primitive.ObjectID `bson:"_id" json:"_id"`
+type user struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Name      string             `json:"name"`
+	Email     string             `json:"email"`
+	Password  string             `json:"-"`
+	CreatedAt int64              `json:"createdAt"`
+}
+
+type post struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Title     string             `json:"title"`
 	Body      string             `json:"body"`
 	User      primitive.ObjectID `json:"user"`
@@ -11,26 +22,29 @@ type postFull struct {
 	CreatedAt int64              `json:"createdAt"`
 }
 
-type commentFull struct {
-	ID        primitive.ObjectID `bson:"_id" json:"_id"`
+type comment struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Body      string             `json:"body"`
 	Points    int64              `json:"points"`
 	User      primitive.ObjectID `json:"user"`
 	Post      primitive.ObjectID `json:"post"`
+	Parent    primitive.ObjectID `json:"parent"`
 	CreatedAt int64              `json:"createdAt"`
 }
 
-type comment struct {
+type commentPopulated struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Body      string             `json:"body"`
 	Points    int64              `json:"points"`
-	User      primitive.ObjectID `json:"user"`
+	User      user               `json:"user"`
 	Post      primitive.ObjectID `json:"post"`
+	Parent    primitive.ObjectID `json:"parent"`
 	CreatedAt int64              `json:"createdAt"`
 }
 
 type getComments struct {
-	Post     postFull      `json:"post"`
-	Comments []commentFull `json:"comments"`
+	Post     post   `json:"post"`
+	Comments bson.M `json:"comments"`
 }
 
 type respondGC struct {
