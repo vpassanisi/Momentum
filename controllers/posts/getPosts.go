@@ -2,6 +2,7 @@ package posts
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/vpassanisi/Project-S/config"
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,7 +17,7 @@ import (
 // @access Public
 func GetPosts(c *fiber.Ctx) {
 
-	posts := []postFull{}
+	posts := []post{}
 	sub := subFull{}
 
 	postsCollection := config.GetCollection("Posts")
@@ -65,12 +66,46 @@ func GetPosts(c *fiber.Ctx) {
 		return
 	}
 
+	populatedPosts := populateUsers(c, posts)
+
 	c.Status(200).JSON(respondGP{
 		Success: true,
 		Data: getPosts{
 			Sub:   sub,
-			Posts: posts,
+			Posts: populatedPosts,
 		},
 	})
 
+}
+
+func populateUsers(c *fiber.Ctx, posts []post) []postPopulated {
+	var populatedPosts []postPopulated
+
+	usersCollection := config.GetCollection("Users")
+
+	for _, v := range posts {
+		user := user{}
+
+		post := postPopulated{
+			ID:        v.ID,
+			Body:      v.Body,
+			Title:     v.Title,
+			Sub:       v.Sub,
+			Points:    v.Points,
+			CreatedAt: v.CreatedAt,
+		}
+
+		findOneErr := usersCollection.FindOne(c.Context(), bson.M{
+			"_id": v.User,
+		}).Decode(&user)
+		if findOneErr != nil {
+			log.Fatal(findOneErr)
+		}
+
+		post.User = user
+
+		populatedPosts = append(populatedPosts, post)
+	}
+
+	return populatedPosts
 }

@@ -52,7 +52,7 @@ func Create(c *fiber.Ctx) {
 
 	collection := config.GetCollection("Posts")
 
-	_, insertErr := collection.InsertOne(c.Context(), post)
+	id, insertErr := collection.InsertOne(c.Context(), post)
 	if insertErr != nil {
 		err := insertErr.(mongo.WriteException)
 		if err.WriteErrors[0].Code == 11000 {
@@ -74,13 +74,11 @@ func Create(c *fiber.Ctx) {
 		return
 	}
 
+	post.ID = id.InsertedID.(primitive.ObjectID)
+
 	c.Status(200).JSON(respondP{
 		Success: true,
-		Data: postSimple{
-			Title:     post.Title,
-			Body:      post.Body,
-			CreatedAt: post.CreatedAt,
-		},
+		Data:    post,
 	})
 
 }

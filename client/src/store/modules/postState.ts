@@ -1,4 +1,5 @@
 import { MutationTree, ActionTree } from "vuex";
+import router from "@/router/index";
 
 interface NewPost {
   title: string;
@@ -42,8 +43,8 @@ interface Comments {
 interface CurrentPostState {
   post: Post | null;
   comments: Comments;
-  isLoading: boolean;
-  error: string | null;
+  isPostLoading: boolean;
+  postError: string | null;
 }
 
 const module = {
@@ -51,8 +52,8 @@ const module = {
   state: {
     post: null,
     comments: {},
-    isLoading: false,
-    error: null,
+    isPostLoading: false,
+    postError: null,
   },
   actions: {
     getPostById: async ({ commit }, post: string) => {
@@ -65,11 +66,16 @@ const module = {
         const json = await res.json();
 
         if (json.success) {
-          commit("setPost", json.data.post);
-          commit("setComments", json.data.comments);
+          commit("getPostByIdSuccess", {
+            post: json.data.post,
+            comments: json.data.comments,
+          });
+        } else {
+          commit("getPostByIdFail", json.message);
         }
       } catch (error) {
-        console.log(error);
+        commit("getPostByIdFail", "Promise rejected with error");
+        console.error(error);
       }
       commit("endLoading");
     },
@@ -84,9 +90,16 @@ const module = {
 
         const json = await res.json();
 
-        console.log(json);
+        if (json.success) {
+          router.push(
+            `/s/${router.currentRoute.params.sub}/comments/${json.data._id}`
+          );
+        } else {
+          commit("createPostFail", json.message);
+        }
       } catch (error) {
-        console.log(error);
+        commit("createPostFail", "Promise rejected with an error");
+        console.error(error);
       }
       commit("endLoading");
     },
@@ -104,19 +117,27 @@ const module = {
         if (json.success) {
           commit("newCommentSuccess", json.data);
         } else {
-          commit("newCommentFail", "something went wrong");
+          commit("newCommentFail", json.message);
           console.log(json);
         }
       } catch (error) {
-        console.log(error);
+        commit("newCommentFail", "Promise rejected with an error");
+        console.error(error);
       }
+      commit("endLoading");
     },
   } as ActionTree<CurrentPostState, null>,
   mutations: {
-    startLoading: (state) => (state.isLoading = true),
-    endLoading: (state) => (state.isLoading = false),
-    setComments: (state, comments) => (state.comments = comments),
-    setPost: (state, post) => (state.post = post),
+    startLoading: (state) => (state.isPostLoading = true),
+    endLoading: (state) => (state.isPostLoading = false),
+    getPostByIdSuccess: (state, { post, comments }) => {
+      state.post = post;
+      state.comments = comments;
+    },
+    getPostByIdFail: (state, error) => {
+      state.postError = error;
+      setTimeout(() => (state.postError = null), 3000);
+    },
     newCommentSuccess: (state, comment: Comment) => {
       state.comments[comment._id] = [];
 
@@ -125,7 +146,14 @@ const module = {
         ...state.comments[comment.parent],
       ];
     },
-    newCommentFail: (state, error) => (state.error = error),
+    newCommentFail: (state, error) => {
+      state.postError = error;
+      setTimeout(() => (state.postError = null), 3000);
+    },
+    createPostFail: (state, error) => {
+      state.postError = error;
+      setTimeout(() => (state.postError = null), 3000);
+    },
   } as MutationTree<CurrentPostState>,
 };
 

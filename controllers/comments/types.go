@@ -1,7 +1,6 @@
 package comments
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -43,8 +42,8 @@ type commentPopulated struct {
 }
 
 type getComments struct {
-	Post     post   `json:"post"`
-	Comments bson.M `json:"comments"`
+	Post     post                          `json:"post"`
+	Comments map[string][]commentPopulated `json:"comments"`
 }
 
 type respondGC struct {

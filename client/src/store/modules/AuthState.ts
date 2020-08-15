@@ -2,8 +2,8 @@ import { MutationTree, ActionTree } from "vuex";
 
 interface AuthState {
   isAuthenticated: boolean | null;
-  isLoading: boolean;
-  error: string | null;
+  isAuthLoading: boolean;
+  authError: string | null;
 }
 
 interface Credencials {
@@ -15,8 +15,8 @@ const module = {
   namespaced: true,
   state: {
     isAuthenticated: null,
-    isLoading: false,
-    error: null,
+    isAuthLoading: false,
+    authError: null,
   },
   actions: {
     login: async ({ commit }, cred: Credencials) => {
@@ -33,11 +33,11 @@ const module = {
         if (json.success) {
           commit("loginSuccess");
         } else {
-          commit("loignFail");
+          commit("loginFail", json.message);
         }
       } catch (error) {
-        commit("loignFail");
-        console.log(error);
+        commit("loginFail", "Proimise rejected with an error");
+        console.error(error);
       }
       commit("endLoading");
     },
@@ -52,9 +52,12 @@ const module = {
 
         if (json.success) {
           commit("logoutSuccess");
+        } else {
+          commit("logoutFail", json.message);
         }
       } catch (error) {
-        console.log(error);
+        commit("logoutFail", "Promise rejected with an error");
+        console.error(error);
       }
       commit("endLoading");
     },
@@ -72,16 +75,23 @@ const module = {
           commit("meFail");
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     },
   } as ActionTree<AuthState, any>,
   mutations: {
-    startLoading: (state) => (state.isLoading = true),
-    endLoading: (state) => (state.isLoading = false),
+    startLoading: (state) => (state.isAuthLoading = true),
+    endLoading: (state) => (state.isAuthLoading = false),
     loginSuccess: (state) => (state.isAuthenticated = true),
-    loignFail: (state) => (state.isAuthenticated = false),
+    loginFail: (state, error) => {
+      state.authError = error;
+      setTimeout(() => (state.authError = null), 3000);
+    },
     logoutSuccess: (state) => (state.isAuthenticated = false),
+    logoutFail: (state, error) => {
+      state.authError = error;
+      setTimeout(() => (state.authError = null), 3000);
+    },
     meSuccess: (state) => (state.isAuthenticated = true),
     meFail: (state) => (state.isAuthenticated = false),
   } as MutationTree<AuthState>,

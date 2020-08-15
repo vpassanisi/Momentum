@@ -104,7 +104,7 @@ func GetComments(c *fiber.Ctx) {
 			Success: true,
 			Data: getComments{
 				Post: post,
-				Comments: bson.M{
+				Comments: map[string][]commentPopulated{
 					post.ID.Hex(): []commentPopulated{},
 				},
 			},
@@ -112,7 +112,7 @@ func GetComments(c *fiber.Ctx) {
 		return
 	}
 
-	mappedComments := populateAndMapUsers(comments, c)
+	mappedComments := populateAndMapUsers(c, comments)
 
 	c.Status(200).JSON(respondGC{
 		Success: true,
@@ -123,17 +123,17 @@ func GetComments(c *fiber.Ctx) {
 	})
 }
 
-func populateAndMapUsers(comments []comment, c *fiber.Ctx) bson.M {
-	var populatedComments []commentPopulated
-	mappedComments := bson.M{}
+func populateAndMapUsers(c *fiber.Ctx, comments []comment) map[string][]commentPopulated {
+	mappedComments := map[string][]commentPopulated{}
 
 	usersCollection := config.GetCollection("Users")
 
-	for _, v := range comments {
+	for i, v := range comments {
 		user := user{}
 
-		mappedComments[v.ID.Hex()] = []commentPopulated{}
-		mappedComments[v.Post.Hex()] = []commentPopulated{}
+		if i == 0 {
+			mappedComments[v.Post.Hex()] = []commentPopulated{}
+		}
 
 		comment := commentPopulated{
 			ID:        v.ID,
@@ -153,11 +153,15 @@ func populateAndMapUsers(comments []comment, c *fiber.Ctx) bson.M {
 
 		comment.User = user
 
-		populatedComments = append(populatedComments, comment)
-	}
+		if mappedComments[comment.ID.Hex()] == nil {
+			mappedComments[comment.ID.Hex()] = []commentPopulated{}
+		}
 
-	for _, v := range populatedComments {
-		mappedComments[v.Parent.Hex()] = append(mappedComments[v.Parent.Hex()].([]commentPopulated), v)
+		if mappedComments[comment.Parent.Hex()] == nil {
+			mappedComments[comment.Parent.Hex()] = []commentPopulated{}
+		}
+
+		mappedComments[comment.Parent.Hex()] = append(mappedComments[comment.Parent.Hex()], comment)
 	}
 
 	return mappedComments

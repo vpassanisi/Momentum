@@ -258,8 +258,8 @@ export default Vue.extend({
   methods: {
     ...mapActions("SubState", ["getSubByName"]),
     ...mapActions("PostState", ["createPost"]),
-    handlePost() {
-      this.createPost({
+    async handlePost() {
+      await this.createPost({
         subId: this.sub._id,
         post: {
           title: this.title,

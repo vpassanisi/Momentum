@@ -3,31 +3,36 @@ package posts
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type post struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Title     string             `json:"title"`
 	Body      string             `json:"body"`
 	User      primitive.ObjectID `json:"user"`
+	Points    int32              `json:"points"`
 	Sub       primitive.ObjectID `json:"sub"`
 	CreatedAt int64              `json:"createdAt"`
 }
 
-type postFull struct {
-	ID        primitive.ObjectID `bson:"_id" json:"_id"`
+type postPopulated struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Title     string             `json:"title"`
 	Body      string             `json:"body"`
-	User      primitive.ObjectID `json:"user"`
+	User      user               `json:"user"`
+	Points    int32              `json:"points"`
 	Sub       primitive.ObjectID `json:"sub"`
 	CreatedAt int64              `json:"createdAt"`
 }
 
-type postSimple struct {
-	Title     string `json:"title"`
-	Body      string `json:"body"`
-	CreatedAt int64  `json:"createdAt"`
+type user struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Name      string             `json:"name"`
+	Email     string             `json:"-"`
+	Password  string             `json:"-"`
+	CreatedAt int64              `json:"createdAt"`
 }
 
 type getPosts struct {
-	Sub   subFull    `json:"sub"`
-	Posts []postFull `json:"posts"`
+	Sub   subFull         `json:"sub"`
+	Posts []postPopulated `json:"posts"`
 }
 
 type subFull struct {
@@ -49,8 +54,8 @@ type respondM struct {
 }
 
 type respondP struct {
-	Success bool       `json:"success"`
-	Data    postSimple `json:"data"`
+	Success bool `json:"success"`
+	Data    post `json:"data"`
 }
 
 type respondGP struct {
