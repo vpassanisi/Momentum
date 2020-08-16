@@ -53,8 +53,7 @@ func GetComments(c *fiber.Ctx) {
 		return
 	}
 
-	// user isn't used for anything ????
-	user := bson.M{}
+	user := user{}
 
 	findUserErr := usersCollection.FindOne(c.Context(), bson.M{
 		"_id": post.User,
@@ -74,6 +73,16 @@ func GetComments(c *fiber.Ctx) {
 			Message: "There was a problem with the query",
 		})
 		return
+	}
+
+	populatedPost := postPopulated{
+		ID:        post.ID,
+		Title:     post.Title,
+		Body:      post.Body,
+		Points:    post.Points,
+		Sub:       post.Sub,
+		User:      user,
+		CreatedAt: post.CreatedAt,
 	}
 
 	cursor, findErr := commentsCollection.Find(c.Context(), bson.M{
@@ -103,7 +112,7 @@ func GetComments(c *fiber.Ctx) {
 		c.Status(200).JSON(respondGC{
 			Success: true,
 			Data: getComments{
-				Post: post,
+				Post: populatedPost,
 				Comments: map[string][]commentPopulated{
 					post.ID.Hex(): []commentPopulated{},
 				},
@@ -117,7 +126,7 @@ func GetComments(c *fiber.Ctx) {
 	c.Status(200).JSON(respondGC{
 		Success: true,
 		Data: getComments{
-			Post:     post,
+			Post:     populatedPost,
 			Comments: mappedComments,
 		},
 	})

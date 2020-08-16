@@ -31,6 +31,7 @@ interface Post {
   _id: string;
   title: string;
   body: string;
+  points: number;
   user: string;
   sub: string;
   createdAt: number;

@@ -7,7 +7,7 @@ import (
 type user struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Name      string             `json:"name"`
-	Email     string             `json:"email"`
+	Email     string             `json:"-"`
 	Password  string             `json:"-"`
 	CreatedAt int64              `json:"createdAt"`
 }
@@ -16,7 +16,18 @@ type post struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Title     string             `json:"title"`
 	Body      string             `json:"body"`
+	Points    int32              `json:"points"`
 	User      primitive.ObjectID `json:"user"`
+	Sub       primitive.ObjectID `json:"sub"`
+	CreatedAt int64              `json:"createdAt"`
+}
+
+type postPopulated struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Title     string             `json:"title"`
+	Body      string             `json:"body"`
+	Points    int32              `json:"points"`
+	User      user               `json:"user"`
 	Sub       primitive.ObjectID `json:"sub"`
 	CreatedAt int64              `json:"createdAt"`
 }
@@ -42,7 +53,7 @@ type commentPopulated struct {
 }
 
 type getComments struct {
-	Post     post                          `json:"post"`
+	Post     postPopulated                 `json:"post"`
 	Comments map[string][]commentPopulated `json:"comments"`
 }
 

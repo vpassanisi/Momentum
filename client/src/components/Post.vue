@@ -9,13 +9,17 @@
         class="flex w-full text-gray-900 dark:text-gray-400"
         @click="(e) => e.stopPropagation()"
       >
-        <div class="w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+        <div class="w-full py-2">
+          <svg
+            viewBox="100 14.653 300 168.661"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               fill="currentColor"
-              d="M288.662 352H31.338c-17.818 0-26.741-21.543-14.142-34.142l128.662-128.662c7.81-7.81 20.474-7.81 28.284 0l128.662 128.662c12.6 12.599 3.676 34.142-14.142 34.142z"
+              d="M 379.784 183.315 L 120.215 183.315 C 102.241 183.315 93.24 161.772 105.949 149.173 L 235.734 20.511 C 243.613 12.701 256.387 12.701 264.265 20.511 L 394.05 149.173 C 406.76 161.772 397.758 183.315 379.784 183.315 Z"
               class=""
-            ></path>
+              style=""
+            />
           </svg>
         </div>
       </button>
@@ -25,16 +29,20 @@
         }}
       </div>
       <button
-        class="flex w-full text-gray-900 dark:text-gray-400"
+        class="flex w-full text-gray-900 dark:text-gray-400 py-2"
         @click="(e) => e.stopPropagation()"
       >
         <div class="w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+          <svg
+            viewBox="100 14.112 300 168.65"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               fill="currentColor"
-              d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"
+              d="M 120.186 14.112 L 379.814 14.112 C 397.775 14.112 406.756 35.612 394.042 48.212 L 264.278 176.912 C 256.408 184.712 243.593 184.712 235.722 176.912 L 105.958 48.212 C 93.244 35.612 102.225 14.112 120.186 14.112 Z"
               class=""
-            ></path>
+              style=""
+            />
           </svg>
         </div>
       </button>

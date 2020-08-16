@@ -1,22 +1,31 @@
 <template>
   <div v-if="isOpen" class="flex flex-row py-4">
-    <div class="flex flex-col min-w-6">
-      <button class="w-full focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+    <div class="flex flex-col w-6">
+      <button
+        class="w-full text-gray-900 dark:text-gray-400 focus:outline-none py-2"
+      >
+        <svg
+          viewBox="100 14.653 300 168.661"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             fill="currentColor"
-            d="M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z"
+            d="M 379.784 183.315 L 120.215 183.315 C 102.241 183.315 93.24 161.772 105.949 149.173 L 235.734 20.511 C 243.613 12.701 256.387 12.701 264.265 20.511 L 394.05 149.173 C 406.76 161.772 397.758 183.315 379.784 183.315 Z"
             class=""
-          ></path>
+            style=""
+          />
         </svg>
       </button>
-      <button class="w-full focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+      <button
+        class="w-full text-gray-900 dark:text-gray-400 focus:outline-none py-2"
+      >
+        <svg viewBox="100 14.112 300 168.65" xmlns="http://www.w3.org/2000/svg">
           <path
             fill="currentColor"
-            d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"
+            d="M 120.186 14.112 L 379.814 14.112 C 397.775 14.112 406.756 35.612 394.042 48.212 L 264.278 176.912 C 256.408 184.712 243.593 184.712 235.722 176.912 L 105.958 48.212 C 93.244 35.612 102.225 14.112 120.186 14.112 Z"
             class=""
-          ></path>
+            style=""
+          />
         </svg>
       </button>
       <div
