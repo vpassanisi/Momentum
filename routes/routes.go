@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/controllers/auth"
 	"github.com/vpassanisi/Project-S/controllers/comments"
+	"github.com/vpassanisi/Project-S/controllers/points"
 	"github.com/vpassanisi/Project-S/controllers/posts"
 	"github.com/vpassanisi/Project-S/controllers/subs"
 	arbiter "github.com/vpassanisi/Project-S/middleware"
@@ -33,5 +34,9 @@ func BuildRoutes(app *fiber.App, client *mongo.Client) {
 	Comments := v1.Group("/comments")
 	Comments.Get("/:post", comments.GetComments)
 	Comments.Post("/:post", arbiter.Protected, comments.Create)
+
+	Points := v1.Group("/points")
+	Points.Post("/increment", arbiter.Protected, points.Increment)
+	Points.Post("/decrement", arbiter.Protected, points.Decrement)
 
 }

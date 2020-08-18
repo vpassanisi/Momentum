@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/vpassanisi/Project-S/config"
-	arbiter "github.com/vpassanisi/Project-S/middleware"
 
 	"github.com/gofiber/fiber"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -26,9 +25,7 @@ func Create(c *fiber.Ctx) {
 
 	sub.CreatedAt = time.Now().Unix()
 
-	claims := arbiter.GetClaims()
-
-	id, objErr := primitive.ObjectIDFromHex(claims["id"].(string))
+	id, objErr := primitive.ObjectIDFromHex(c.Locals("id").(string))
 	if objErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,

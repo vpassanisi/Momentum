@@ -6,7 +6,6 @@ import (
 
 	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/config"
-	arbiter "github.com/vpassanisi/Project-S/middleware"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -17,9 +16,7 @@ import (
 // @access Private
 func Create(c *fiber.Ctx) {
 
-	claims := arbiter.GetClaims()
-
-	user, objErr := primitive.ObjectIDFromHex(claims["id"].(string))
+	user, objErr := primitive.ObjectIDFromHex(c.Locals("id").(string))
 	if objErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,

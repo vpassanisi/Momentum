@@ -1,11 +1,8 @@
 package posts
 
 import (
-	"fmt"
 	"log"
 	"time"
-
-	arbiter "github.com/vpassanisi/Project-S/middleware"
 
 	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/config"
@@ -19,9 +16,7 @@ import (
 // @access Private
 func Create(c *fiber.Ctx) {
 
-	claims := arbiter.GetClaims()
-
-	user, objErr := primitive.ObjectIDFromHex(claims["id"].(string))
+	user, objErr := primitive.ObjectIDFromHex(c.Locals("id").(string))
 	if objErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,
@@ -47,8 +42,6 @@ func Create(c *fiber.Ctx) {
 	if err := c.BodyParser(&post); err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println(post)
 
 	collection := config.GetCollection("Posts")
 

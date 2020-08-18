@@ -12,8 +12,8 @@ import (
 
 // GetSubs //
 // @desc gets subs and sorts them based on query params
-// @route POST /api/v1/subs/?
-// @access Public
+// @route POST /api/v1/subs/?key&order&*name&*id
+// @access Private
 func GetSubs(c *fiber.Ctx) {
 	subs := []subSimple{}
 	filter := bson.M{}

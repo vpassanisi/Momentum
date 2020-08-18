@@ -13,9 +13,6 @@ type respondM struct {
 	Message string `json:"message"`
 }
 
-var claims jwt.MapClaims
-var ok bool
-
 func Protected(c *fiber.Ctx) {
 	cookie := c.Cookies("token")
 
@@ -44,7 +41,8 @@ func Protected(c *fiber.Ctx) {
 	}
 
 	// if token is valid and claims are mapped set the users id to the context map with key "id" else abort
-	if claims, ok = token.Claims.(jwt.MapClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		c.Locals("id", claims["id"].(string))
 		c.Next()
 	} else {
 		c.Status(401).JSON(respondM{
@@ -52,8 +50,4 @@ func Protected(c *fiber.Ctx) {
 			Message: "Claims not ok or token is not valid",
 		})
 	}
-}
-
-func GetClaims() jwt.MapClaims {
-	return claims
 }
