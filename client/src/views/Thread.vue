@@ -58,6 +58,7 @@
           v-for="com in comments[post._id]"
           :key="com._id"
           :comment="com"
+          :rootComment="com._id"
         />
       </div>
       <About class="order-last" />
@@ -121,12 +122,12 @@ export default Vue.extend({
     ...mapState("SubState", ["sub", "posts"]),
   },
   methods: {
-    ...mapActions("PostState", ["getPostById"]),
+    ...mapActions("PostState", ["getPostAndComments"]),
     ...mapActions("SubState", ["getSubByName"]),
     ...mapActions("EventState", ["getTimeSince"]),
   },
   mounted: async function() {
-    await this.getPostById(this.$route.params.id);
+    await this.getPostAndComments(this.$route.params.id);
 
     this.readOnlyEditor.setContent(JSON.parse(this.post.body));
     this.formatedTime = await this.getTimeSince(this.post.createdAt);

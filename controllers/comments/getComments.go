@@ -33,6 +33,7 @@ func GetComments(c *fiber.Ctx) {
 	postsCollection := config.GetCollection("Posts")
 	commentsCollection := config.GetCollection("Comments")
 	usersCollection := config.GetCollection("Users")
+	repliesCollection := config.GetCollection("Replies")
 
 	findOneErr := postsCollection.FindOne(c.Context(), bson.M{
 		"_id": postID,
@@ -94,7 +95,7 @@ func GetComments(c *fiber.Ctx) {
 
 	opts := options.Find().SetSort(bson.D{{c.Query("sort"), order}})
 
-	cursor, findErr := commentsCollection.Find(c.Context(), bson.M{
+	commentsCursor, findErr := commentsCollection.Find(c.Context(), bson.M{
 		"post": post.ID,
 	}, opts)
 	if findErr != nil {
@@ -107,8 +108,8 @@ func GetComments(c *fiber.Ctx) {
 		return
 	}
 
-	// loop through cursor and put todos in the todos slice of todos
-	cursorErr := cursor.All(c.Context(), &comments)
+	// loop through cursor and put comments in the slice
+	cursorErr := commentsCursor.All(c.Context(), &comments)
 	if cursorErr != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
@@ -122,15 +123,46 @@ func GetComments(c *fiber.Ctx) {
 			Success: true,
 			Data: getComments{
 				Post: populatedPost,
-				Comments: map[string][]commentPopulated{
-					post.ID.Hex(): []commentPopulated{},
+				Comments: map[string][]interface{}{
+					post.ID.Hex(): []interface{}{},
 				},
 			},
 		})
 		return
 	}
 
-	mappedComments := populateAndMapUsers(c, comments)
+	arr := bson.A{}
+
+	for _, v := range comments {
+		arr = append(arr, bson.M{"comment": v.ID})
+	}
+
+	filter := bson.M{
+		"$or": arr,
+	}
+
+	replies := []reply{}
+
+	repliesCursor, repliesErr := repliesCollection.Find(c.Context(), filter, opts)
+	if repliesErr != nil {
+		c.Status(500).JSON(respondM{
+			Success: false,
+			Message: "There was an error during query",
+		})
+		fmt.Println(repliesErr)
+		return
+	}
+
+	repliesCursorErr := repliesCursor.All(c.Context(), &replies)
+	if repliesCursorErr != nil {
+		c.Status(500).JSON(respondM{
+			Success: false,
+			Message: "There was an error during cursor loop",
+		})
+		return
+	}
+
+	mappedComments := populateUsersAndMap(c, comments)
 
 	c.Status(200).JSON(respondGC{
 		Success: true,
@@ -141,8 +173,8 @@ func GetComments(c *fiber.Ctx) {
 	})
 }
 
-func populateAndMapUsers(c *fiber.Ctx, comments []comment) map[string][]commentPopulated {
-	mappedComments := map[string][]commentPopulated{}
+func populateUsersAndMap(c *fiber.Ctx, comments []comment) map[string][]interface{} {
+	mappedComments := map[string][]interface{}{}
 
 	usersCollection := config.GetCollection("Users")
 
@@ -150,7 +182,7 @@ func populateAndMapUsers(c *fiber.Ctx, comments []comment) map[string][]commentP
 		user := user{}
 
 		if i == 0 {
-			mappedComments[v.Post.Hex()] = []commentPopulated{}
+			mappedComments[v.Post.Hex()] = []interface{}{}
 		}
 
 		comment := commentPopulated{
@@ -172,11 +204,11 @@ func populateAndMapUsers(c *fiber.Ctx, comments []comment) map[string][]commentP
 		comment.User = user
 
 		if mappedComments[comment.ID.Hex()] == nil {
-			mappedComments[comment.ID.Hex()] = []commentPopulated{}
+			mappedComments[comment.ID.Hex()] = []interface{}{}
 		}
 
 		if mappedComments[comment.Parent.Hex()] == nil {
-			mappedComments[comment.Parent.Hex()] = []commentPopulated{}
+			mappedComments[comment.Parent.Hex()] = []interface{}{}
 		}
 
 		mappedComments[comment.Parent.Hex()] = append(mappedComments[comment.Parent.Hex()], comment)

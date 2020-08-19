@@ -7,8 +7,9 @@ type reply struct {
 	Body      string             `json:"body"`
 	Points    int64              `json:"points"`
 	User      primitive.ObjectID `json:"user"`
-	Comment   primitive.ObjectID `json:"post"`
+	Comment   primitive.ObjectID `json:"comment"`
 	Parent    primitive.ObjectID `json:"parent"`
+	Post      primitive.ObjectID `json:"post"`
 	CreatedAt int64              `json:"createdAt"`
 }
 

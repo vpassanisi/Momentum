@@ -52,9 +52,20 @@ type commentPopulated struct {
 	CreatedAt int64              `json:"createdAt"`
 }
 
+type reply struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Body      string             `json:"body"`
+	Points    int64              `json:"points"`
+	User      primitive.ObjectID `json:"user"`
+	Comment   primitive.ObjectID `json:"comment"`
+	Parent    primitive.ObjectID `json:"parent"`
+	Post      primitive.ObjectID `json:"post"`
+	CreatedAt int64              `json:"createdAt"`
+}
+
 type getComments struct {
-	Post     postPopulated                 `json:"post"`
-	Comments map[string][]commentPopulated `json:"comments"`
+	Post     postPopulated            `json:"post"`
+	Comments map[string][]interface{} `json:"comments"`
 }
 
 type respondGC struct {

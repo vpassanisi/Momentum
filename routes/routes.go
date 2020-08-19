@@ -6,6 +6,7 @@ import (
 	"github.com/vpassanisi/Project-S/controllers/comments"
 	"github.com/vpassanisi/Project-S/controllers/points"
 	"github.com/vpassanisi/Project-S/controllers/posts"
+	"github.com/vpassanisi/Project-S/controllers/replies"
 	"github.com/vpassanisi/Project-S/controllers/subs"
 	arbiter "github.com/vpassanisi/Project-S/middleware"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -38,5 +39,8 @@ func BuildRoutes(app *fiber.App, client *mongo.Client) {
 	Points := v1.Group("/points")
 	Points.Post("/increment", arbiter.Protected, points.Increment)
 	Points.Post("/decrement", arbiter.Protected, points.Decrement)
+
+	Replies := v1.Group("/replies")
+	Replies.Post("/:commentID", arbiter.Protected, replies.Create)
 
 }

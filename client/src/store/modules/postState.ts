@@ -17,6 +17,13 @@ interface CreateCommentObj {
   parent: string;
 }
 
+interface CreateReplyObj {
+  postId: string;
+  body: string;
+  parentId: string;
+  commentId: string;
+}
+
 interface Comment {
   _id: string;
   body: string;
@@ -57,12 +64,15 @@ const module = {
     postError: null,
   },
   actions: {
-    getPostById: async ({ commit }, post: string) => {
+    getPostAndComments: async ({ commit }, post: string) => {
       commit("startLoading");
       try {
-        const res = await fetch(`/api/v1/comments/${post}`, {
-          method: "GET",
-        });
+        const res = await fetch(
+          `/api/v1/comments/?postID=${post}&sort=createdat&order=-1`,
+          {
+            method: "GET",
+          }
+        );
 
         const json = await res.json();
 
@@ -130,6 +140,33 @@ const module = {
       }
       commit("endLoading");
     },
+    newReplyByPost: async ({ commit }, obj: CreateReplyObj) => {
+      commit("startLoading");
+      try {
+        const res = await fetch(`/api/v1/replies/${obj.commentId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            body: obj.body,
+            parent: obj.parentId,
+            post: obj.postId,
+          }),
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("newReplySuccess", json.data);
+        } else {
+          commit("newReplyFail", json.message);
+          console.log(json);
+        }
+      } catch (error) {
+        commit("newReplyFail", "Promise rejected with an error");
+        console.error(error);
+      }
+      commit("endLoading");
+    },
   } as ActionTree<CurrentPostState, null>,
   mutations: {
     startLoading: (state) => (state.isPostLoading = true),
@@ -150,7 +187,19 @@ const module = {
         ...state.comments[comment.parent],
       ];
     },
+    newReplySuccess: (state, comment: Comment) => {
+      state.comments[comment._id] = [];
+
+      state.comments[comment.parent] = [
+        comment,
+        ...state.comments[comment.parent],
+      ];
+    },
     newCommentFail: (state, error) => {
+      state.postError = error;
+      setTimeout(() => (state.postError = null), 3000);
+    },
+    newReplyFail: (state, error) => {
       state.postError = error;
       setTimeout(() => (state.postError = null), 3000);
     },

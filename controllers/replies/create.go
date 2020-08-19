@@ -13,7 +13,7 @@ import (
 
 // Create //
 // @desc creates a new reply and adds it to the database
-// @route POST /api/v1/replies/:comment
+// @route POST /api/v1/replies/:commentID
 // @access Private
 func Create(c *fiber.Ctx) {
 
@@ -26,11 +26,11 @@ func Create(c *fiber.Ctx) {
 		return
 	}
 
-	commentID, commentErr := primitive.ObjectIDFromHex(c.Params("comment"))
+	commentID, commentErr := primitive.ObjectIDFromHex(c.Params("commentID"))
 	if commentErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,
-			Message: "Bad sub id",
+			Message: "Bad comment id",
 		})
 		return
 	}
