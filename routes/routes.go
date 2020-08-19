@@ -32,7 +32,7 @@ func BuildRoutes(app *fiber.App, client *mongo.Client) {
 	Posts.Get("/:sub", posts.GetPosts)
 
 	Comments := v1.Group("/comments")
-	Comments.Get("/:post", comments.GetComments)
+	Comments.Get("/", comments.GetComments)
 	Comments.Post("/:post", arbiter.Protected, comments.Create)
 
 	Points := v1.Group("/points")

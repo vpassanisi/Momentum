@@ -11,6 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// TODO: move response to the seperate functions to make the code more concise
+
 // Decrement //
 // @desc removes a point from a post or comment
 // @route POST /api/v1/points/decrement/?type&id
@@ -51,7 +53,7 @@ func Decrement(c *fiber.Ctx) {
 
 	opts := options.Find().SetLimit(1)
 
-	cur, findErr := collection.Find(c.Context(), bson.M{"_id": targetID}, opts)
+	targetCur, findErr := collection.Find(c.Context(), bson.M{"_id": targetID}, opts)
 	if findErr != nil {
 		if findErr == mongo.ErrNoDocuments {
 			c.Status(400).JSON(respondM{
@@ -67,7 +69,7 @@ func Decrement(c *fiber.Ctx) {
 		return
 	}
 
-	if cur.RemainingBatchLength() == 0 {
+	if targetCur.RemainingBatchLength() == 0 {
 		c.Status(400).JSON(respondM{
 			Success: false,
 			Message: "There is no target with that id",
@@ -92,7 +94,7 @@ func Decrement(c *fiber.Ctx) {
 	point := point{}
 
 	if pointCur.RemainingBatchLength() == 0 {
-		point.Active = true
+		point.Active = false
 		point.Target = targetID
 		point.User = userID
 		point.UpdatedAt = time.Now().Unix()
@@ -106,59 +108,95 @@ func Decrement(c *fiber.Ctx) {
 		}
 
 		if c.Query("type") == "post" {
-			post, incrementErr := incrementPost(c, collection, targetID)
+			decrementPost(c, collection, targetID)
+		} else {
+			decrementComment(c, collection, targetID)
+		}
+		return
+	}
 
-			if incrementErr != nil {
-				c.Status(500).JSON(respondM{
-					Success: false,
-					Message: "there was a problem incrementing the target",
-				})
-				return
-			}
-
-			post.Points = post.Points + 1
-
-			c.Status(200).JSON(respondP{
-				Success: true,
-				Data:    post,
-			})
-			return
-		} else if c.Query("type") == "comment" {
-			comment, incrementErr := incrementComment(c, collection, targetID)
-
-			if incrementErr != nil {
-				c.Status(500).JSON(respondM{
-					Success: false,
-					Message: "there was a problem incrementing the target",
-				})
-				return
-			}
-
-			c.Status(200).JSON(respondC{
-				Success: true,
-				Data:    comment,
+	defer pointCur.Close(c.Context())
+	if pointCur.TryNext(c.Context()) {
+		if err := pointCur.Decode(&point); err != nil {
+			c.Status(500).JSON(respondM{
+				Success: false,
+				Message: "there was a problem decoding the point cursor",
 			})
 			return
 		}
 	}
 
+	if err := pointCur.Err(); err != nil {
+		c.Status(500).JSON(respondM{
+			Success: false,
+			Message: "there was a problem decoding the point cursor",
+		})
+		return
+	}
+
+	if point.Active {
+		pointErr := pointsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": point.ID}, bson.M{"$set": bson.M{"active": false}}).Decode(&point)
+		if pointErr != nil {
+			c.Status(500).JSON(respondM{
+				Success: false,
+				Message: "there was a problem updating the point",
+			})
+			return
+		}
+
+		if c.Query("type") == "post" {
+			decrementPost(c, collection, targetID)
+		} else {
+			decrementComment(c, collection, targetID)
+		}
+		return
+	}
+
+	c.Status(400).JSON(respondM{
+		Success: false,
+		Message: "you already down voted that",
+	})
+	return
 }
 
-func incrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID primitive.ObjectID) (post, error) {
+func decrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID primitive.ObjectID) {
 
 	post := post{}
 
-	incrementErr := postsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": -1}}).Decode(&post)
+	decrementErr := postsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": -1}}).Decode(&post)
+	if decrementErr != nil {
+		c.Status(500).JSON(respondM{
+			Success: false,
+			Message: "there was a problem decrementing the target",
+		})
+		return
+	}
 
-	return post, incrementErr
+	post.Points = post.Points - 1
 
+	c.Status(200).JSON(respondP{
+		Success: true,
+		Data:    post,
+	})
 }
 
-func incrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, targetID primitive.ObjectID) (comment, error) {
+func decrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, targetID primitive.ObjectID) {
 
 	comment := comment{}
 
-	incrementErr := commentsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": -1}}).Decode(&comment)
+	decrementErr := commentsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": -1}}).Decode(&comment)
+	if decrementErr != nil {
+		c.Status(500).JSON(respondM{
+			Success: false,
+			Message: "there was a problem decrementing the target",
+		})
+		return
+	}
 
-	return comment, incrementErr
+	comment.Points = comment.Points - 1
+
+	c.Status(200).JSON(respondC{
+		Success: true,
+		Data:    comment,
+	})
 }

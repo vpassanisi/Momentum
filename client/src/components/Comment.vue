@@ -34,10 +34,9 @@
       />
     </div>
     <div class="w-full">
-      <span class="pl-4 text-sm text-gray-500"
-        >{{ comment.user.name
-        }}<span class="ml-2">{{ `${comment.points} Points` }}</span></span
-      >
+      <span class="pl-4 text-sm text-gray-500">{{
+        `${comment.user.name} • ${comment.points} Points • ${formatedTime} ago`
+      }}</span>
       <editor-content :editor="readOnlyEditor" />
       <div v-if="isAuthenticated">
         <div v-if="isReplyOpen" class="flex flex-row">
@@ -78,15 +77,14 @@
       >
     </button>
     <span class="text-sm text-gray-500 flex items-center justify-center"
-      >{{ `${comment.user.name}`
-      }}<span class="pl-2">{{ `${comment.points} Points` }}</span>
+      >{{ `${comment.user.name} • ${comment.points} Points • ${formatedTime}` }}
     </span>
   </div>
 </template>
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import Comment from "./Comment.vue";
 import NewCommentEditor from "./NewCommentEditor.vue";
 import { Editor, EditorContent } from "tiptap";
@@ -124,6 +122,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      formatedTime: null,
       isReplyOpen: false,
       isOpen: true,
       readOnlyEditor: new Editor({
@@ -152,6 +151,7 @@ export default Vue.extend({
     ...mapState("PostState", ["comments"]),
   },
   methods: {
+    ...mapActions("EventState", ["getTimeSince"]),
     close() {
       this.isOpen = false;
     },
@@ -165,8 +165,10 @@ export default Vue.extend({
       this.isReplyOpen = false;
     },
   },
-  mounted: function() {
+  mounted: async function() {
     this.readOnlyEditor.setContent(JSON.parse(this.comment.body));
+
+    this.formatedTime = await this.getTimeSince(this.comment.createdAt);
   },
 });
 </script>

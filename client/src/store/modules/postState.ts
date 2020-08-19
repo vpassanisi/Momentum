@@ -13,7 +13,7 @@ interface CreatePostObj {
 
 interface CreateCommentObj {
   postId: string;
-  comment: string;
+  body: string;
   parent: string;
 }
 
@@ -110,7 +110,10 @@ const module = {
         const res = await fetch(`/api/v1/comments/${obj.postId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ body: obj.comment, parent: obj.parent }),
+          body: JSON.stringify({
+            body: obj.body,
+            parent: obj.parent,
+          }),
         });
 
         const json = await res.json();

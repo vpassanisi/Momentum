@@ -1,23 +1,24 @@
-package comments
+package replies
 
 import (
 	"log"
 	"time"
 
-	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/config"
+
+	"github.com/gofiber/fiber"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Create //
-// @desc creates a new comment and adds it to the database
-// @route POST /api/v1/comments/:post
+// @desc creates a new reply and adds it to the database
+// @route POST /api/v1/replies/:comment
 // @access Private
 func Create(c *fiber.Ctx) {
 
-	user, objErr := primitive.ObjectIDFromHex(c.Locals("id").(string))
-	if objErr != nil {
+	userID, userErr := primitive.ObjectIDFromHex(c.Locals("id").(string))
+	if userErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,
 			Message: "Bad cookie",
@@ -25,29 +26,29 @@ func Create(c *fiber.Ctx) {
 		return
 	}
 
-	post, postErr := primitive.ObjectIDFromHex(c.Params("post"))
-	if postErr != nil {
+	commentID, commentErr := primitive.ObjectIDFromHex(c.Params("comment"))
+	if commentErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,
-			Message: "Bad post id",
+			Message: "Bad sub id",
 		})
 		return
 	}
 
-	newComment := comment{
+	newReply := reply{
 		CreatedAt: time.Now().Unix(),
-		User:      user,
-		Post:      post,
 		Points:    0,
+		User:      userID,
+		Comment:   commentID,
 	}
 
-	if err := c.BodyParser(&newComment); err != nil {
+	if err := c.BodyParser(&newReply); err != nil {
 		log.Fatal(err)
 	}
 
-	commentsCollection := config.GetCollection("Comments")
+	repliesCollection := config.GetCollection("Replies")
 
-	id, insertErr := commentsCollection.InsertOne(c.Context(), newComment)
+	replyID, insertErr := repliesCollection.InsertOne(c.Context(), newReply)
 	if insertErr != nil {
 		err := insertErr.(mongo.WriteException)
 		if err.WriteErrors[0].Code == 121 {
@@ -64,10 +65,10 @@ func Create(c *fiber.Ctx) {
 		return
 	}
 
-	newComment.ID = id.InsertedID.(primitive.ObjectID)
+	newReply.ID = replyID.InsertedID.(primitive.ObjectID)
 
-	c.Status(200).JSON(respondC{
+	c.Status(200).JSON(respondR{
 		Success: true,
-		Data:    newComment,
+		Data:    newReply,
 	})
 }

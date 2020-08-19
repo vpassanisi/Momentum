@@ -231,7 +231,7 @@ export default Vue.extend({
     async handleComment() {
       await this.newCommentByPost({
         postId: this.postId,
-        comment: this.commentJSON,
+        body: this.commentJSON,
         parent: this.parent,
       });
       this.$emit("close");

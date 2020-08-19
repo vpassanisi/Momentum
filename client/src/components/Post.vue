@@ -49,7 +49,7 @@
     </div>
     <div class="p-4">
       <div class="text-sm text-gray-700 dark:text-gray-500">
-        Posted by {{ postData.user.name }} {{ formatedTime }} ago
+        Posted by {{ postData.user.name }} • {{ formatedTime }} ago
       </div>
       <div class="text-2xl font-medium">{{ postData.title }}</div>
       <editor-content :editor="readOnlyEditor" />

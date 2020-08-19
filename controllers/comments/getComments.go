@@ -9,18 +9,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// GetPost //
+// GetComments //
 // @desc gets the post and comments for a given id
-// @route GET /api/v1/posts/:sub/:id
+// @route GET /api/v1/comments/?postID&sort&order
 // @access Public
 func GetComments(c *fiber.Ctx) {
 
 	post := post{}
 	comments := []comment{}
 
-	id, idErr := primitive.ObjectIDFromHex(c.Params("post"))
+	postID, idErr := primitive.ObjectIDFromHex(c.Query("postID"))
 	if idErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,
@@ -34,7 +35,7 @@ func GetComments(c *fiber.Ctx) {
 	usersCollection := config.GetCollection("Users")
 
 	findOneErr := postsCollection.FindOne(c.Context(), bson.M{
-		"_id": id,
+		"_id": postID,
 	}).Decode(&post)
 	if findOneErr != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
@@ -85,9 +86,17 @@ func GetComments(c *fiber.Ctx) {
 		CreatedAt: post.CreatedAt,
 	}
 
+	order := 1
+
+	if c.Query("order") == "-1" {
+		order = -1
+	}
+
+	opts := options.Find().SetSort(bson.D{{c.Query("sort"), order}})
+
 	cursor, findErr := commentsCollection.Find(c.Context(), bson.M{
 		"post": post.ID,
-	})
+	}, opts)
 	if findErr != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,

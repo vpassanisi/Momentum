@@ -42,13 +42,17 @@
           </div>
           <div>
             <div class="text-sm text-gray-700 dark:text-gray-500 pl-4">
-              Posted by {{ post.user.name }} {{ formatedTime }} ago
+              Posted by {{ post.user.name }} • {{ formatedTime }} ago
             </div>
             <div class="text-xl font-medium pl-4">{{ post.title }}</div>
             <editor-content :editor="readOnlyEditor" />
           </div>
         </div>
-        <NewCommentEditor :postId="post._id" :parent="post._id" />
+        <NewCommentEditor
+          :postId="post._id"
+          :parent="post._id"
+          :root="post._id"
+        />
         <div class="border-b border-gray-400 dark:border-gray-700 my-4" />
         <Comment
           v-for="com in comments[post._id]"
