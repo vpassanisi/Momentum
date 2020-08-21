@@ -14,14 +14,8 @@ interface CreatePostObj {
 interface CreateCommentObj {
   postId: string;
   body: string;
-  parent: string;
-}
-
-interface CreateReplyObj {
-  postId: string;
-  body: string;
   parentId: string;
-  commentId: string;
+  rootId: string;
 }
 
 interface Comment {
@@ -51,6 +45,7 @@ interface Comments {
 interface CurrentPostState {
   post: Post | null;
   comments: Comments;
+  ids: Array<string>;
   isPostLoading: boolean;
   postError: string | null;
 }
@@ -60,6 +55,7 @@ const module = {
   state: {
     post: null,
     comments: {},
+    ids: [],
     isPostLoading: false,
     postError: null,
   },
@@ -88,6 +84,12 @@ const module = {
         commit("getPostByIdFail", "Promise rejected with error");
         console.error(error);
       }
+      commit("endLoading");
+    },
+    getPoints: async ({ commit }, obj) => {
+      commit("startLoading");
+      // try {
+      // } catch (error) {}
       commit("endLoading");
     },
     createPost: async ({ commit }, obj: CreatePostObj) => {
@@ -122,7 +124,8 @@ const module = {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             body: obj.body,
-            parent: obj.parent,
+            parent: obj.parentId,
+            root: obj.rootId,
           }),
         });
 
@@ -140,32 +143,8 @@ const module = {
       }
       commit("endLoading");
     },
-    newReplyByPost: async ({ commit }, obj: CreateReplyObj) => {
-      commit("startLoading");
-      try {
-        const res = await fetch(`/api/v1/replies/${obj.commentId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            body: obj.body,
-            parent: obj.parentId,
-            post: obj.postId,
-          }),
-        });
-
-        const json = await res.json();
-
-        if (json.success) {
-          commit("newReplySuccess", json.data);
-        } else {
-          commit("newReplyFail", json.message);
-          console.log(json);
-        }
-      } catch (error) {
-        commit("newReplyFail", "Promise rejected with an error");
-        console.error(error);
-      }
-      commit("endLoading");
+    clearState: ({ commit }) => {
+      commit("clearState");
     },
   } as ActionTree<CurrentPostState, null>,
   mutations: {
@@ -173,7 +152,20 @@ const module = {
     endLoading: (state) => (state.isPostLoading = false),
     getPostByIdSuccess: (state, { post, comments }) => {
       state.post = post;
-      state.comments = comments;
+      if (state.comments[post._id] === undefined) {
+        state.comments[post._id] = [];
+      }
+      state.comments[post._id] = [
+        ...state.comments[post._id],
+        ...comments[post._id],
+      ];
+      delete comments[post._id];
+
+      state.comments = { ...state.comments, ...comments };
+
+      const arr = [];
+      for (const k in state.comments) arr.push(k);
+      state.ids = arr;
     },
     getPostByIdFail: (state, error) => {
       state.postError = error;
@@ -206,6 +198,10 @@ const module = {
     createPostFail: (state, error) => {
       state.postError = error;
       setTimeout(() => (state.postError = null), 3000);
+    },
+    clearState: (state) => {
+      state.post = null;
+      state.comments = {};
     },
   } as MutationTree<CurrentPostState>,
 };

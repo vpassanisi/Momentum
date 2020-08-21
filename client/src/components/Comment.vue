@@ -45,10 +45,10 @@
               class="border-r-2 border-gray-300 dark:border-gray-700 w-50p h-full self-start"
             />
           </div>
-          <NewReplyEditor
+          <NewCommentEditor
             :postId="comment.post"
             :parentId="comment._id"
-            :commentId="rootComment"
+            :rootId="rootId"
             @close="closeReply"
           />
         </div>
@@ -66,7 +66,7 @@
           v-for="com in comments[comment._id]"
           :key="com._id"
           :comment="com"
-          :rootComment="rootComment"
+          :rootId="rootId"
         />
       </div>
     </div>
@@ -87,7 +87,7 @@
 import Vue, { PropType } from "vue";
 import { mapState, mapActions } from "vuex";
 import Comment from "./Comment.vue";
-import NewReplyEditor from "./NewReplyEditor.vue";
+import NewCommentEditor from "./NewCommentEditor.vue";
 import { Editor, EditorContent } from "tiptap";
 import {
   Bold,
@@ -116,11 +116,11 @@ export default Vue.extend({
   name: "Comment",
   components: {
     EditorContent,
-    NewReplyEditor,
+    NewCommentEditor,
   },
   props: {
     comment: Object as PropType<Comment>,
-    rootComment: String,
+    rootId: String,
   },
   data() {
     return {

@@ -51,6 +51,8 @@ func Decrement(c *fiber.Ctx) {
 		return
 	}
 
+	// -- check if the targetID is valid (find is faster than findone) -- //
+
 	opts := options.Find().SetLimit(1)
 
 	targetCur, findErr := collection.Find(c.Context(), bson.M{"_id": targetID}, opts)
@@ -77,6 +79,8 @@ func Decrement(c *fiber.Ctx) {
 		return
 	}
 
+	// -- check if point already exists -- //
+
 	pointsCollection := config.GetCollection("Points")
 
 	pointCur, findPointErr := pointsCollection.Find(c.Context(), bson.M{
@@ -93,6 +97,7 @@ func Decrement(c *fiber.Ctx) {
 
 	point := point{}
 
+	// -- add new point  -- //
 	if pointCur.RemainingBatchLength() == 0 {
 		point.Active = false
 		point.Target = targetID
@@ -134,6 +139,7 @@ func Decrement(c *fiber.Ctx) {
 		return
 	}
 
+	// -- make active point inactive -- //
 	if point.Active {
 		pointErr := pointsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": point.ID}, bson.M{"$set": bson.M{"active": false}}).Decode(&point)
 		if pointErr != nil {
@@ -159,6 +165,7 @@ func Decrement(c *fiber.Ctx) {
 	return
 }
 
+//  subtract one from the post and return the new value -- //
 func decrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID primitive.ObjectID) {
 
 	post := post{}
@@ -180,6 +187,7 @@ func decrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID pri
 	})
 }
 
+// -- subtract one from the comment and return the new value -- //
 func decrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, targetID primitive.ObjectID) {
 
 	comment := comment{}

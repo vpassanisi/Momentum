@@ -180,7 +180,8 @@ export default Vue.extend({
   name: "NewCommentEditor",
   props: {
     postId: String,
-    parent: String,
+    parentId: String,
+    rootId: String,
     closeButton: Boolean,
   },
   components: {
@@ -232,7 +233,8 @@ export default Vue.extend({
       await this.newCommentByPost({
         postId: this.postId,
         body: this.commentJSON,
-        parent: this.parent,
+        parentId: this.parentId,
+        rootId: this.rootId,
       });
       this.$emit("close");
     },

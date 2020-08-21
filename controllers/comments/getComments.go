@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // GetComments //
@@ -17,9 +17,6 @@ import (
 // @route GET /api/v1/comments/?postID&sort&order
 // @access Public
 func GetComments(c *fiber.Ctx) {
-
-	post := post{}
-	comments := []comment{}
 
 	postID, idErr := primitive.ObjectIDFromHex(c.Query("postID"))
 	if idErr != nil {
@@ -32,85 +29,55 @@ func GetComments(c *fiber.Ctx) {
 
 	postsCollection := config.GetCollection("Posts")
 	commentsCollection := config.GetCollection("Comments")
-	usersCollection := config.GetCollection("Users")
-	repliesCollection := config.GetCollection("Replies")
 
-	findOneErr := postsCollection.FindOne(c.Context(), bson.M{
-		"_id": postID,
-	}).Decode(&post)
-	if findOneErr != nil {
-		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if findOneErr == mongo.ErrNoDocuments {
-			c.Status(404).JSON(respondM{
-				Success: false,
-				Message: "Nothing matched that id",
-			})
-			return
-		}
+	// -- get post and populate user field -- //
 
+	matchStage := bson.D{{"$match", bson.M{"_id": postID}}}
+	limitStage := bson.D{{"$limit", 1}}
+	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}
+	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$user"}, {"preserveNullAndEmptyArrays", false}}}}
+
+	postCursor, postErr := postsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, limitStage, lookupStage, unwindStage})
+	if postErr != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
-			Message: "There was a problem with the query",
+			Message: "there was an error populating post",
 		})
-		return
 	}
 
-	user := user{}
+	post := postPopulated{}
 
-	findUserErr := usersCollection.FindOne(c.Context(), bson.M{
-		"_id": post.User,
-	}).Decode(&user)
-	if findUserErr != nil {
-		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if findUserErr == mongo.ErrNoDocuments {
-			c.Status(404).JSON(respondM{
-				Success: false,
-				Message: "Nothing matched that id",
-			})
-			return
+	for postCursor.Next(c.Context()) {
+		if err := postCursor.Decode(&post); err != nil {
+			log.Fatal(err)
 		}
-
-		c.Status(500).JSON(respondM{
-			Success: false,
-			Message: "There was a problem with the query",
-		})
-		return
+	}
+	if err := postCursor.Err(); err != nil {
+		log.Fatal(err)
 	}
 
-	populatedPost := postPopulated{
-		ID:        post.ID,
-		Title:     post.Title,
-		Body:      post.Body,
-		Points:    post.Points,
-		Sub:       post.Sub,
-		User:      user,
-		CreatedAt: post.CreatedAt,
-	}
+	// -- get root comments and populate user field and sort by query -- //
 
 	order := 1
-
 	if c.Query("order") == "-1" {
 		order = -1
 	}
 
-	opts := options.Find().SetSort(bson.D{{c.Query("sort"), order}})
+	matchStage = bson.D{{"$match", bson.M{"$and": bson.A{bson.M{"post": post.ID}, bson.M{"parent": post.ID}}}}}
+	sortStage := bson.D{{"$sort", bson.M{c.Query("sort"): order}}}
 
-	commentsCursor, findErr := commentsCollection.Find(c.Context(), bson.M{
-		"post": post.ID,
-	}, opts)
-	if findErr != nil {
+	rootCommentsCursor, err := commentsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, sortStage, lookupStage, unwindStage})
+	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
-			Message: "There was an error during query",
+			Message: "there was an error populating root comments",
 		})
-
-		fmt.Println(findErr)
-		return
 	}
 
-	// loop through cursor and put comments in the slice
-	cursorErr := commentsCursor.All(c.Context(), &comments)
-	if cursorErr != nil {
+	rootComments := []commentPopulated{}
+
+	err = rootCommentsCursor.All(c.Context(), &rootComments)
+	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
 			Message: "There was an error during cursor loop",
@@ -118,101 +85,84 @@ func GetComments(c *fiber.Ctx) {
 		return
 	}
 
-	if len(comments) == 0 {
+	if len(rootComments) == 0 {
 		c.Status(200).JSON(respondGC{
 			Success: true,
 			Data: getComments{
-				Post: populatedPost,
-				Comments: map[string][]interface{}{
-					post.ID.Hex(): []interface{}{},
+				Post: post,
+				Comments: map[string][]commentPopulated{
+					post.ID.Hex(): []commentPopulated{},
 				},
 			},
 		})
 		return
 	}
 
+	// -- get comments based on root comments -- //
+
 	arr := bson.A{}
 
-	for _, v := range comments {
-		arr = append(arr, bson.M{"comment": v.ID})
+	for _, v := range rootComments {
+		item := bson.M{"root": v.ID}
+		arr = append(arr, item)
 	}
 
-	filter := bson.M{
-		"$or": arr,
-	}
+	matchStage = bson.D{{"$match", bson.M{"$or": arr}}}
 
-	replies := []reply{}
-
-	repliesCursor, repliesErr := repliesCollection.Find(c.Context(), filter, opts)
-	if repliesErr != nil {
+	commentsCursor, err := commentsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, sortStage, lookupStage, unwindStage})
+	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
-			Message: "There was an error during query",
+			Message: "there was an error populating root comments",
 		})
-		fmt.Println(repliesErr)
-		return
 	}
 
-	repliesCursorErr := repliesCursor.All(c.Context(), &replies)
-	if repliesCursorErr != nil {
+	comments := []commentPopulated{}
+
+	err = commentsCursor.All(c.Context(), &comments)
+	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
 			Message: "There was an error during cursor loop",
 		})
+		fmt.Println(err)
 		return
 	}
 
-	mappedComments := populateUsersAndMap(c, comments)
+	mappedComments := mapComments(c, rootComments, comments)
 
 	c.Status(200).JSON(respondGC{
 		Success: true,
 		Data: getComments{
-			Post:     populatedPost,
+			Post:     post,
 			Comments: mappedComments,
 		},
 	})
 }
 
-func populateUsersAndMap(c *fiber.Ctx, comments []comment) map[string][]interface{} {
-	mappedComments := map[string][]interface{}{}
+func mapComments(c *fiber.Ctx, rootComments []commentPopulated, comments []commentPopulated) map[string][]commentPopulated {
 
-	usersCollection := config.GetCollection("Users")
+	m := map[string][]commentPopulated{}
 
-	for i, v := range comments {
-		user := user{}
+	m[c.Query("postID")] = rootComments
 
-		if i == 0 {
-			mappedComments[v.Post.Hex()] = []interface{}{}
+	for _, v := range rootComments {
+		if m[v.ID.Hex()] == nil {
+			m[v.ID.Hex()] = []commentPopulated{}
 		}
-
-		comment := commentPopulated{
-			ID:        v.ID,
-			Body:      v.Body,
-			Points:    v.Points,
-			Post:      v.Post,
-			Parent:    v.Parent,
-			CreatedAt: v.CreatedAt,
-		}
-
-		findOneErr := usersCollection.FindOne(c.Context(), bson.M{
-			"_id": v.User,
-		}).Decode(&user)
-		if findOneErr != nil {
-			log.Fatal(findOneErr)
-		}
-
-		comment.User = user
-
-		if mappedComments[comment.ID.Hex()] == nil {
-			mappedComments[comment.ID.Hex()] = []interface{}{}
-		}
-
-		if mappedComments[comment.Parent.Hex()] == nil {
-			mappedComments[comment.Parent.Hex()] = []interface{}{}
-		}
-
-		mappedComments[comment.Parent.Hex()] = append(mappedComments[comment.Parent.Hex()], comment)
 	}
 
-	return mappedComments
+	for _, v := range comments {
+		if m[v.ID.Hex()] == nil {
+			m[v.ID.Hex()] = []commentPopulated{}
+		}
+
+		if m[v.Parent.Hex()] == nil {
+			m[v.Parent.Hex()] = []commentPopulated{}
+		}
+
+		m[v.Parent.Hex()] = append(m[v.Parent.Hex()], v)
+	}
+
+	return m
 }

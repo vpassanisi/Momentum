@@ -50,15 +50,16 @@
         </div>
         <NewCommentEditor
           :postId="post._id"
-          :parent="post._id"
-          :root="post._id"
+          :parentId="post._id"
+          :rootId="null"
+          :closeButton="false"
         />
         <div class="border-b border-gray-400 dark:border-gray-700 my-4" />
         <Comment
           v-for="com in comments[post._id]"
           :key="com._id"
           :comment="com"
-          :rootComment="com._id"
+          :rootId="com._id"
         />
       </div>
       <About class="order-last" />
@@ -120,14 +121,21 @@ export default Vue.extend({
   computed: {
     ...mapState("PostState", ["post", "comments"]),
     ...mapState("SubState", ["sub", "posts"]),
+    ...mapState("AuthState", ["isAuthenticated"]),
   },
   methods: {
-    ...mapActions("PostState", ["getPostAndComments"]),
+    ...mapActions("PostState", [
+      "getPostAndComments",
+      "getPoints",
+      "clearState",
+    ]),
     ...mapActions("SubState", ["getSubByName"]),
     ...mapActions("EventState", ["getTimeSince"]),
   },
   mounted: async function() {
     await this.getPostAndComments(this.$route.params.id);
+
+    if (this.isAuthenticated) await this.getPoints();
 
     this.readOnlyEditor.setContent(JSON.parse(this.post.body));
     this.formatedTime = await this.getTimeSince(this.post.createdAt);
@@ -136,6 +144,8 @@ export default Vue.extend({
   },
   beforeDestroy() {
     this.readOnlyEditor.destroy();
+
+    this.clearState();
   },
 });
 </script>
