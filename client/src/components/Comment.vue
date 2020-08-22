@@ -2,7 +2,15 @@
   <div v-if="isOpen" class="flex flex-row py-4">
     <div class="flex flex-col w-6">
       <button
-        class="w-full text-gray-900 dark:text-gray-400 focus:outline-none py-2"
+        class="w-full focus:outline-none py-2"
+        :class="[
+          points[comment._id] === true
+            ? 'text-green-600 dark:text-green-500'
+            : 'text-gray-900 dark:text-gray-400',
+          points[comment._id] === false
+            ? 'text-red-600 dark:text-red-500'
+            : 'text-gray-900 dark:text-gray-400',
+        ]"
       >
         <svg
           viewBox="100 14.653 300 168.661"
@@ -124,6 +132,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      isActive: false,
       formatedTime: null,
       isReplyOpen: false,
       isOpen: true,
@@ -150,7 +159,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState("AuthState", ["isAuthenticated"]),
-    ...mapState("PostState", ["comments"]),
+    ...mapState("PostState", ["comments", "points"]),
   },
   methods: {
     ...mapActions("EventState", ["getTimeSince"]),

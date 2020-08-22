@@ -24,13 +24,21 @@ func GetPoints(c *fiber.Ctx) {
 		log.Fatal(err)
 	}
 
-	arr := bson.A{}
+	arr := []bson.M{}
 
 	for _, v := range ids.IDs {
-		arr = append(arr, v)
+		id, err := primitive.ObjectIDFromHex(v)
+		if err != nil {
+			c.Status(400).JSON(respondM{
+				Success: false,
+				Message: "Bad id",
+			})
+			return
+		}
+		arr = append(arr, bson.M{"target": id})
 	}
 
-	userId, err := primitive.ObjectIDFromHex(c.Locals("id").(string))
+	userID, err := primitive.ObjectIDFromHex(c.Locals("id").(string))
 	if err != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,
@@ -43,9 +51,16 @@ func GetPoints(c *fiber.Ctx) {
 
 	pointsCollection := config.GetCollection("Points")
 
+	// filter := bson.M{
+	// 	"$and": bson.A{
+	// 		bson.M{"_id": userID},
+	// 		bson.M{"$or": arr},
+	// 	},
+	// }
+
 	filter := bson.M{
-		"$and": bson.A{
-			bson.M{"_id": userId},
+		"$and": []bson.M{
+			bson.M{"user": userID},
 			bson.M{"$or": arr},
 		},
 	}
@@ -55,5 +70,24 @@ func GetPoints(c *fiber.Ctx) {
 		log.Fatal(err)
 	}
 
-	cursor.All(c.Context())
+	points := []point{}
+
+	err = cursor.All(c.Context(), &points)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// -- return map of points -- //
+
+	m := map[string]bool{}
+
+	for _, v := range points {
+		m[v.Target.Hex()] = v.Active
+	}
+
+	c.Status(200).JSON(respondMP{
+		Success: true,
+		Data:    m,
+	})
+
 }

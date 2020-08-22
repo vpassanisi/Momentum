@@ -119,7 +119,7 @@ export default Vue.extend({
     };
   },
   computed: {
-    ...mapState("PostState", ["post", "comments"]),
+    ...mapState("PostState", ["post", "comments", "targetIds"]),
     ...mapState("SubState", ["sub", "posts"]),
     ...mapState("AuthState", ["isAuthenticated"]),
   },
@@ -135,7 +135,7 @@ export default Vue.extend({
   mounted: async function() {
     await this.getPostAndComments(this.$route.params.id);
 
-    if (this.isAuthenticated) await this.getPoints();
+    if (this.isAuthenticated) await this.getPoints(this.targetIds);
 
     this.readOnlyEditor.setContent(JSON.parse(this.post.body));
     this.formatedTime = await this.getTimeSince(this.post.createdAt);

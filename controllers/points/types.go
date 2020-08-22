@@ -19,12 +19,17 @@ type respondC struct {
 	Data    comment `json:"data"`
 }
 
+type respondMP struct {
+	Success bool            `json:"success"`
+	Data    map[string]bool `json:"data"`
+}
+
 type point struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	User      primitive.ObjectID `bson:"-" json:"user"`
-	Target    primitive.ObjectID `bson:"-" json:"traget"`
-	Active    bool               `bson"active" json:"active"`
-	UpdatedAt int64              `bson:"-" json:"updatedAt"`
+	User      primitive.ObjectID `bson:"user" json:"user"`
+	Target    primitive.ObjectID `bson:"target" json:"traget"`
+	Active    bool               `bson:"active" json:"active"`
+	UpdatedAt int64              `bson:"updatedAt" json:"updatedAt"`
 }
 
 type post struct {

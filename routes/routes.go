@@ -38,6 +38,6 @@ func BuildRoutes(app *fiber.App, client *mongo.Client) {
 	Points := v1.Group("/points")
 	Points.Post("/increment", arbiter.Protected, points.Increment)
 	Points.Post("/decrement", arbiter.Protected, points.Decrement)
-	Points.Get("/", arbiter.Protected, points.GetPoints)
+	Points.Post("/", arbiter.Protected, points.GetPoints)
 
 }

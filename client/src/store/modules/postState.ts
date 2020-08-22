@@ -18,6 +18,10 @@ interface CreateCommentObj {
   rootId: string;
 }
 
+interface GetPointsObj {
+  targetIds: Array<string>;
+}
+
 interface Comment {
   _id: string;
   body: string;
@@ -45,7 +49,8 @@ interface Comments {
 interface CurrentPostState {
   post: Post | null;
   comments: Comments;
-  ids: Array<string>;
+  points: Record<string, any>;
+  targetIds: Array<string>;
   isPostLoading: boolean;
   postError: string | null;
 }
@@ -55,7 +60,8 @@ const module = {
   state: {
     post: null,
     comments: {},
-    ids: [],
+    points: {},
+    tragetIds: [],
     isPostLoading: false,
     postError: null,
   },
@@ -86,10 +92,26 @@ const module = {
       }
       commit("endLoading");
     },
-    getPoints: async ({ commit }, obj) => {
+    getPoints: async ({ commit }, arr: GetPointsObj) => {
       commit("startLoading");
-      // try {
-      // } catch (error) {}
+      try {
+        const res = await fetch(`/api/v1/points`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: arr }),
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("getPointsSuccess", json.data);
+        } else {
+          commit("getPointsFail", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("getPointsfail", "Promise rejected with an error");
+      }
       commit("endLoading");
     },
     createPost: async ({ commit }, obj: CreatePostObj) => {
@@ -165,7 +187,7 @@ const module = {
 
       const arr = [];
       for (const k in state.comments) arr.push(k);
-      state.ids = arr;
+      state.targetIds = arr;
     },
     getPostByIdFail: (state, error) => {
       state.postError = error;
@@ -196,6 +218,13 @@ const module = {
       setTimeout(() => (state.postError = null), 3000);
     },
     createPostFail: (state, error) => {
+      state.postError = error;
+      setTimeout(() => (state.postError = null), 3000);
+    },
+    getPointsSuccess: (state, points) => {
+      state.points = points;
+    },
+    getPointsFail: (state, error) => {
       state.postError = error;
       setTimeout(() => (state.postError = null), 3000);
     },
