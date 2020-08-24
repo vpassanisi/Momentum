@@ -19,6 +19,8 @@ func main() {
 
 	client := config.ConnectDB()
 
+	app.Static("/", "client/dist")
+
 	routes.BuildRoutes(app, client)
 
 	app.Listen(os.Getenv("PORT"))

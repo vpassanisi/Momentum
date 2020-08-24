@@ -40,4 +40,10 @@ func BuildRoutes(app *fiber.App, client *mongo.Client) {
 	Points.Post("/decrement", arbiter.Protected, points.Decrement)
 	Points.Post("/", arbiter.Protected, points.GetPoints)
 
+	app.Get("/*", func(c *fiber.Ctx) {
+		if err := c.SendFile("client/dist/index.html"); err != nil {
+			c.Next(fiber.ErrInternalServerError)
+		}
+	})
+
 }

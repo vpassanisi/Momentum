@@ -181,9 +181,14 @@ func decrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID pri
 
 	post.Points = post.Points - 1
 
-	c.Status(200).JSON(respondP{
+	c.Status(200).JSON(respondPP{
 		Success: true,
-		Data:    post,
+		Data: pointAndPost{
+			Post: post,
+			Point: bson.M{
+				post.ID.Hex(): false,
+			},
+		},
 	})
 }
 
@@ -203,8 +208,13 @@ func decrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, target
 
 	comment.Points = comment.Points - 1
 
-	c.Status(200).JSON(respondC{
+	c.Status(200).JSON(respondPC{
 		Success: true,
-		Data:    comment,
+		Data: pointAndComment{
+			Comment: comment,
+			Point: bson.M{
+				comment.ID.Hex(): false,
+			},
+		},
 	})
 }

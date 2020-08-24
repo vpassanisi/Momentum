@@ -168,6 +168,48 @@ const module = {
     clearState: ({ commit }) => {
       commit("clearState");
     },
+    incrementComment: async ({ commit }, id: string) => {
+      try {
+        const res = await fetch(
+          `/api/v1/points/increment/?type=comment&id=${id}`,
+          {
+            method: "POST",
+          }
+        );
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("incrementCommentSuccess", json.data.point);
+        } else {
+          commit("incrementCommentFail", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("incrementCommentFail", "Promise rejected with an error");
+      }
+    },
+    decrementComment: async ({ commit }, id: string) => {
+      try {
+        const res = await fetch(
+          `/api/v1/points/decrement/?type=comment&id=${id}`,
+          {
+            method: "POST",
+          }
+        );
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("decrementCommentSuccess", json.data.point);
+        } else {
+          commit("decrementCommentFail", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("decrementCommentFail", "Promise rejected with an error");
+      }
+    },
   } as ActionTree<CurrentPostState, null>,
   mutations: {
     startLoading: (state) => (state.isPostLoading = true),
@@ -225,6 +267,20 @@ const module = {
       state.points = points;
     },
     getPointsFail: (state, error) => {
+      state.postError = error;
+      setTimeout(() => (state.postError = null), 3000);
+    },
+    incrementCommentSuccess: (state, obj) => {
+      state.points = { ...state.points, ...obj };
+    },
+    incrementCommentFail: (state, error) => {
+      state.postError = error;
+      setTimeout(() => (state.postError = null), 3000);
+    },
+    decrementCommentSuccess: (state, obj) => {
+      state.points = { ...state.points, ...obj };
+    },
+    decrementCommentFail: (state, error) => {
       state.postError = error;
       setTimeout(() => (state.postError = null), 3000);
     },

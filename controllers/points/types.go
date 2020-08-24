@@ -1,6 +1,7 @@
 package points
 
 import (
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -22,6 +23,26 @@ type respondC struct {
 type respondMP struct {
 	Success bool            `json:"success"`
 	Data    map[string]bool `json:"data"`
+}
+
+type pointAndPost struct {
+	Post  post   `json:"post"`
+	Point bson.M `json:"point"`
+}
+
+type pointAndComment struct {
+	Comment comment `json:"comment"`
+	Point   bson.M  `json:"point"`
+}
+
+type respondPC struct {
+	Success bool            `json:"success"`
+	Data    pointAndComment `json:"data"`
+}
+
+type respondPP struct {
+	Success bool         `json:"success"`
+	Data    pointAndPost `json:"data"`
 }
 
 type point struct {

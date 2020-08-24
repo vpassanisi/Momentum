@@ -2,17 +2,21 @@ const materialPalette = require("./materialPalette.js");
 
 module.exports = {
   corePlugins: {
-    // backgroundOpacity: false,
     borderOpacity: false,
   },
-  purge: [
-    "./src/**/*.html",
-    "./src/**/*.vue",
-    "./src/**/*.js",
-    "./src/**/*.svelte",
-    "./src/**/*.jsx",
-    "./public/*.html",
-  ],
+  purge: {
+    content: [
+      "./src/**/*.html",
+      "./src/**/*.vue",
+      "./src/**/*.js",
+      "./src/**/*.svelte",
+      "./src/**/*.jsx",
+      "./public/*.html",
+    ],
+    options: {
+      whitelist: ["mode-dark"],
+    },
+  },
   theme: {
     rotate: {
       "-180": "-180deg",
