@@ -191,21 +191,21 @@ export default Vue.extend({
     async handleUp() {
       if (!this.isAuthenticated) return;
       if (this.isActive === null || this.isActive === false) {
-        await this.incrementComment(this.comment._id);
         this.isActive = true;
+        await this.incrementComment(this.comment._id);
       } else {
-        await this.removePoint({ targetId: this.comment._id, type: "comment" });
         this.isActive = null;
+        await this.removePoint({ targetId: this.comment._id, type: "comment" });
       }
     },
     async handleDown() {
       if (!this.isAuthenticated) return;
       if (this.isActive === null || this.isActive === true) {
-        await this.decrementComment(this.comment._id);
         this.isActive = false;
+        await this.decrementComment(this.comment._id);
       } else {
-        await this.removePoint({ targetId: this.comment._id, type: "comment" });
         this.isActive = null;
+        await this.removePoint({ targetId: this.comment._id, type: "comment" });
       }
     },
   },

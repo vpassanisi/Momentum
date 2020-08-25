@@ -103,6 +103,7 @@ const module = {
         if (json.success) {
           commit("incrementPostSuccess", json.data.point);
           commit("PostState/updatePostPoints", json.data.post, { root: true });
+          commit("SubState/updatePostPoints", json.data.post, { root: true });
         } else {
           commit("incrementPostFail", json.message);
         }
@@ -125,6 +126,7 @@ const module = {
         if (json.success) {
           commit("decrementPostSuccess", json.data.point);
           commit("PostState/updatePostPoints", json.data.post, { root: true });
+          commit("SubState/updatePostPoints", json.data.post, { root: true });
         } else {
           commit("decrementPostFail", json.message);
         }
@@ -152,6 +154,7 @@ const module = {
             commit("PostState/updatePostPoints", json.data, {
               root: true,
             });
+            commit("SubState/updatePostPoints", json.data, { root: true });
           }
         } else {
           commit("removePointFail", json.message);

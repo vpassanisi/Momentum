@@ -158,22 +158,22 @@ export default Vue.extend({
       if (!this.isAuthenticated) return;
 
       if (this.isActive === null || this.isActive === false) {
-        this.incrementPost(this.post._id);
         this.isActive = true;
+        this.incrementPost(this.post._id);
       } else {
-        this.removePoint({ targetId: this.post._id, type: "post" });
         this.isActive = null;
+        this.removePoint({ targetId: this.post._id, type: "post" });
       }
     },
     handleDown() {
       if (!this.isAuthenticated) return;
 
       if (this.isActive === null || this.isActive === true) {
-        this.decrementPost(this.post._id);
         this.isActive = false;
+        this.decrementPost(this.post._id);
       } else {
-        this.removePoint({ targetId: this.post._id, type: "post" });
         this.isActive = null;
+        this.removePoint({ targetId: this.post._id, type: "post" });
       }
     },
   },

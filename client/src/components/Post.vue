@@ -163,21 +163,21 @@ export default Vue.extend({
     async handleUp() {
       if (!this.isAuthenticated) return;
       if (this.isActive === null || this.isActive === false) {
-        await this.incrementPost(this.postData._id);
         this.isActive = true;
+        await this.incrementPost(this.postData._id);
       } else {
-        await this.removePoint({ targetId: this.postData._id, type: "post" });
         this.isActive = null;
+        await this.removePoint({ targetId: this.postData._id, type: "post" });
       }
     },
     async handleDown() {
       if (!this.isAuthenticated) return;
       if (this.isActive === null || this.isActive === true) {
-        await this.decrementPost(this.postData._id);
         this.isActive = false;
+        await this.decrementPost(this.postData._id);
       } else {
-        await this.removePoint({ targetId: this.postData._id, type: "post" });
         this.isActive = null;
+        await this.removePoint({ targetId: this.postData._id, type: "post" });
       }
     },
   },
