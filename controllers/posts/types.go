@@ -33,8 +33,9 @@ type user struct {
 }
 
 type getPosts struct {
-	Sub   subFull         `json:"sub"`
-	Posts []postPopulated `json:"posts"`
+	Sub       subFull         `json:"sub"`
+	Posts     []postPopulated `json:"posts"`
+	TargetIDs []string        `json:"targetIds"`
 }
 
 type subFull struct {

@@ -75,6 +75,9 @@ const module = {
             posts: json.data.posts,
             sub: json.data.sub,
           });
+          commit("PointState/setTargetIds", json.data.targetIds, {
+            root: true,
+          });
           setColors(
             json.data.sub.colorPrimary,
             json.data.sub.colorPrimaryLight,
@@ -130,6 +133,15 @@ const module = {
     getSubByNameFail: (state, error) => {
       state.subError = error;
       setTimeout(() => (state.subError = null), 3000);
+    },
+    updatePostPoints: (state, post) => {
+      if (state.posts) {
+        const index = state.posts.findIndex((v) => {
+          return v._id === post._id;
+        });
+
+        state.posts[index].points = post.points;
+      }
     },
   } as MutationTree<CurrentSubState>,
 };

@@ -54,14 +54,25 @@ type commentPopulated struct {
 	CreatedAt int64              `json:"createdAt"`
 }
 
-type getComments struct {
-	Post     postPopulated                 `json:"post"`
-	Comments map[string][]commentPopulated `json:"comments"`
+type postCommentTarget struct {
+	Post      postPopulated                 `json:"post"`
+	Comments  map[string][]commentPopulated `json:"comments"`
+	TargetIDs []string                      `json:"targetIds"`
 }
 
-type respondGC struct {
-	Success bool        `json:"success"`
-	Data    getComments `json:"data"`
+type commentTarget struct {
+	Comments  map[string][]commentPopulated `json:"comments"`
+	TargetIDs []string                      `json:"targetIds"`
+}
+
+type respondPCT struct {
+	Success bool              `json:"success"`
+	Data    postCommentTarget `json:"data"`
+}
+
+type respondCT struct {
+	Success bool          `json:"success"`
+	Data    commentTarget `json:"data"`
 }
 
 type respondC struct {

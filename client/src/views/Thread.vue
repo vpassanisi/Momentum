@@ -7,7 +7,13 @@
         <div class="flex flex-row">
           <div class="flex flex-col w-6">
             <button
-              class="w-full text-gray-900 dark:text-gray-400 focus:outline-none py-2"
+              class="w-full focus:outline-none py-2"
+              :class="[
+                isActive !== null && isActive
+                  ? 'text-green-600 dark:text-green-500'
+                  : 'text-gray-900 dark:text-gray-400',
+              ]"
+              @click="handleUp"
             >
               <svg
                 viewBox="100 14.653 300 168.661"
@@ -22,10 +28,20 @@
               </svg>
             </button>
             <div class="w-full text-center">
-              {{ post.points > 999 ? `${post.points / 1000}k` : post.points }}
+              {{
+                post.points > 999
+                  ? `${(post.points / 1000).toPrecision(2)}k`
+                  : post.points
+              }}
             </div>
             <button
-              class="w-full text-gray-900 dark:text-gray-400 focus:outline-none py-2"
+              class="w-full focus:outline-none py-2"
+              :class="[
+                isActive !== null && !isActive
+                  ? 'text-red-600 dark:text-red-500'
+                  : 'text-gray-900 dark:text-gray-400',
+              ]"
+              @click="handleDown"
             >
               <svg
                 viewBox="100 14.112 300 168.65"
@@ -96,6 +112,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      isActive: null as null | boolean,
       formatedTime: null,
       readOnlyEditor: new Editor({
         editable: false,
@@ -119,33 +136,76 @@ export default Vue.extend({
     };
   },
   computed: {
-    ...mapState("PostState", ["post", "comments", "targetIds"]),
-    ...mapState("SubState", ["sub", "posts"]),
+    ...mapState("PostState", ["post"]),
+    ...mapState("CommentState", ["comments"]),
+    ...mapState("PointState", ["targetIds", "points"]),
+    ...mapState("SubState", ["sub"]),
     ...mapState("AuthState", ["isAuthenticated"]),
   },
   methods: {
-    ...mapActions("PostState", [
-      "getPostAndComments",
+    ...mapActions("PostState", ["getPostAndComments", "clearPostState"]),
+    ...mapActions("CommentState", ["clearCommentState"]),
+    ...mapActions("PointState", [
       "getPoints",
-      "clearState",
+      "clearPointState",
+      "incrementPost",
+      "decrementPost",
+      "removePoint",
     ]),
     ...mapActions("SubState", ["getSubByName"]),
     ...mapActions("EventState", ["getTimeSince"]),
+    handleUp() {
+      if (!this.isAuthenticated) return;
+
+      if (this.isActive === null || this.isActive === false) {
+        this.isActive = true;
+        this.incrementPost(this.post._id);
+      } else {
+        this.isActive = null;
+        this.removePoint({ targetId: this.post._id, type: "post" });
+      }
+    },
+    handleDown() {
+      if (!this.isAuthenticated) return;
+
+      if (this.isActive === null || this.isActive === true) {
+        this.isActive = false;
+        this.decrementPost(this.post._id);
+      } else {
+        this.isActive = null;
+        this.removePoint({ targetId: this.post._id, type: "post" });
+      }
+    },
   },
   mounted: async function() {
     await this.getPostAndComments(this.$route.params.id);
 
     if (this.isAuthenticated) await this.getPoints(this.targetIds);
 
+    if (this.points[this.post._id] !== undefined) {
+      this.isActive = this.points[this.post._id];
+    }
+
     this.readOnlyEditor.setContent(JSON.parse(this.post.body));
     this.formatedTime = await this.getTimeSince(this.post.createdAt);
 
     await this.getSubByName(this.$route.params.sub);
   },
+  watch: {
+    points: function() {
+      if (this.points[this.post._id] !== undefined) {
+        this.isActive = this.points[this.post._id];
+      } else {
+        this.points[this.post._id] = null;
+      }
+    },
+  },
   beforeDestroy() {
     this.readOnlyEditor.destroy();
 
-    this.clearState();
+    this.clearPostState();
+    this.clearCommentState();
+    this.clearPointState();
   },
 });
 </script>
