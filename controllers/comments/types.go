@@ -55,8 +55,9 @@ type commentPopulated struct {
 }
 
 type getComments struct {
-	Post     postPopulated                 `json:"post"`
-	Comments map[string][]commentPopulated `json:"comments"`
+	Post      postPopulated                 `json:"post"`
+	Comments  map[string][]commentPopulated `json:"comments"`
+	TargetIDs []string                      `json:"targetIds"`
 }
 
 type respondGC struct {

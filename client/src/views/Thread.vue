@@ -119,16 +119,16 @@ export default Vue.extend({
     };
   },
   computed: {
-    ...mapState("PostState", ["post", "comments", "targetIds"]),
+    ...mapState("PostState", ["post"]),
+    ...mapState("CommentState", ["comments"]),
+    ...mapState("PointState", ["targetIds"]),
     ...mapState("SubState", ["sub", "posts"]),
     ...mapState("AuthState", ["isAuthenticated"]),
   },
   methods: {
-    ...mapActions("PostState", [
-      "getPostAndComments",
-      "getPoints",
-      "clearState",
-    ]),
+    ...mapActions("PostState", ["getPostAndComments", "clearPostState"]),
+    ...mapActions("CommentState", ["clearCommentState"]),
+    ...mapActions("PointState", ["getPoints", "clearPointState"]),
     ...mapActions("SubState", ["getSubByName"]),
     ...mapActions("EventState", ["getTimeSince"]),
   },
@@ -145,7 +145,9 @@ export default Vue.extend({
   beforeDestroy() {
     this.readOnlyEditor.destroy();
 
-    this.clearState();
+    this.clearPostState();
+    this.clearCommentState();
+    this.clearPointState();
   },
 });
 </script>

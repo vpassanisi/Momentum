@@ -93,6 +93,7 @@ func GetComments(c *fiber.Ctx) {
 				Comments: map[string][]commentPopulated{
 					post.ID.Hex(): []commentPopulated{},
 				},
+				TargetIDs: []string{},
 			},
 		})
 		return
@@ -131,11 +132,18 @@ func GetComments(c *fiber.Ctx) {
 
 	mappedComments := mapComments(c, rootComments, comments)
 
+	targetIds := []string{}
+
+	for k := range mappedComments {
+		targetIds = append(targetIds, k)
+	}
+
 	c.Status(200).JSON(respondGC{
 		Success: true,
 		Data: getComments{
-			Post:     post,
-			Comments: mappedComments,
+			Post:      post,
+			Comments:  mappedComments,
+			TargetIDs: targetIds,
 		},
 	})
 }

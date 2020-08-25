@@ -228,7 +228,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions("EventState", ["openLoginModal"]),
-    ...mapActions("PostState", ["newCommentByPost"]),
+    ...mapActions("CommentState", ["newCommentByPost"]),
     async handleComment() {
       await this.newCommentByPost({
         postId: this.postId,
