@@ -165,12 +165,13 @@ export default Vue.extend({
   },
   computed: {
     ...mapState("AuthState", ["isAuthenticated"]),
-    ...mapState("PointState", ["points"]),
+    ...mapState("PointState", ["points", "targetIds"]),
     ...mapState("CommentState", ["comments"]),
   },
   methods: {
     ...mapActions("EventState", ["getTimeSince"]),
     ...mapActions("PointState", [
+      "getPoints",
       "incrementComment",
       "decrementComment",
       "removePoint",
@@ -187,21 +188,23 @@ export default Vue.extend({
     closeReply() {
       this.isReplyOpen = false;
     },
-    handleUp() {
+    async handleUp() {
+      if (!this.isAuthenticated) return;
       if (this.isActive === null || this.isActive === false) {
-        this.incrementComment(this.comment._id);
+        await this.incrementComment(this.comment._id);
         this.isActive = true;
       } else {
-        this.removePoint(this.comment._id);
+        await this.removePoint({ targetId: this.comment._id, type: "comment" });
         this.isActive = null;
       }
     },
-    handleDown() {
+    async handleDown() {
+      if (!this.isAuthenticated) return;
       if (this.isActive === null || this.isActive === true) {
-        this.decrementComment(this.comment._id);
+        await this.decrementComment(this.comment._id);
         this.isActive = false;
       } else {
-        this.removePoint(this.comment._id);
+        await this.removePoint({ targetId: this.comment._id, type: "comment" });
         this.isActive = null;
       }
     },

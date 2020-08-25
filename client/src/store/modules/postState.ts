@@ -111,6 +111,11 @@ const module = {
       state.postError = error;
       setTimeout(() => (state.postError = null), 3000);
     },
+    updatePostPoints: (state, post: Post) => {
+      if (state.post) {
+        state.post.points = post.points;
+      }
+    },
     clearPostsState: (state) => {
       state.post = null;
     },

@@ -1,4 +1,5 @@
 import { MutationTree, ActionTree } from "vuex";
+import router from "@/router/index";
 
 interface AuthState {
   isAuthenticated: boolean | null;
@@ -32,6 +33,7 @@ const module = {
 
         if (json.success) {
           commit("loginSuccess");
+          router.go(0);
         } else {
           commit("loginFail", json.message);
         }
@@ -52,6 +54,7 @@ const module = {
 
         if (json.success) {
           commit("logoutSuccess");
+          router.go(0);
         } else {
           commit("logoutFail", json.message);
         }

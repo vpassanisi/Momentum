@@ -77,7 +77,9 @@ func RemoveCommentPoint(c *fiber.Ctx) {
 		update = bson.M{"$inc": bson.M{"points": 1}}
 	}
 
-	err = commentsCollection.FindOneAndUpdate(c.Context(), filter, update).Decode(&point)
+	comment := comment{}
+
+	err = commentsCollection.FindOneAndUpdate(c.Context(), filter, update).Decode(&comment)
 	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
@@ -86,7 +88,20 @@ func RemoveCommentPoint(c *fiber.Ctx) {
 		return
 	}
 
+	if point.Active {
+		comment.Points = comment.Points - 1
+	}
+
+	if !point.Active {
+		comment.Points = comment.Points + 1
+	}
+
 	// -- delete point doc from db -- //
+
+	filter = bson.M{
+		"user":   userID,
+		"target": targetID,
+	}
 
 	_, err = pointsCollection.DeleteOne(c.Context(), filter)
 	if err != nil {
@@ -97,8 +112,8 @@ func RemoveCommentPoint(c *fiber.Ctx) {
 		return
 	}
 
-	c.Status(200).JSON(respondM{
+	c.Status(200).JSON(respondC{
 		Success: true,
-		Message: "Point Deleted",
+		Data:    comment,
 	})
 }

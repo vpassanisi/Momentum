@@ -1,6 +1,8 @@
 package points
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/config"
 	"go.mongodb.org/mongo-driver/bson"
@@ -64,7 +66,7 @@ func RemovePostPoint(c *fiber.Ctx) {
 
 	// -- if point is Active subtract one form target else add one too target -- //
 
-	postCollection := config.GetCollection("Post")
+	postCollection := config.GetCollection("Posts")
 
 	filter = bson.M{"_id": targetID}
 	update := bson.M{}
@@ -77,16 +79,33 @@ func RemovePostPoint(c *fiber.Ctx) {
 		update = bson.M{"$inc": bson.M{"points": 1}}
 	}
 
-	err = postCollection.FindOneAndUpdate(c.Context(), filter, update).Decode(&point)
+	post := post{}
+
+	err = postCollection.FindOneAndUpdate(c.Context(), filter, update).Decode(&post)
 	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
 			Message: "there was a problem updating the target",
 		})
+		fmt.Println(err)
+		fmt.Println(targetID)
 		return
 	}
 
+	if point.Active {
+		post.Points = post.Points - 1
+	}
+
+	if !point.Active {
+		post.Points = post.Points + 1
+	}
+
 	// -- delete point doc from db -- //
+
+	filter = bson.M{
+		"user":   userID,
+		"target": targetID,
+	}
 
 	_, err = pointsCollection.DeleteOne(c.Context(), filter)
 	if err != nil {
@@ -97,8 +116,8 @@ func RemovePostPoint(c *fiber.Ctx) {
 		return
 	}
 
-	c.Status(200).JSON(respondM{
+	c.Status(200).JSON(respondP{
 		Success: true,
-		Message: "Point Deleted",
+		Data:    post,
 	})
 }

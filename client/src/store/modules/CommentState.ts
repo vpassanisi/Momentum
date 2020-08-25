@@ -75,6 +75,13 @@ const module = {
 
       state.comments = { ...state.comments, ...comments };
     },
+    updateCommentPoints: (state, comment: Comment) => {
+      const index = state.comments[comment.parent].findIndex((v) => {
+        return v._id === comment._id;
+      });
+
+      state.comments[comment.parent][index].points = comment.points;
+    },
     newCommentSuccess: (state, comment: Comment) => {
       state.comments[comment._id] = [];
 

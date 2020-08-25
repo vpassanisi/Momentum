@@ -54,6 +54,9 @@ const module = {
 
         if (json.success) {
           commit("incrementCommentSuccess", json.data.point);
+          commit("CommentState/updateCommentPoints", json.data.comment, {
+            root: true,
+          });
         } else {
           commit("incrementCommentFail", json.message);
         }
@@ -75,6 +78,9 @@ const module = {
 
         if (json.success) {
           commit("decrementCommentSuccess", json.data.point);
+          commit("CommentState/updateCommentPoints", json.data.comment, {
+            root: true,
+          });
         } else {
           commit("decrementCommentFail", json.message);
         }
@@ -96,6 +102,7 @@ const module = {
 
         if (json.success) {
           commit("incrementPostSuccess", json.data.point);
+          commit("PostState/updatePostPoints", json.data.post, { root: true });
         } else {
           commit("incrementPostFail", json.message);
         }
@@ -117,6 +124,7 @@ const module = {
 
         if (json.success) {
           commit("decrementPostSuccess", json.data.point);
+          commit("PostState/updatePostPoints", json.data.post, { root: true });
         } else {
           commit("decrementPostFail", json.message);
         }
@@ -125,9 +133,9 @@ const module = {
         commit("decrementPostFail", "Promise rejected with an error");
       }
     },
-    removePoint: async ({ commit }, targetId: string) => {
+    removePoint: async ({ commit }, { targetId, type }) => {
       try {
-        const res = await fetch(`/api/v1/points/remove/${targetId}`, {
+        const res = await fetch(`/api/v1/points/${type}/${targetId}`, {
           method: "DELETE",
         });
 
@@ -135,6 +143,16 @@ const module = {
 
         if (json.success) {
           commit("removePointSuccess", targetId);
+          if (type === "comment") {
+            commit("CommentState/updateCommentPoints", json.data, {
+              root: true,
+            });
+          }
+          if (type === "post") {
+            commit("PostState/updatePostPoints", json.data, {
+              root: true,
+            });
+          }
         } else {
           commit("removePointFail", json.message);
         }

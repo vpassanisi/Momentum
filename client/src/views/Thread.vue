@@ -155,20 +155,24 @@ export default Vue.extend({
     ...mapActions("SubState", ["getSubByName"]),
     ...mapActions("EventState", ["getTimeSince"]),
     handleUp() {
+      if (!this.isAuthenticated) return;
+
       if (this.isActive === null || this.isActive === false) {
         this.incrementPost(this.post._id);
         this.isActive = true;
       } else {
-        this.removePoint(this.post._id);
+        this.removePoint({ targetId: this.post._id, type: "post" });
         this.isActive = null;
       }
     },
     handleDown() {
+      if (!this.isAuthenticated) return;
+
       if (this.isActive === null || this.isActive === true) {
         this.decrementPost(this.post._id);
         this.isActive = false;
       } else {
-        this.removePoint(this.post._id);
+        this.removePoint({ targetId: this.post._id, type: "post" });
         this.isActive = null;
       }
     },
