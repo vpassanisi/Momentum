@@ -45,15 +45,18 @@ export default {
 input:not(:placeholder-shown) ~ label,
 input:focus ~ label {
   transform: translateY(-85%) scale(0.85);
+  z-index: 20;
 }
 
 input {
+  position: relative;
   width: 100%;
   border-width: 1px;
   background-color: #ff000000;
   border-radius: 0.25rem;
   padding: 0.5rem;
   border-color: var(--borderColor);
+  z-index: 10;
 
   transition-property: border-color;
   transition-duration: 300ms;
@@ -81,7 +84,7 @@ label {
 
 .wrap {
   position: relative;
-  margin-top: 1rem;
+  margin-top: 1.25rem;
 }
 
 .w-50p {
