@@ -14,7 +14,7 @@ import (
 
 // GetComments //
 // @desc gets the post and comments for a given id
-// @route GET /api/v1/comments/?postID&sort&order
+// @route GET /api/v1/comments/?postID&sort&order&post*
 // @access Public
 func GetComments(c *fiber.Ctx) {
 
@@ -86,16 +86,28 @@ func GetComments(c *fiber.Ctx) {
 	}
 
 	if len(rootComments) == 0 {
-		c.Status(200).JSON(respondGC{
-			Success: true,
-			Data: getComments{
-				Post: post,
-				Comments: map[string][]commentPopulated{
-					post.ID.Hex(): []commentPopulated{},
+		if c.Query("post") == "true" {
+			c.Status(200).JSON(respondPCT{
+				Success: true,
+				Data: postCommentTarget{
+					Post: post,
+					Comments: map[string][]commentPopulated{
+						post.ID.Hex(): []commentPopulated{},
+					},
+					TargetIDs: []string{},
 				},
-				TargetIDs: []string{},
-			},
-		})
+			})
+		} else {
+			c.Status(200).JSON(respondCT{
+				Success: true,
+				Data: commentTarget{
+					Comments: map[string][]commentPopulated{
+						post.ID.Hex(): []commentPopulated{},
+					},
+					TargetIDs: []string{},
+				},
+			})
+		}
 		return
 	}
 
@@ -138,14 +150,24 @@ func GetComments(c *fiber.Ctx) {
 		targetIds = append(targetIds, k)
 	}
 
-	c.Status(200).JSON(respondGC{
-		Success: true,
-		Data: getComments{
-			Post:      post,
-			Comments:  mappedComments,
-			TargetIDs: targetIds,
-		},
-	})
+	if c.Query("post") == "true" {
+		c.Status(200).JSON(respondPCT{
+			Success: true,
+			Data: postCommentTarget{
+				Post:      post,
+				Comments:  mappedComments,
+				TargetIDs: targetIds,
+			},
+		})
+	} else {
+		c.Status(200).JSON(respondCT{
+			Success: true,
+			Data: commentTarget{
+				Comments:  mappedComments,
+				TargetIDs: targetIds,
+			},
+		})
+	}
 }
 
 func mapComments(c *fiber.Ctx, rootComments []commentPopulated, comments []commentPopulated) map[string][]commentPopulated {

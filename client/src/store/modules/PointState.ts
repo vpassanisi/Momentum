@@ -83,6 +83,48 @@ const module = {
         commit("decrementCommentFail", "Promise rejected with an error");
       }
     },
+    incrementPost: async ({ commit }, id: string) => {
+      try {
+        const res = await fetch(
+          `/api/v1/points/increment/?type=post&id=${id}`,
+          {
+            method: "POST",
+          }
+        );
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("incrementPostSuccess", json.data.point);
+        } else {
+          commit("incrementPostFail", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("incrementPostFail", "Promise rejected with an error");
+      }
+    },
+    decrementPost: async ({ commit }, id: string) => {
+      try {
+        const res = await fetch(
+          `/api/v1/points/decrement/?type=post&id=${id}`,
+          {
+            method: "POST",
+          }
+        );
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("decrementPostSuccess", json.data.point);
+        } else {
+          commit("decrementPostFail", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("decrementPostFail", "Promise rejected with an error");
+      }
+    },
   } as ActionTree<PointState, null>,
   mutations: {
     startLoading: (state) => (state.isPointLoading = true),
@@ -109,6 +151,20 @@ const module = {
       state.points = { ...state.points, ...obj };
     },
     decrementCommentFail: (state, error) => {
+      state.pointError = error;
+      setTimeout(() => (state.pointError = null), 3000);
+    },
+    incrementPostSuccess: (state, obj) => {
+      state.points = { ...state.points, ...obj };
+    },
+    incrementPostFail: (state, error) => {
+      state.pointError = error;
+      setTimeout(() => (state.pointError = null), 3000);
+    },
+    decrementPostSuccess: (state, obj) => {
+      state.points = { ...state.points, ...obj };
+    },
+    decrementPostFail: (state, error) => {
       state.pointError = error;
       setTimeout(() => (state.pointError = null), 3000);
     },

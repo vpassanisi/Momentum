@@ -41,7 +41,7 @@ const module = {
       commit("startLoading");
       try {
         const res = await fetch(
-          `/api/v1/comments/?postID=${post}&sort=createdat&order=-1`,
+          `/api/v1/comments/?postID=${post}&sort=createdat&order=-1&post=true`,
           {
             method: "GET",
           }
