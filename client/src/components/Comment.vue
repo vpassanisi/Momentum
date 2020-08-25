@@ -8,7 +8,7 @@
             ? 'text-green-600 dark:text-green-500'
             : 'text-gray-900 dark:text-gray-400',
         ]"
-        @click="handleIncrement"
+        @click="handleUp"
       >
         <svg
           viewBox="100 14.653 300 168.661"
@@ -29,7 +29,7 @@
             ? 'text-red-600 dark:text-red-500'
             : 'text-gray-900 dark:text-gray-400',
         ]"
-        @click="handleDecrement"
+        @click="handleDown"
       >
         <svg viewBox="100 14.112 300 168.65" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -170,7 +170,11 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions("EventState", ["getTimeSince"]),
-    ...mapActions("PointState", ["incrementComment", "decrementComment"]),
+    ...mapActions("PointState", [
+      "incrementComment",
+      "decrementComment",
+      "removePoint",
+    ]),
     close() {
       this.isOpen = false;
     },
@@ -183,13 +187,23 @@ export default Vue.extend({
     closeReply() {
       this.isReplyOpen = false;
     },
-    handleDecrement() {
-      this.decrementComment(this.comment._id);
-      this.isActive = false;
+    handleUp() {
+      if (this.isActive === null || this.isActive === false) {
+        this.incrementComment(this.comment._id);
+        this.isActive = true;
+      } else {
+        this.removePoint(this.comment._id);
+        this.isActive = null;
+      }
     },
-    handleIncrement() {
-      this.incrementComment(this.comment._id);
-      this.isActive = true;
+    handleDown() {
+      if (this.isActive === null || this.isActive === true) {
+        this.decrementComment(this.comment._id);
+        this.isActive = false;
+      } else {
+        this.removePoint(this.comment._id);
+        this.isActive = null;
+      }
     },
   },
   mounted: async function() {

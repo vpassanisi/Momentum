@@ -1,7 +1,7 @@
 import { MutationTree, ActionTree } from "vuex";
 
 interface PointState {
-  points: Record<string, boolean>;
+  points: Record<string, boolean | null>;
   targetIds: Array<string>;
   isPointLoading: boolean;
   pointError: null | string;
@@ -125,6 +125,24 @@ const module = {
         commit("decrementPostFail", "Promise rejected with an error");
       }
     },
+    removePoint: async ({ commit }, targetId: string) => {
+      try {
+        const res = await fetch(`/api/v1/points/remove/${targetId}`, {
+          method: "DELETE",
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("removePointSuccess", targetId);
+        } else {
+          commit("removePointFail", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("removePointFail", "Promise rejected with an error");
+      }
+    },
   } as ActionTree<PointState, null>,
   mutations: {
     startLoading: (state) => (state.isPointLoading = true),
@@ -165,6 +183,13 @@ const module = {
       state.points = { ...state.points, ...obj };
     },
     decrementPostFail: (state, error) => {
+      state.pointError = error;
+      setTimeout(() => (state.pointError = null), 3000);
+    },
+    removePointSuccess: (state, targetId) => {
+      state.points[targetId] = null;
+    },
+    removePointFail: (state, error) => {
       state.pointError = error;
       setTimeout(() => (state.pointError = null), 3000);
     },

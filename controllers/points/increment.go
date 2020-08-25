@@ -99,9 +99,9 @@ func Increment(c *fiber.Ctx) {
 		}
 
 		if c.Query("type") == "post" {
-			incrementPost(c, collection, targetID)
+			incrementPost(c, collection, targetID, 1)
 		} else {
-			incrementComment(c, collection, targetID)
+			incrementComment(c, collection, targetID, 1)
 		}
 		return
 	}
@@ -136,9 +136,9 @@ func Increment(c *fiber.Ctx) {
 		}
 
 		if c.Query("type") == "post" {
-			incrementPost(c, collection, targetID)
+			incrementPost(c, collection, targetID, 2)
 		} else {
-			incrementComment(c, collection, targetID)
+			incrementComment(c, collection, targetID, 2)
 		}
 		return
 	}
@@ -150,11 +150,11 @@ func Increment(c *fiber.Ctx) {
 	return
 }
 
-func incrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID primitive.ObjectID) {
+func incrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID primitive.ObjectID, inc int32) {
 
 	post := post{}
 
-	decrementErr := postsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": 1}}).Decode(&post)
+	decrementErr := postsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": inc}}).Decode(&post)
 	if decrementErr != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
@@ -163,7 +163,7 @@ func incrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID pri
 		return
 	}
 
-	post.Points = post.Points + 1
+	post.Points = post.Points + inc
 
 	c.Status(200).JSON(respondPP{
 		Success: true,
@@ -176,11 +176,11 @@ func incrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID pri
 	})
 }
 
-func incrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, targetID primitive.ObjectID) {
+func incrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, targetID primitive.ObjectID, inc int64) {
 
 	comment := comment{}
 
-	decrementErr := commentsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": 1}}).Decode(&comment)
+	decrementErr := commentsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": inc}}).Decode(&comment)
 	if decrementErr != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
@@ -189,7 +189,7 @@ func incrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, target
 		return
 	}
 
-	comment.Points = comment.Points + 1
+	comment.Points = comment.Points + inc
 
 	c.Status(200).JSON(respondPC{
 		Success: true,

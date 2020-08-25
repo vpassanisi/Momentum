@@ -11,8 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// TODO: move response to the seperate functions to make the code more concise
-
 // Decrement //
 // @desc removes a point from a post or comment
 // @route POST /api/v1/points/decrement/?type&id
@@ -113,9 +111,9 @@ func Decrement(c *fiber.Ctx) {
 		}
 
 		if c.Query("type") == "post" {
-			decrementPost(c, collection, targetID)
+			decrementPost(c, collection, targetID, -1)
 		} else {
-			decrementComment(c, collection, targetID)
+			decrementComment(c, collection, targetID, -1)
 		}
 		return
 	}
@@ -151,9 +149,9 @@ func Decrement(c *fiber.Ctx) {
 		}
 
 		if c.Query("type") == "post" {
-			decrementPost(c, collection, targetID)
+			decrementPost(c, collection, targetID, -2)
 		} else {
-			decrementComment(c, collection, targetID)
+			decrementComment(c, collection, targetID, -2)
 		}
 		return
 	}
@@ -166,11 +164,11 @@ func Decrement(c *fiber.Ctx) {
 }
 
 //  subtract one from the post and return the new value -- //
-func decrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID primitive.ObjectID) {
+func decrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID primitive.ObjectID, dec int32) {
 
 	post := post{}
 
-	decrementErr := postsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": -1}}).Decode(&post)
+	decrementErr := postsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": dec}}).Decode(&post)
 	if decrementErr != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
@@ -179,7 +177,7 @@ func decrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID pri
 		return
 	}
 
-	post.Points = post.Points - 1
+	post.Points = post.Points + dec
 
 	c.Status(200).JSON(respondPP{
 		Success: true,
@@ -193,11 +191,11 @@ func decrementPost(c *fiber.Ctx, postsCollection *mongo.Collection, targetID pri
 }
 
 // -- subtract one from the comment and return the new value -- //
-func decrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, targetID primitive.ObjectID) {
+func decrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, targetID primitive.ObjectID, dec int64) {
 
 	comment := comment{}
 
-	decrementErr := commentsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": -1}}).Decode(&comment)
+	decrementErr := commentsCollection.FindOneAndUpdate(c.Context(), bson.M{"_id": targetID}, bson.M{"$inc": bson.M{"points": dec}}).Decode(&comment)
 	if decrementErr != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
@@ -206,7 +204,7 @@ func decrementComment(c *fiber.Ctx, commentsCollection *mongo.Collection, target
 		return
 	}
 
-	comment.Points = comment.Points - 1
+	comment.Points = comment.Points + dec
 
 	c.Status(200).JSON(respondPC{
 		Success: true,

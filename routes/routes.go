@@ -39,6 +39,8 @@ func BuildRoutes(app *fiber.App, client *mongo.Client) {
 	Points.Post("/increment", arbiter.Protected, points.Increment)
 	Points.Post("/decrement", arbiter.Protected, points.Decrement)
 	Points.Post("/", arbiter.Protected, points.GetPoints)
+	Points.Delete("/comment/:targetId", arbiter.Protected, points.RemoveCommentPoint)
+	Points.Delete("/post/:targetId", arbiter.Protected, points.RemovePostPoint)
 
 	app.Get("/*", func(c *fiber.Ctx) {
 		if err := c.SendFile("client/dist/index.html"); err != nil {

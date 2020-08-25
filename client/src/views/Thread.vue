@@ -13,7 +13,7 @@
                   ? 'text-green-600 dark:text-green-500'
                   : 'text-gray-900 dark:text-gray-400',
               ]"
-              @click="handleIncrement"
+              @click="handleUp"
             >
               <svg
                 viewBox="100 14.653 300 168.661"
@@ -28,7 +28,11 @@
               </svg>
             </button>
             <div class="w-full text-center">
-              {{ post.points > 999 ? `${post.points / 1000}k` : post.points }}
+              {{
+                post.points > 999
+                  ? `${(post.points / 1000).toPrecision(2)}k`
+                  : post.points
+              }}
             </div>
             <button
               class="w-full focus:outline-none py-2"
@@ -37,7 +41,7 @@
                   ? 'text-red-600 dark:text-red-500'
                   : 'text-gray-900 dark:text-gray-400',
               ]"
-              @click="handleDecrement"
+              @click="handleDown"
             >
               <svg
                 viewBox="100 14.112 300 168.65"
@@ -146,16 +150,27 @@ export default Vue.extend({
       "clearPointState",
       "incrementPost",
       "decrementPost",
+      "removePoint",
     ]),
     ...mapActions("SubState", ["getSubByName"]),
     ...mapActions("EventState", ["getTimeSince"]),
-    handleDecrement() {
-      this.decrementPost(this.post._id);
-      this.isActive = false;
+    handleUp() {
+      if (this.isActive === null || this.isActive === false) {
+        this.incrementPost(this.post._id);
+        this.isActive = true;
+      } else {
+        this.removePoint(this.post._id);
+        this.isActive = null;
+      }
     },
-    handleIncrement() {
-      this.incrementPost(this.post._id);
-      this.isActive = true;
+    handleDown() {
+      if (this.isActive === null || this.isActive === true) {
+        this.decrementPost(this.post._id);
+        this.isActive = false;
+      } else {
+        this.removePoint(this.post._id);
+        this.isActive = null;
+      }
     },
   },
   mounted: async function() {
