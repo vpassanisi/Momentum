@@ -20,12 +20,18 @@ export default Vue.extend({
     Header,
     Content,
   },
-  computed: mapState("SubState", ["sub"]),
+  computed: {
+    ...mapState("SubState", ["sub"]),
+    ...mapState("PointState", ["targetIds"]),
+    ...mapState("AuthState", ["isAuthenticated"]),
+  },
   methods: {
     ...mapActions("SubState", ["getPostsBySubName"]),
+    ...mapActions("PointState", ["getPoints"]),
   },
   mounted: async function() {
     await this.getPostsBySubName(this.$route.params.sub);
+    if (this.isAuthenticated) this.getPoints(this.targetIds);
   },
 });
 </script>

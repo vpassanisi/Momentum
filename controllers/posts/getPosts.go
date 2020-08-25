@@ -2,7 +2,6 @@ package posts
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/vpassanisi/Project-S/config"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,18 +16,18 @@ import (
 // @access Public
 func GetPosts(c *fiber.Ctx) {
 
-	posts := []post{}
+	posts := []postPopulated{}
 	sub := subFull{}
 
 	postsCollection := config.GetCollection("Posts")
 	subsCollection := config.GetCollection("Subs")
 
-	findOneErr := subsCollection.FindOne(c.Context(), bson.M{
+	err := subsCollection.FindOne(c.Context(), bson.M{
 		"name": c.Params("sub"),
 	}).Decode(&sub)
-	if findOneErr != nil {
+	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if findOneErr == mongo.ErrNoDocuments {
+		if err == mongo.ErrNoDocuments {
 			c.Status(404).JSON(respondM{
 				Success: false,
 				Message: "Nothing matched that id",
@@ -43,22 +42,25 @@ func GetPosts(c *fiber.Ctx) {
 		return
 	}
 
-	cursor, findErr := postsCollection.Find(c.Context(), bson.M{
-		"sub": sub.ID,
-	})
-	if findErr != nil {
+	matchStage := bson.D{{"$match", bson.M{"sub": sub.ID}}}
+	limitStage := bson.D{{"$limit", 10}}
+	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}
+	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$user"}, {"preserveNullAndEmptyArrays", false}}}}
+
+	cursor, err := postsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, limitStage, lookupStage, unwindStage})
+	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
-			Message: "There was an error during query",
+			Message: "There was an error populating posts",
 		})
 
-		fmt.Println(findErr)
+		fmt.Println(err)
 		return
 	}
 
 	// loop through cursor and put todos in the todos slice of todos
-	cursorErr := cursor.All(c.Context(), &posts)
-	if cursorErr != nil {
+	err = cursor.All(c.Context(), &posts)
+	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
 			Message: "There was an error during cursor loop",
@@ -66,46 +68,19 @@ func GetPosts(c *fiber.Ctx) {
 		return
 	}
 
-	populatedPosts := populateUsers(c, posts)
+	targetIDs := []string{}
+
+	for _, v := range posts {
+		targetIDs = append(targetIDs, v.ID.Hex())
+	}
 
 	c.Status(200).JSON(respondGP{
 		Success: true,
 		Data: getPosts{
-			Sub:   sub,
-			Posts: populatedPosts,
+			Sub:       sub,
+			Posts:     posts,
+			TargetIDs: targetIDs,
 		},
 	})
 
-}
-
-func populateUsers(c *fiber.Ctx, posts []post) []postPopulated {
-	var populatedPosts []postPopulated
-
-	usersCollection := config.GetCollection("Users")
-
-	for _, v := range posts {
-		user := user{}
-
-		post := postPopulated{
-			ID:        v.ID,
-			Body:      v.Body,
-			Title:     v.Title,
-			Sub:       v.Sub,
-			Points:    v.Points,
-			CreatedAt: v.CreatedAt,
-		}
-
-		findOneErr := usersCollection.FindOne(c.Context(), bson.M{
-			"_id": v.User,
-		}).Decode(&user)
-		if findOneErr != nil {
-			log.Fatal(findOneErr)
-		}
-
-		post.User = user
-
-		populatedPosts = append(populatedPosts, post)
-	}
-
-	return populatedPosts
 }

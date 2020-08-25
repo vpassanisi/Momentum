@@ -75,6 +75,9 @@ const module = {
             posts: json.data.posts,
             sub: json.data.sub,
           });
+          commit("PointState/setTargetIds", json.data.targetIds, {
+            root: true,
+          });
           setColors(
             json.data.sub.colorPrimary,
             json.data.sub.colorPrimaryLight,
