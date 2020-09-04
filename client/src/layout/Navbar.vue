@@ -1,14 +1,14 @@
 <template>
   <nav
-    class="fixed z-10 top-0 left-0 w-full bg-white dark:bg-dark-gray-900 transition-height duration-500 ease-in-out border-b border-gray-500"
+    class="fixed z-10 top-0 left-0 w-full bg-white dark:bg-dark-gray-900 transition-height duration-500 ease-in-out border-b border-gray-500 py-2"
     :class="[scroll === 0 ? 'h-20' : 'h-12']"
     @openLoginModal="openLoginModal"
   >
     <div class="flex flex-row items-center justify-center w-full h-full">
       <div class="flex flex-row justify-between items-center w-90p h-full">
-        <div class="flex flex-row items-center justify-center h-full">
+        <div class="flex flex-row h-full">
           <svg
-            class="dark:text-white fill-current h-full p-3"
+            class="dark:text-white fill-current h-full px-3"
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             x="0px"
@@ -55,43 +55,57 @@
             </g>
           </svg>
 
-          <button class="h-full">Project-S</button>
+          <button class="h-full mr-4">Project-S</button>
+
+          <DropDown>
+            <template v-slot:content>
+              <div
+                class="w-full bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
+              >
+                <router-link
+                  v-if="isAuthenticated && $router.currentRoute.name !== 'Create Sub'"
+                  class="flex flex-row items-center justify-start w-full py-4 px-2 focus:outline-none"
+                  :to="{ path: `/subs/create` }"
+                >
+                  <i class="material-icons mr-2">create</i> Create Sub
+                </router-link>
+                <router-link
+                  v-if="isAuthenticated && $router.currentRoute.name !== 'Create Post'"
+                  class="flex flex-row items-center justify-start w-full py-4 px-2 focus:outline-none"
+                  :to="{ path: `/s/${$route.params.sub}/create` }"
+                >
+                  <i class="material-icons mr-2">create</i> Create Post
+                </router-link>
+              </div>
+            </template>
+          </DropDown>
         </div>
         <div v-if="mq === 'lg' || mq === 'xl'" class="flex flex-row h-full">
           <div v-if="isAuthenticated" class="flex flex-row h-full">
             <button
-              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none"
+              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none h-full"
               :class="[
-                scroll === 0 ? 'my-4' : 'my-2',
                 isDarkMode ? 'hover:bg-blue-500' : 'hover:bg-blue-100',
               ]"
               @click="handleLogout"
-            >
-              LOG OUT
-            </button>
+            >LOG OUT</button>
           </div>
           <div v-else class="flex flex-row h-full">
             <button
-              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none"
+              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none h-full"
               :class="[
-                scroll === 0 ? 'my-4' : 'my-2',
                 isDarkMode ? 'hover:bg-blue-500' : 'hover:bg-blue-100',
               ]"
               @click="openLoginModal"
-            >
-              LOG IN
-            </button>
+            >LOG IN</button>
             <button
-              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none"
+              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none h-full"
               :class="[
-                scroll === 0 ? 'my-4' : 'my-2',
                 isDarkMode
                   ? 'bg-blue-700 hover:bg-blue-400'
                   : 'bg-blue-100 hover:bg-blue-300',
               ]"
-            >
-              SING UP
-            </button>
+            >SING UP</button>
           </div>
           <DarkModeToggle class="px-2" />
         </div>
@@ -131,6 +145,7 @@ import DarkModeToggle from "@/components/DarkModeToggle.vue";
 import LoginModal from "@/components/LoginModal.vue";
 import Sidebar from "@/components/Sidebar.vue";
 import Error from "@/components/Error.vue";
+import DropDown from "@/components/DropDown.vue";
 
 export default Vue.extend({
   name: "Navbar",
@@ -139,8 +154,9 @@ export default Vue.extend({
     LoginModal,
     Sidebar,
     Error,
+    DropDown,
   },
-  data: function() {
+  data: function () {
     return {
       scroll: document.documentElement.scrollTop,
       perfersDark: window.matchMedia("(prefers-color-scheme: dark)").matches,
@@ -149,7 +165,7 @@ export default Vue.extend({
   computed: {
     ...mapState("AuthState", ["isAuthenticated", "isAuthLoading"]),
     ...mapState("PostState", ["isPostLoading"]),
-    ...mapState("SubState", ["isSubLoading"]),
+    ...mapState("SubState", ["isSubLoading", "sub"]),
     ...mapState("DarkMode", ["isDarkMode"]),
     ...mapState("MediaQueryState", ["mq"]),
     ...mapState("EventState", ["loginModal", "sidebar"]),
@@ -167,7 +183,7 @@ export default Vue.extend({
       this.logout();
     },
   },
-  mounted: function() {
+  mounted: function () {
     document.addEventListener(
       "scroll",
       () => (this.scroll = document.documentElement.scrollTop)
