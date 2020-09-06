@@ -1,9 +1,12 @@
 <template>
-  <div class="relative w-40 border border-blue-500 rounded" @click="handleClick">
+  <div
+    class="relative w-40 border border-blue-500 rounded"
+    @click="handleClick"
+  >
     <button
-      class="flex flex-row items-center justify-between w-full h-full px-2 focus:outline-none"
+      class="flex flex-row items-center justify-between w-full h-full px-2 focus:outline-none shadow"
     >
-      s/{{$router.currentRoute.params.sub}}
+      s/{{ $router.currentRoute.params.sub }}
       <i class="material-icons">arrow_drop_down</i>
     </button>
 
@@ -17,7 +20,7 @@
 import Vue from "vue";
 export default Vue.extend({
   name: "DropDown",
-  data: function () {
+  data: function() {
     return {
       isOpen: false,
     };

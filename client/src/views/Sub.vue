@@ -21,7 +21,7 @@ export default Vue.extend({
     Content,
   },
   computed: {
-    ...mapState("SubState", ["sub"]),
+    ...mapState("SubState", ["sub", "subError"]),
     ...mapState("PointState", ["targetIds"]),
     ...mapState("AuthState", ["isAuthenticated"]),
   },
@@ -31,6 +31,7 @@ export default Vue.extend({
   },
   mounted: async function() {
     await this.getPostsBySubName(this.$route.params.sub);
+    if (this.subError) this.$router.push("/NotFound");
     if (this.isAuthenticated) this.getPoints(this.targetIds);
   },
 });

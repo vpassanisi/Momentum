@@ -21,7 +21,10 @@
             class="relative flex flex-col justify-center h-full w-full md:w-3/4 p-4"
             :class="[mq === 'sm' || mq === 'md' ? 'items-center' : '']"
           >
-            <button class="absolute flex top-0 right-0 p-2 m-2 focus:outline-none" @click="close">
+            <button
+              class="absolute flex top-0 right-0 p-2 m-2 focus:outline-none"
+              @click="close"
+            >
               <i class="material-icons">clear</i>
             </button>
             <div class="text-2xl">Log In</div>
@@ -37,6 +40,7 @@
               type="email"
               name="email"
               @input="handleEmailInput"
+              @enter="handleLogin"
             />
             <MaterialInput
               class="shadow"
@@ -45,16 +49,20 @@
               hoverBorderColor="#64B5F6"
               placeholder="pasword"
               :backgroundColor="isDarkMode ? '#121212' : '#ffffff'"
+              :autofillColor="isDarkMode ? '#ffffff' : '#121212'"
               focusBorderColor="#1976D2"
               type="password"
               name="password"
               @input="handlePasswordInput"
+              @enter="handleLogin"
             />
             <button
               class="bg-blue-100 dark:bg-blue-700 rounded shadow text-sm py-2 focus:outline-none mt-4"
               :class="[mq === 'sm' || mq === 'md' ? 'w-full' : 'w-50p']"
               @click="handleLogin"
-            >LOGIN</button>
+            >
+              LOGIN
+            </button>
           </div>
         </div>
       </transition>
@@ -72,7 +80,7 @@ export default Vue.extend({
   components: {
     MaterialInput,
   },
-  data: function () {
+  data: function() {
     return {
       email: "",
       password: "",
@@ -109,7 +117,7 @@ export default Vue.extend({
     },
   },
   watch: {
-    isAuthenticated: function () {
+    isAuthenticated: function() {
       this.$emit("closeModal");
     },
   },

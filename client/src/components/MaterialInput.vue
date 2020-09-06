@@ -9,6 +9,7 @@
       :type="type"
       :name="name"
       @input="handleInput"
+      @keydown.enter="handleEnter"
     />
     <label
       ref="label"
@@ -30,12 +31,14 @@ export default {
     focusBorderColor: String,
     autofillColor: String,
     type: String,
-    value: String,
     name: String,
   },
   methods: {
     handleInput(e) {
       this.$emit("input", e.target.value);
+    },
+    handleEnter() {
+      this.$emit("enter");
     },
   },
 };
