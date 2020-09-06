@@ -37,6 +37,7 @@ module.exports = {
       transitionProperty: {
         height: "height",
         button: "background-color, margin",
+        borderColor: "border-color",
       },
     },
   },

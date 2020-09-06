@@ -65,7 +65,7 @@ func Update(c *fiber.Ctx) {
 
 	c.Status(200).JSON(respondS{
 		Success: true,
-		Data: subSimple{
+		Data: sub{
 			ID:          updated["_id"].(primitive.ObjectID),
 			Name:        updated["name"].(string),
 			Description: updated["description"].(string),

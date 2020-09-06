@@ -15,7 +15,7 @@
             class="h-full w-1/4 rounded-l"
             :class="[mq === 'sm' || mq === 'md' ? 'hidden' : '']"
             src="https://source.unsplash.com/collection/3330445/300x1800"
-            alt=""
+            alt
           />
           <div
             class="relative flex flex-col justify-center h-full w-full md:w-3/4 p-4"
@@ -31,7 +31,7 @@
             <MaterialInput
               class="shadow"
               :half="mq === 'sm' || mq === 'md' ? false : true"
-              borderColor="#BDBDBD"
+              bordercolor="#BDBDBD"
               hoverBorderColor="#64B5F6"
               placeholder="email"
               :backgroundColor="isDarkMode ? '#121212' : '#ffffff'"
@@ -40,18 +40,21 @@
               type="email"
               name="email"
               @input="handleEmailInput"
+              @enter="handleLogin"
             />
             <MaterialInput
               class="shadow"
               :half="mq === 'sm' || mq === 'md' ? false : true"
-              borderColor="#BDBDBD"
+              bordercolor="#BDBDBD"
               hoverBorderColor="#64B5F6"
               placeholder="pasword"
               :backgroundColor="isDarkMode ? '#121212' : '#ffffff'"
+              :autofillColor="isDarkMode ? '#ffffff' : '#121212'"
               focusBorderColor="#1976D2"
               type="password"
               name="password"
               @input="handlePasswordInput"
+              @enter="handleLogin"
             />
             <button
               class="bg-blue-100 dark:bg-blue-700 rounded shadow text-sm py-2 focus:outline-none mt-4"

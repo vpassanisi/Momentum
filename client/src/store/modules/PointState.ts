@@ -37,7 +37,7 @@ const module = {
         }
       } catch (error) {
         console.log(error);
-        commit("getPointsfail", "Promise rejected with an error");
+        commit("getPointsFail", "Promise rejected with an error");
       }
       commit("endLoading");
     },

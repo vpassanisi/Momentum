@@ -15,7 +15,7 @@ import (
 // @route POST /api/v1/subs/?key&order&*name&*id
 // @access Private
 func GetSubs(c *fiber.Ctx) {
-	subs := []subSimple{}
+	subs := []sub{}
 	filter := bson.M{}
 	key := c.Query("key")
 	order := -1

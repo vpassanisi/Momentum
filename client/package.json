@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@types/jest": "^24.0.19",
+    "@types/vue-color": "^2.4.2",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "@vue/cli-plugin-babel": "~4.4.0",
@@ -44,6 +45,7 @@
     "tiptap": "^1.29.4",
     "tiptap-extensions": "^1.32.1",
     "typescript": "~3.9.3",
+    "vue-color": "^2.7.1",
     "vue-template-compiler": "^2.6.11"
   }
 }

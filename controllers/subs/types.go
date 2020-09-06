@@ -3,34 +3,10 @@ package subs
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type sub struct {
+	ID                primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Name              string             `json:"name"`
 	Description       string             `json:"description"`
 	Founder           primitive.ObjectID `json:"founder"`
-	Banner            string             `json:"banner"`
-	CreatedAt         int64              `json:"createdAt"`
-	Icon              string             `json:"icon"`
-	ColorPrimary      string             `json:"colorPrimary"`
-	ColorPrimaryLight string             `json:"colorPrimaryLight"`
-	ColorPrimaryDark  string             `json:"colorPrimaryDark"`
-}
-
-type subFull struct {
-	ID                primitive.ObjectID `json:"_id" bson:"_id"`
-	Name              string             `json:"name"`
-	Description       string             `json:"description"`
-	Founder           primitive.ObjectID `json:"founder"`
-	Banner            string             `json:"banner"`
-	CreatedAt         int64              `json:"createdAt"`
-	Icon              string             `json:"icon"`
-	ColorPrimary      string             `json:"colorPrimary"`
-	ColorPrimaryLight string             `json:"colorPrimaryLight"`
-	ColorPrimaryDark  string             `json:"colorPrimaryDark"`
-}
-
-type subSimple struct {
-	ID                primitive.ObjectID `json:"_id" bson:"_id"`
-	Name              string             `json:"name"`
-	Description       string             `json:"description"`
 	Banner            string             `json:"banner"`
 	CreatedAt         int64              `json:"createdAt"`
 	Icon              string             `json:"icon"`
@@ -45,11 +21,11 @@ type respondM struct {
 }
 
 type respondS struct {
-	Success bool      `json:"success"`
-	Data    subSimple `json:"data"`
+	Success bool `json:"success"`
+	Data    sub  `json:"data"`
 }
 
 type respondGS struct {
-	Success bool        `json:"success"`
-	Data    []subSimple `json:"data"`
+	Success bool  `json:"success"`
+	Data    []sub `json:"data"`
 }
