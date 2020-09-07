@@ -1,4 +1,5 @@
 import { MutationTree, ActionTree } from "vuex";
+import router from "@/router/index";
 
 interface Sub {
   _id: string;
@@ -145,6 +146,7 @@ const module = {
             json.data.colorPrimaryLight,
             json.data.colorPrimaryDark
           );
+          router.push(`/s/${json.data.name}`);
         } else {
           commit("subError", json.message);
         }
