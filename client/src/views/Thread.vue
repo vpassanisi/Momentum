@@ -76,8 +76,8 @@
               v-model="pagination.sort"
               @change="handlePage"
             >
-              <option value="createdat" class="focus:outline-none">New</option>
               <option value="points" class="focus:outline-none">Top</option>
+              <option value="createdat" class="focus:outline-none">New</option>
             </select>
 
             <button class="flex ml-4 focus:outline-none" @click="handleOrder">
@@ -126,7 +126,7 @@ export default Vue.extend({
     return {
       pagination: {
         postID: this.$route.params.id,
-        sort: "createdat",
+        sort: "points",
         order: -1,
       },
       isActive: null as null | boolean,
