@@ -24,6 +24,14 @@ func GetPoints(c *fiber.Ctx) {
 		log.Fatal(err)
 	}
 
+	if len(ids.IDs) < 1 {
+		c.Status(200).JSON(respondMP{
+			Success: true,
+			Data:    map[string]bool{},
+		})
+		return
+	}
+
 	arr := []bson.M{}
 
 	for _, v := range ids.IDs {

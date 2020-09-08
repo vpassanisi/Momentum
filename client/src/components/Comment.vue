@@ -10,10 +10,7 @@
         ]"
         @click="handleUp"
       >
-        <svg
-          viewBox="100 14.653 300 168.661"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg viewBox="100 14.653 300 168.661" xmlns="http://www.w3.org/2000/svg">
           <path
             fill="currentColor"
             d="M 379.784 183.315 L 120.215 183.315 C 102.241 183.315 93.24 161.772 105.949 149.173 L 235.734 20.511 C 243.613 12.701 256.387 12.701 264.265 20.511 L 394.05 149.173 C 406.76 161.772 397.758 183.315 379.784 183.315 Z"
@@ -48,16 +45,14 @@
     <div class="w-full">
       <span class="pl-4 text-sm text-gray-500">
         {{
-          `${comment.user.name} • ${comment.points} Points • ${formatedTime} ago`
+        `${comment.user.name} • ${comment.points} Points • ${formatedTime} ago`
         }}
       </span>
       <editor-content :editor="readOnlyEditor" />
       <div v-if="isAuthenticated">
         <div v-if="isReplyOpen" class="flex flex-row">
           <div class="flex flex-col min-w-6">
-            <div
-              class="border-r-2 border-gray-300 dark:border-gray-700 w-50p h-full self-start"
-            />
+            <div class="border-r-2 border-gray-300 dark:border-gray-700 w-50p h-full self-start" />
           </div>
           <NewCommentEditor
             :postId="comment.post"
@@ -87,13 +82,13 @@
   </div>
   <div v-else class="flex flex-row items-center justify-start py-4">
     <button @click="open" class="flex pr-3">
-      <i class="material-icons text-blue-700 dark:text-blue-100 text-3xl"
-        >add_circle</i
-      >
+      <i class="material-icons text-blue-700 dark:text-blue-100 text-3xl">add_circle</i>
     </button>
-    <span class="text-sm text-gray-500 flex items-center justify-center">{{
-      `${comment.user.name} • ${comment.points} Points • ${formatedTime}`
-    }}</span>
+    <span class="text-sm text-gray-500 flex items-center justify-center">
+      {{
+      `${comment.user.name} • ${comment.points} Points • ${formatedTime} ago`
+      }}
+    </span>
   </div>
 </template>
 
@@ -209,7 +204,7 @@ export default Vue.extend({
       }
     },
   },
-  mounted: async function() {
+  mounted: async function () {
     this.readOnlyEditor.setContent(JSON.parse(this.comment.body));
 
     this.formatedTime = await this.getTimeSince(this.comment.createdAt);
@@ -219,7 +214,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    points: function() {
+    points: function () {
       if (this.points[this.comment._id] !== undefined) {
         this.isActive = this.points[this.comment._id];
       } else {

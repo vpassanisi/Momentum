@@ -23,6 +23,12 @@ interface CommentState {
   commentError: null | string;
 }
 
+interface UpdatePaginationObj {
+  postID: string;
+  sort: string;
+  order: number;
+}
+
 const module = {
   namespaced: true,
   state: {
@@ -58,6 +64,37 @@ const module = {
       }
       commit("endLoading");
     },
+    updatePagination: async ({ commit }, obj: UpdatePaginationObj) => {
+      commit("startLoading");
+      try {
+        const res = await fetch(
+          `/api/v1/comments/?postID=${obj.postID}&sort=${obj.sort}&order=${obj.order}&post=true`,
+          {
+            method: "GET",
+          }
+        );
+
+        const json = await res.json();
+
+        if (json.success) {
+          const a = {
+            post: json.data.post,
+            comments: json.data.comments,
+          };
+
+          commit("updatePaginationSuccess", a);
+          commit("PointState/setTargetIds", json.data.targetIds, {
+            root: true,
+          });
+        } else {
+          commit("commentError", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("commentError", "Promise rejected with an error");
+      }
+      commit("endLoading");
+    },
     clearCommentState: ({ commit }) => {
       commit("clearCommentState");
     },
@@ -75,6 +112,9 @@ const module = {
 
       state.comments = { ...state.comments, ...comments };
     },
+    updatePaginationSuccess: (state, { comments }) => {
+      state.comments = { ...comments };
+    },
     updateCommentPoints: (state, comment: Comment) => {
       const index = state.comments[comment.parent].findIndex((v) => {
         return v._id === comment._id;
@@ -91,6 +131,10 @@ const module = {
       ];
     },
     newCommentFail: (state, error) => {
+      state.commentError = error;
+      setTimeout(() => (state.commentError = null), 3000);
+    },
+    commentError: (state, error) => {
       state.commentError = error;
       setTimeout(() => (state.commentError = null), 3000);
     },

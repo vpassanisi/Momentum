@@ -37,11 +37,11 @@ const module = {
     postError: null,
   },
   actions: {
-    getPostAndComments: async ({ commit }, post: string) => {
+    getPostAndComments: async ({ commit }, postID: string) => {
       commit("startLoading");
       try {
         const res = await fetch(
-          `/api/v1/comments/?postID=${post}&sort=createdat&order=-1&post=true`,
+          `/api/v1/comments/?postID=${postID}&sort=points&order=-1&post=true`,
           {
             method: "GET",
           }
