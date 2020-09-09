@@ -12,9 +12,14 @@ import (
 
 // GetPosts //
 // @desc gets all posts in a sub and sorts them based on query params
-// @route GET /api/v1/posts/:sub
+// @route GET /api/v1/posts/?sub&sort&order
 // @access Public
 func GetPosts(c *fiber.Ctx) {
+
+	order := -1
+	if c.Query("order") == "1" {
+		order = 1
+	}
 
 	posts := []postPopulated{}
 	sub := subFull{}
@@ -23,7 +28,7 @@ func GetPosts(c *fiber.Ctx) {
 	subsCollection := config.GetCollection("Subs")
 
 	err := subsCollection.FindOne(c.Context(), bson.M{
-		"name": c.Params("sub"),
+		"name": c.Query("sub"),
 	}).Decode(&sub)
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
@@ -44,10 +49,11 @@ func GetPosts(c *fiber.Ctx) {
 
 	matchStage := bson.D{{"$match", bson.M{"sub": sub.ID}}}
 	limitStage := bson.D{{"$limit", 10}}
+	sortStage := bson.D{{"$sort", bson.M{c.Query("sort"): order}}}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}
 	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$user"}, {"preserveNullAndEmptyArrays", false}}}}
 
-	cursor, err := postsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, limitStage, lookupStage, unwindStage})
+	cursor, err := postsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, limitStage, sortStage, lookupStage, unwindStage})
 	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,

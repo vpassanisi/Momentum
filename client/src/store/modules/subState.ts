@@ -41,9 +41,16 @@ interface Post {
 
 interface CurrentSubState {
   sub: Sub | null;
+  subsArr: Array<Sub>;
   posts: Array<Post> | null;
   isSubLoading: boolean;
   subError: string | null;
+}
+
+interface GetPostsObj {
+  sub: string;
+  sort: string;
+  order: number;
 }
 
 const setColors = (
@@ -67,17 +74,19 @@ const module = {
   namespaced: true,
   state: {
     sub: null,
+    subsArr: [],
     posts: null,
     isSubLoading: false,
     subError: null,
   },
   actions: {
-    getPostsBySubName: async ({ commit }, sub: string) => {
+    getPostsBySubName: async ({ commit }, obj: GetPostsObj) => {
       commit("startLoading");
       try {
-        const req = await fetch(`/api/v1/posts/${sub}`, {
-          method: "GET",
-        });
+        const req = await fetch(
+          `/api/v1/posts/?sub=${obj.sub}&sort=${obj.sort}&order=${obj.order}`,
+          { method: "GET" }
+        );
 
         const json = await req.json();
 
@@ -156,6 +165,26 @@ const module = {
       }
       commit("endLoading");
     },
+    getSubs: async ({ commit }) => {
+      commit("startLoading");
+      try {
+        const res = await fetch(`/api/v1/subs/?key=name&order=asc`, {
+          method: "GET",
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("setSubsArr", json.data);
+        } else {
+          commit("subError", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("subError", "Promise rejected with an error");
+      }
+      commit("endLoading");
+    },
   } as ActionTree<CurrentSubState, null>,
   mutations: {
     startLoading: (state) => (state.isSubLoading = true),
@@ -163,6 +192,9 @@ const module = {
     getPostsBySubNameSuccess: (state, { posts, sub }) => {
       state.posts = posts;
       state.sub = sub;
+    },
+    setSubsArr: (state, subs) => {
+      state.subsArr = subs;
     },
     getSubByNameSuccess: (state, sub) => (state.sub = sub),
     createSubSuccess: (state, sub) => (state.sub = sub),

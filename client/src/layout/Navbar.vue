@@ -1,7 +1,7 @@
 <template>
   <nav
-    class="fixed z-10 top-0 left-0 w-full bg-white dark:bg-dark-gray-900 transition-height duration-500 ease-in-out border-b border-gray-500 py-2"
-    :class="[scroll === 0 ? 'h-20' : 'h-12']"
+    class="fixed z-10 top-0 left-0 w-full bg-white dark:bg-dark-gray-900 transition-nav duration-500 ease-in-out border-b border-gray-500"
+    :class="[scroll === 0 ? 'h-20 py-2' : 'h-12 py-1']"
     @openLoginModal="openLoginModal"
   >
     <div class="flex flex-row items-center justify-center w-full h-full">
@@ -128,7 +128,7 @@
     </div>
     <div
       ref="progressLine"
-      class="progress-line"
+      class="progress-line mt-2"
       :class="[
         isAuthLoading || isPostLoading || isSubLoading
           ? 'visible'
