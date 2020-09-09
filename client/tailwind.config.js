@@ -38,6 +38,7 @@ module.exports = {
         height: "height",
         button: "background-color, margin",
         borderColor: "border-color",
+        nav: "height, padding",
       },
     },
   },

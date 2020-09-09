@@ -29,8 +29,12 @@ export default Vue.extend({
     ...mapActions("SubState", ["getPostsBySubName"]),
     ...mapActions("PointState", ["getPoints"]),
   },
-  mounted: async function() {
-    await this.getPostsBySubName(this.$route.params.sub);
+  mounted: async function () {
+    await this.getPostsBySubName({
+      sub: this.$route.params.sub,
+      sort: "points",
+      order: -1,
+    });
     if (this.subError) this.$router.push("/NotFound");
     if (this.isAuthenticated) this.getPoints(this.targetIds);
   },
