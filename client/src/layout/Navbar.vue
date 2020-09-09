@@ -57,7 +57,7 @@
 
           <button class="h-full mr-4">Project-S</button>
 
-          <DropDown>
+          <DropDown class="hidden md:inline-block">
             <template v-slot:content>
               <div
                 class="w-full bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
@@ -143,8 +143,8 @@ import Vue from "vue";
 import { mapState, mapActions } from "vuex";
 import DarkModeToggle from "@/components/DarkModeToggle.vue";
 import LoginModal from "@/components/LoginModal.vue";
-import Sidebar from "@/components/Sidebar.vue";
-import Error from "@/components/Error.vue";
+import Sidebar from "@/layout/Sidebar.vue";
+import Error from "@/layout/Error.vue";
 import DropDown from "@/components/DropDown.vue";
 
 export default Vue.extend({
@@ -192,6 +192,8 @@ export default Vue.extend({
     if (this.perfersDark) this.turnOn();
 
     this.me();
+
+    console.log(this.$router.currentRoute);
   },
 });
 </script>

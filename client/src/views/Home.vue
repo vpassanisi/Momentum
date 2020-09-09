@@ -1,6 +1,6 @@
 <template>
   <div class="mt-32">
-    <div class="flex flex-col mx-auto max-w-screen-md">
+    <div class="flex flex-col mx-auto w-11/12 max-w-screen-md">
       <SubCard v-for="sub in subsArr" :key="sub._id" :sub="sub" />
     </div>
   </div>

@@ -7,7 +7,7 @@
       <transition name="slide">
         <div
           v-if="showSidebar"
-          class="fixed flex flex-col items-center justify-start bg-white dark:bg-dark-gray-900 top-0 left-0 h-full w-45vw border-r dark:border-gray-400 border-gray-700 shadow"
+          class="fixed flex flex-col items-center justify-start bg-white dark:bg-dark-gray-900 top-0 left-0 h-full w-1/2 border-r dark:border-gray-400 border-gray-700 shadow"
           @click="(e) => e.stopPropagation()"
         >
           <div
@@ -24,27 +24,38 @@
                 close();
               }
             "
-          >
-            LOG OUT
-          </button>
-          <div v-else class="flex flex-col h-full w-90p">
+          >LOG OUT</button>
+          <div v-else class="flex flex-col h-full w-full">
             <button
-              class="focus:outline-none rounded border border-blue-500 my-2 px-8 py-2 shadow"
+              class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
               @click="
                 () => {
                   close();
                   openLoginModal();
                 }
               "
-            >
-              LOG IN
-            </button>
+            >LOG IN</button>
             <button
-              class="focus:outline-none rounded border border-blue-500 my-2 px-8 py-2 shadow"
-              :class="[isDarkMode ? 'bg-blue-700' : 'bg-blue-100']"
-            >
-              SIGN UP
-            </button>
+              class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
+            >SIGN UP</button>
+            <Collapse>
+              <template v-slot:main>
+                <div
+                  class="flex flex-row items-center justify-between focus:outline-none py-3 px-2"
+                >
+                  {{$router.currentRoute.name === "Sub" ? $router.currentRoute.params.sub : $router.currentRoute.name}}
+                  <i
+                    class="material-icons"
+                  >arrow_drop_down</i>
+                </div>
+              </template>
+              <template v-slot:content>
+                <button>123</button>
+                <button>123</button>
+                <button>123</button>
+                <button>123</button>
+              </template>
+            </Collapse>
           </div>
         </div>
       </transition>
@@ -55,12 +66,14 @@
 <script lang="ts">
 import Vue from "vue";
 import { mapState } from "vuex";
-import DarkModeToggle from "./DarkModeToggle.vue";
+import DarkModeToggle from "@/components/DarkModeToggle.vue";
+import Collapse from "@/components/Collapse.vue";
 
 export default Vue.extend({
   name: "Sidebar",
   components: {
     DarkModeToggle,
+    Collapse,
   },
   data() {
     return {
