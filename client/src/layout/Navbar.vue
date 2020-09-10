@@ -101,7 +101,8 @@
               <button
                 class="flex flex-row items-center justify-between w-full h-full px-2 focus:outline-none shadow"
               >
-                <i class="material-icons">person</i>
+                <i v-if="!name" class="material-icons">person</i>
+                {{name ? name : ""}}
                 <i class="material-icons">arrow_drop_down</i>
               </button>
             </template>
@@ -119,6 +120,7 @@
                 <button
                   v-if="!isAuthenticated"
                   class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  @click="openRegisterModal"
                 >
                   <i class="material-icons mr-2">person_add</i> Sign Up
                 </button>
@@ -142,6 +144,7 @@
         </button>
       </div>
       <LoginModal v-show="loginModal" @closeModal="closeLoginModal" />
+      <RegisterModal v-show="registerModal" @closeModal="closeRegisterModal" />
       <Sidebar
         v-show="sidebar"
         @logout="handleLogout"
@@ -167,6 +170,7 @@ import Vue from "vue";
 import { mapState, mapActions } from "vuex";
 import DarkModeToggle from "@/components/DarkModeToggle.vue";
 import LoginModal from "@/components/LoginModal.vue";
+import RegisterModal from "@/components/RegisterModal.vue";
 import Sidebar from "@/layout/Sidebar.vue";
 import Error from "@/layout/Error.vue";
 import DropDown from "@/components/DropDown.vue";
@@ -176,6 +180,7 @@ export default Vue.extend({
   components: {
     DarkModeToggle,
     LoginModal,
+    RegisterModal,
     Sidebar,
     Error,
     DropDown,
@@ -188,12 +193,12 @@ export default Vue.extend({
     };
   },
   computed: {
-    ...mapState("AuthState", ["isAuthenticated", "isAuthLoading"]),
+    ...mapState("AuthState", ["isAuthenticated", "isAuthLoading", "name"]),
     ...mapState("PostState", ["isPostLoading"]),
     ...mapState("SubState", ["isSubLoading", "sub"]),
     ...mapState("DarkMode", ["isDarkMode"]),
     ...mapState("MediaQueryState", ["mq"]),
-    ...mapState("EventState", ["loginModal", "sidebar"]),
+    ...mapState("EventState", ["loginModal", "sidebar", "registerModal"]),
   },
   methods: {
     ...mapActions("AuthState", ["logout", "me"]),
@@ -201,6 +206,8 @@ export default Vue.extend({
     ...mapActions("EventState", [
       "openLoginModal",
       "closeLoginModal",
+      "openRegisterModal",
+      "closeRegisterModal",
       "openSidebar",
       "closeSidebar",
     ]),

@@ -16,12 +16,26 @@
             alt
           />
           <div
-            class="relative flex flex-col itmes-center md:items-start justify-center h-full w-full md:w-3/4 p-4"
+            class="relative flex flex-col items-center md:items-start justify-center h-full w-full md:w-3/4 p-4"
           >
             <button class="absolute flex top-0 right-0 p-2 m-2 focus:outline-none" @click="close">
               <i class="material-icons">clear</i>
             </button>
-            <div class="text-2xl">Log In</div>
+            <div class="text-2xl">Sign Up</div>
+            <MaterialInput
+              class="shadow"
+              :half="mq === 'sm' || mq === 'md' ? false : true"
+              borderClr="#BDBDBD"
+              hoverBorderColor="#64B5F6"
+              placeholder="name"
+              :backgroundColor="isDarkMode ? '#121212' : '#ffffff'"
+              :autofillColor="isDarkMode ? '#ffffff' : '#121212'"
+              focusBorderColor="#1976D2"
+              type="text"
+              name="name"
+              @input="handleNameInput"
+              @enter="handleRegister"
+            />
             <MaterialInput
               class="shadow"
               :half="mq === 'sm' || mq === 'md' ? false : true"
@@ -34,7 +48,7 @@
               type="email"
               name="email"
               @input="handleEmailInput"
-              @enter="handleLogin"
+              @enter="handleRegister"
             />
             <MaterialInput
               class="shadow"
@@ -48,17 +62,12 @@
               type="password"
               name="password"
               @input="handlePasswordInput"
-              @enter="handleLogin"
+              @enter="handleRegister"
             />
             <button
               class="bg-blue-100 dark:bg-blue-700 rounded shadow text-sm py-2 focus:outline-none mt-4 w-full md:w-1/2"
-              @click="handleLogin"
-            >LOGIN</button>
-            <div class="text-center w-full md:w-1/2 mt-2">or</div>
-            <a
-              class="mt-2 text-center w-full md:w-1/2 cursor-pointer text-blue-500 dark:text-blue-400"
-              @click="handleDemoLogin"
-            >Use Demo Account</a>
+              @click="handleRegister"
+            >Sign Up</button>
           </div>
         </div>
       </transition>
@@ -72,12 +81,13 @@ import { mapActions, mapState } from "vuex";
 import MaterialInput from "./MaterialInput.vue";
 
 export default Vue.extend({
-  name: "LoginModal",
+  name: "RegisterModal",
   components: {
     MaterialInput,
   },
   data: function () {
     return {
+      name: "",
       email: "",
       password: "",
       showModal: false,
@@ -89,27 +99,25 @@ export default Vue.extend({
     ...mapState("DarkMode", ["isDarkMode"]),
   },
   methods: {
-    ...mapActions("AuthState", ["login"]),
+    ...mapActions("AuthState", ["register"]),
     close() {
       this.showModal = false;
       this.$emit("closeModal", false);
     },
-    handleLogin() {
-      this.login({
+    handleRegister() {
+      this.register({
+        name: this.name,
         email: this.email,
         password: this.password,
       });
     },
-    handleDemoLogin() {
-      this.login({
-        email: "Demo@gmail.com",
-        password: "123456",
-      });
-    },
     handleKeyDown(e: KeyboardEvent) {
       if (e.code === "Enter") {
-        this.handleLogin();
+        this.handleRegister();
       }
+    },
+    handleNameInput(value: string) {
+      this.name = value;
     },
     handleEmailInput(value: string) {
       this.email = value;
@@ -125,5 +133,3 @@ export default Vue.extend({
   },
 });
 </script>
-
-<style scoped></style>

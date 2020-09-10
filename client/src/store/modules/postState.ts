@@ -58,7 +58,15 @@ const module = {
           };
 
           commit("getPostByIdSuccess", a);
-          commit("CommentState/setComments", a, { root: true });
+
+          if (a.comments[postID].length < 10) {
+            commit("CommentState/noMoreComments", null, { root: true });
+          }
+
+          if (a.comments[postID].length > 0) {
+            commit("CommentState/setComments", a, { root: true });
+          }
+
           commit("PointState/setTargetIds", json.data.targetIds, {
             root: true,
           });

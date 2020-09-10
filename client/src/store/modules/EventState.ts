@@ -2,6 +2,7 @@ import { ActionTree, MutationTree } from "vuex";
 
 interface EventState {
   loginModal: boolean;
+  registerModal: boolean;
   sidebar: boolean;
 }
 
@@ -9,6 +10,7 @@ const module = {
   namespaced: true,
   state: {
     loginModal: false,
+    registerModal: false,
     sidebar: false,
   },
   actions: {
@@ -17,6 +19,12 @@ const module = {
     },
     closeLoginModal({ commit }) {
       commit("closeLoginModal");
+    },
+    openRegisterModal({ commit }) {
+      commit("openRegisterModal");
+    },
+    closeRegisterModal({ commit }) {
+      commit("closeRegisterModal");
     },
     openSidebar({ commit }) {
       commit("openSidebar");
@@ -59,6 +67,8 @@ const module = {
   mutations: {
     openLoginModal: (state) => (state.loginModal = true),
     closeLoginModal: (state) => (state.loginModal = false),
+    openRegisterModal: (state) => (state.registerModal = true),
+    closeRegisterModal: (state) => (state.registerModal = false),
     openSidebar: (state) => (state.sidebar = true),
     closeSidebar: (state) => (state.sidebar = false),
   } as MutationTree<EventState>,
