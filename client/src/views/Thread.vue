@@ -91,6 +91,7 @@
         <Comment v-for="com in comments[post._id]" :key="com._id" :comment="com" :rootId="com._id" />
         <div class="flex flex-row items-center justify-center mt-4">
           <button
+            v-show="moreComments"
             class="w-1/2 bg-blue-500 text-white shadow rounded p-2 focus:outline-none"
             @click="handleNextComments"
           >Load More Comments</button>
@@ -156,7 +157,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState("PostState", ["post"]),
-    ...mapState("CommentState", ["comments", "pagination"]),
+    ...mapState("CommentState", ["comments", "pagination", "moreComments"]),
     ...mapState("PointState", ["targetIds", "points"]),
     ...mapState("SubState", ["sub"]),
     ...mapState("AuthState", ["isAuthenticated"]),

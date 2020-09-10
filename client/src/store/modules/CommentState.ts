@@ -31,6 +31,7 @@ interface CommentState {
   comments: Record<string, Array<Comment>>;
   isCommentLoading: boolean;
   commentError: null | string;
+  moreComments: boolean;
   pagination: Pagination;
 }
 
@@ -60,6 +61,7 @@ const module = {
       lastVal: 0,
       lastCreatedAt: "",
     },
+    moreComments: true,
     isCommentsLoading: false,
     commentError: null,
   },
@@ -93,6 +95,7 @@ const module = {
     },
     updateComments: async ({ commit, state }) => {
       commit("startLoading");
+      commit("setMoreComments");
       try {
         const res = await fetch(
           `/api/v1/comments/?postID=${state.pagination.postID}&sort=${state.pagination.sort}&order=${state.pagination.order}&post=true`,
@@ -133,6 +136,10 @@ const module = {
         const json = await res.json();
 
         if (json.success) {
+          if (json.data.comments[state.pagination.postID].length < 10) {
+            commit("noMoreComments");
+          }
+
           commit("getNextCommentsSuccess", json.data.comments);
           commit("PointState/addToTargetIds", json.data.targetIds, {
             root: true,
@@ -243,13 +250,20 @@ const module = {
 
       // update pagination
     },
+    noMoreComments: (state) => (state.moreComments = false),
+    setMoreComments: (state) => (state.moreComments = true),
     commentError: (state, error) => {
       state.commentError = error;
       setTimeout(() => (state.commentError = null), 3000);
     },
     startLoading: (state) => (state.isCommentLoading = true),
     endLoading: (state) => (state.isCommentLoading = false),
-    clearCommentState: (state) => (state.comments = {}),
+    clearCommentState: (state) => {
+      state.comments = {};
+      state.moreComments = true;
+      state.pagination.order = -1;
+      state.pagination.sort = "points";
+    },
   } as MutationTree<CommentState>,
 };
 

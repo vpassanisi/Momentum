@@ -42,6 +42,9 @@ module.exports = {
       width: {
         "max-content": "max-content",
       },
+      height: {
+        "3/4": "75%",
+      },
       transitionProperty: {
         height: "height",
         "max-height": "max-height",

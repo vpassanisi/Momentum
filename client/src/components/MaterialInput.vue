@@ -1,9 +1,9 @@
 <template>
-  <div ref="wrapper" class="wrap" :class="[half ? 'w-50p' : 'w-full']">
+  <div ref="wrapper" class="wrap" :class="[half ? 'w-1/2' : 'w-full']">
     <input
       ref="input"
       :style="
-        `--hoverBorderColor: ${hoverBorderColor}; --borderColor: ${borderColor}; --focusBorderColor: ${focusBorderColor}; --autofillColor: ${autofillColor};`
+        `--hoverBorderColor: ${hoverBorderColor}; --borderColor: ${borderClr}; --focusBorderColor: ${focusBorderColor}; --autofillColor: ${autofillColor};`
       "
       placeholder=" "
       :type="type"
@@ -15,8 +15,7 @@
       ref="label"
       for="input"
       :style="`--backgroundColor: ${backgroundColor};`"
-      >{{ placeholder }}</label
-    >
+    >{{ placeholder }}</label>
   </div>
 </template>
 
@@ -24,7 +23,7 @@
 export default {
   props: {
     half: Boolean,
-    borderColor: String,
+    borderClr: String,
     hoverBorderColor: String,
     placeholder: String,
     backgroundColor: String,
@@ -88,14 +87,6 @@ label {
 .wrap {
   position: relative;
   margin-top: 1.25rem;
-}
-
-.w-50p {
-  width: 50%;
-}
-
-.w-full {
-  width: 100%;
 }
 
 outline-none:focus {
