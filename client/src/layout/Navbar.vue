@@ -57,61 +57,85 @@
 
           <button class="h-full mr-4">Project-S</button>
 
-          <DropDown>
+          <DropDown class="hidden md:inline-block">
+            <template v-slot:button>
+              <button
+                class="flex flex-row items-center justify-between w-full h-full px-2 focus:outline-none shadow"
+              >
+                {{routeText}}
+                <i class="material-icons">arrow_drop_down</i>
+              </button>
+            </template>
             <template v-slot:content>
               <div
-                class="w-full bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
+                class="absolute w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
               >
                 <router-link
                   v-if="isAuthenticated && $router.currentRoute.name !== 'Create Sub'"
-                  class="flex flex-row items-center justify-start w-full py-4 px-2 focus:outline-none"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
                   :to="{ path: `/subs/create` }"
                 >
                   <i class="material-icons mr-2">create</i> Create Sub
                 </router-link>
                 <router-link
-                  v-if="isAuthenticated && $router.currentRoute.name !== 'Create Post'"
-                  class="flex flex-row items-center justify-start w-full py-4 px-2 focus:outline-none"
+                  v-if="isAuthenticated && $router.currentRoute.name !== 'Create Post' && $router.currentRoute.params.sub"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
                   :to="{ path: `/s/${$route.params.sub}/create` }"
                 >
                   <i class="material-icons mr-2">create</i> Create Post
+                </router-link>
+                <router-link
+                  v-if="$router.currentRoute.name !== 'Home'"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  :to="{ path: `/` }"
+                >
+                  <i class="material-icons mr-2">home</i>Home
                 </router-link>
               </div>
             </template>
           </DropDown>
         </div>
-        <div v-if="mq === 'lg' || mq === 'xl'" class="flex flex-row h-full">
-          <div v-if="isAuthenticated" class="flex flex-row h-full">
-            <button
-              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none h-full"
-              :class="[
-                isDarkMode ? 'hover:bg-blue-500' : 'hover:bg-blue-100',
-              ]"
-              @click="handleLogout"
-            >LOG OUT</button>
-          </div>
-          <div v-else class="flex flex-row h-full">
-            <button
-              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none h-full"
-              :class="[
-                isDarkMode ? 'hover:bg-blue-500' : 'hover:bg-blue-100',
-              ]"
-              @click="openLoginModal"
-            >LOG IN</button>
-            <button
-              class="rounded shadow px-8 mx-2 border border-blue-500 transition-button duration-300 ease-in-out focus:outline-none h-full"
-              :class="[
-                isDarkMode
-                  ? 'bg-blue-700 hover:bg-blue-400'
-                  : 'bg-blue-100 hover:bg-blue-300',
-              ]"
-            >SING UP</button>
-          </div>
-          <DarkModeToggle class="px-2" />
+        <div class="hidden md:flex flex-row h-full">
+          <DropDown>
+            <template v-slot:button>
+              <button
+                class="flex flex-row items-center justify-between w-full h-full px-2 focus:outline-none shadow"
+              >
+                <i class="material-icons">person</i>
+                <i class="material-icons">arrow_drop_down</i>
+              </button>
+            </template>
+            <template v-slot:content>
+              <div
+                class="absolute w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
+              >
+                <button
+                  v-if="!isAuthenticated"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  @click="openLoginModal"
+                >
+                  <i class="material-icons mr-2">login</i> Login
+                </button>
+                <button
+                  v-if="!isAuthenticated"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                >
+                  <i class="material-icons mr-2">person_add</i> Sign Up
+                </button>
+                <button
+                  v-if="isAuthenticated"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  @click="logout"
+                >
+                  <i class="material-icons mr-2">west</i> Log Out
+                </button>
+              </div>
+            </template>
+          </DropDown>
+          <DarkModeToggle class="px-4" />
         </div>
         <button
-          v-else
-          class="flex h-full items-center justify-center focus:outline-none px-2"
+          class="flex md:hidden h-full items-center justify-center focus:outline-none px-2"
           @click="openSidebar"
         >
           <i class="material-icons">menu</i>
@@ -143,8 +167,8 @@ import Vue from "vue";
 import { mapState, mapActions } from "vuex";
 import DarkModeToggle from "@/components/DarkModeToggle.vue";
 import LoginModal from "@/components/LoginModal.vue";
-import Sidebar from "@/components/Sidebar.vue";
-import Error from "@/components/Error.vue";
+import Sidebar from "@/layout/Sidebar.vue";
+import Error from "@/layout/Error.vue";
 import DropDown from "@/components/DropDown.vue";
 
 export default Vue.extend({
@@ -158,6 +182,7 @@ export default Vue.extend({
   },
   data: function () {
     return {
+      routeText: "" as string,
       scroll: document.documentElement.scrollTop,
       perfersDark: window.matchMedia("(prefers-color-scheme: dark)").matches,
     };
@@ -180,7 +205,16 @@ export default Vue.extend({
       "closeSidebar",
     ]),
     handleLogout() {
-      this.logout();
+      this.logout;
+    },
+  },
+  watch: {
+    $route(to, from) {
+      if (to.path != from.path && to.params.sub) {
+        this.routeText = to.params.sub;
+      } else {
+        this.routeText = to.name;
+      }
     },
   },
   mounted: function () {
@@ -188,6 +222,12 @@ export default Vue.extend({
       "scroll",
       () => (this.scroll = document.documentElement.scrollTop)
     );
+
+    if (this.$router.currentRoute.params.sub) {
+      this.routeText = this.$router.currentRoute.params.sub;
+    } else if (this.$router.currentRoute.name) {
+      this.routeText = this.$router.currentRoute.name;
+    }
 
     if (this.perfersDark) this.turnOn();
 

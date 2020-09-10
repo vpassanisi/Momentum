@@ -18,6 +18,11 @@ module.exports = {
     },
   },
   theme: {
+    maxHeight: {
+      "0": "0",
+      full: "100%",
+      screen: "100vh",
+    },
     rotate: {
       "-180": "-180deg",
       "-135": "-135deg",
@@ -34,8 +39,12 @@ module.exports = {
     },
     colors: materialPalette,
     extend: {
+      width: {
+        "max-content": "max-content",
+      },
       transitionProperty: {
         height: "height",
+        "max-height": "max-height",
         button: "background-color, margin",
         borderColor: "border-color",
         nav: "height, padding",

@@ -53,6 +53,8 @@ const module = {
           const a = {
             post: json.data.post,
             comments: json.data.comments,
+            sort: "points",
+            order: -1,
           };
 
           commit("getPostByIdSuccess", a);

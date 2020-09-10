@@ -3,6 +3,7 @@ package comments
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -14,7 +15,7 @@ import (
 
 // GetComments //
 // @desc gets the post and comments for a given id
-// @route GET /api/v1/comments/?postID&sort&order&post*
+// @route GET /api/v1/comments/?postID&sort&order&lastCreatedAt*&lastVal*&post*
 // @access Public
 func GetComments(c *fiber.Ctx) {
 
@@ -58,15 +59,45 @@ func GetComments(c *fiber.Ctx) {
 
 	// -- get root comments and populate user field and sort by query -- //
 
+	op := "$gte"
+	cop := "$gt"
 	order := 1
 	if c.Query("order") == "-1" {
 		order = -1
+		op = "$lte"
+		cop = "$lt"
 	}
 
-	matchStage = bson.D{{"$match", bson.M{"$and": bson.A{bson.M{"post": post.ID}, bson.M{"parent": post.ID}}}}}
-	sortStage := bson.D{{"$sort", bson.M{c.Query("sort"): order}}}
+	matchArr := bson.A{bson.M{"post": post.ID}, bson.M{"parent": post.ID}}
 
-	rootCommentsCursor, err := commentsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, sortStage, lookupStage, unwindStage})
+	if c.Query("lastVal") != "" {
+		lastVal, err := strconv.Atoi(c.Query("lastVal"))
+		if err != nil {
+			c.Status(400).JSON(respondM{
+				Success: false,
+				Message: "Please inlcude lastVal that can be parsed to int",
+			})
+			return
+		}
+		matchArr = append(matchArr, bson.M{c.Query("sort"): bson.M{op: lastVal}})
+
+		lastCreatedAt, err := strconv.Atoi(c.Query("lastCreatedAt"))
+		if err != nil {
+			c.Status(400).JSON(respondM{
+				Success: false,
+				Message: "Please inlcude lastCreatedAt that can be parsed to int",
+			})
+			return
+		}
+
+		matchArr = append(matchArr, bson.M{"createdat": bson.M{cop: lastCreatedAt}})
+	}
+
+	matchStage = bson.D{{"$match", bson.M{"$and": matchArr}}}
+	sortStage := bson.D{{"$sort", bson.M{c.Query("sort"): order, "createdat": order}}}
+	limitStage = bson.D{{"$limit", 10}}
+
+	rootCommentsCursor, err := commentsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, sortStage, limitStage, lookupStage, unwindStage})
 	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
