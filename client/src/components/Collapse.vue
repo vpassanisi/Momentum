@@ -4,7 +4,7 @@
       <slot name="main" />
     </button>
     <div
-      class="w-full transition-max-height duration-500 ease-in-out overflow-hidden border-b border-gray-300 dark:border-gray-600"
+      class="w-full pl-4 transition-max-height duration-500 ease-in-out overflow-hidden border-b border-gray-300 dark:border-gray-600"
       :class="[isOpen ? 'max-h-full' : 'max-h-0']"
     >
       <slot name="content" />

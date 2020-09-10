@@ -36,7 +36,7 @@ export default Vue.extend({
       order: -1,
     });
     if (this.subError) this.$router.push("/NotFound");
-    if (this.isAuthenticated) this.getPoints(this.targetIds);
+    if (this.isAuthenticated) this.getPoints();
   },
 });
 </script>

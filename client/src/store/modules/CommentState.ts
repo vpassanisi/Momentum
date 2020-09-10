@@ -1,5 +1,15 @@
 import { MutationTree, ActionTree } from "vuex";
 
+interface Post {
+  _id: string;
+  title: string;
+  body: string;
+  points: number;
+  user: string;
+  sub: string;
+  createdAt: number;
+}
+
 interface CreateCommentObj {
   postId: string;
   body: string;
@@ -14,25 +24,42 @@ interface Comment {
   user: string;
   post: string;
   parent: string;
-  createdatAt: number;
+  createdAt: number;
 }
 
 interface CommentState {
   comments: Record<string, Array<Comment>>;
   isCommentLoading: boolean;
   commentError: null | string;
+  pagination: Pagination;
 }
 
-interface UpdatePaginationObj {
+interface Pagination {
   postID: string;
   sort: string;
   order: number;
+  lastVal: string | number;
+  lastCreatedAt: number;
+}
+
+interface SetCommentsObj {
+  post: Post;
+  comments: Record<string, Array<Comment>>;
+  order: number;
+  sort: string;
 }
 
 const module = {
   namespaced: true,
   state: {
     comments: {},
+    pagination: {
+      sort: "points",
+      order: -1,
+      postID: "",
+      lastVal: 0,
+      lastCreatedAt: "",
+    },
     isCommentsLoading: false,
     commentError: null,
   },
@@ -64,11 +91,11 @@ const module = {
       }
       commit("endLoading");
     },
-    updatePagination: async ({ commit }, obj: UpdatePaginationObj) => {
+    updateComments: async ({ commit, state }) => {
       commit("startLoading");
       try {
         const res = await fetch(
-          `/api/v1/comments/?postID=${obj.postID}&sort=${obj.sort}&order=${obj.order}&post=true`,
+          `/api/v1/comments/?postID=${state.pagination.postID}&sort=${state.pagination.sort}&order=${state.pagination.order}&post=true`,
           {
             method: "GET",
           }
@@ -82,7 +109,7 @@ const module = {
             comments: json.data.comments,
           };
 
-          commit("updatePaginationSuccess", a);
+          commit("updateCommentsSuccess", a);
           commit("PointState/setTargetIds", json.data.targetIds, {
             root: true,
           });
@@ -95,24 +122,80 @@ const module = {
       }
       commit("endLoading");
     },
+    getNextComments: async ({ commit, state }) => {
+      commit("startLoading");
+      try {
+        const res = await fetch(
+          `/api/v1/comments/?postID=${state.pagination.postID}&order=${state.pagination.order}&sort=${state.pagination.sort}&lastVal=${state.pagination.lastVal}&lastCreatedAt=${state.pagination.lastCreatedAt}`,
+          { method: "GET" }
+        );
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("getNextCommentsSuccess", json.data.comments);
+          commit("PointState/addToTargetIds", json.data.targetIds, {
+            root: true,
+          });
+        } else {
+          commit("commentError", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("commentError", "Promise rejected with an error");
+      }
+      commit("endLoading");
+    },
+    setPagination: ({ commit }, obj) => {
+      commit("setPagination", obj);
+    },
     clearCommentState: ({ commit }) => {
       commit("clearCommentState");
     },
   } as ActionTree<CommentState, null>,
   mutations: {
-    setComments: (state, { post, comments }) => {
-      if (state.comments[post._id] === undefined) {
-        state.comments[post._id] = [];
+    setComments: (state, obj: SetCommentsObj) => {
+      if (state.comments[obj.post._id] === undefined) {
+        state.comments[obj.post._id] = [];
       }
-      state.comments[post._id] = [
-        ...state.comments[post._id],
-        ...comments[post._id],
+      state.comments[obj.post._id] = [
+        ...state.comments[obj.post._id],
+        ...obj.comments[obj.post._id],
       ];
-      delete comments[post._id];
+      delete obj.comments[obj.post._id];
 
-      state.comments = { ...state.comments, ...comments };
+      state.comments = { ...state.comments, ...obj.comments };
+
+      const lastIndex = state.comments[obj.post._id].length - 1;
+
+      if (obj.sort === "points") {
+        state.pagination.lastVal =
+          state.comments[obj.post._id][lastIndex].points;
+      } else {
+        state.pagination.lastVal =
+          state.comments[obj.post._id][lastIndex].createdAt;
+      }
+
+      state.pagination.postID = obj.post._id;
+
+      state.pagination.lastCreatedAt =
+        state.comments[obj.post._id][lastIndex].createdAt;
     },
-    updatePaginationSuccess: (state, { comments }) => {
+    setPagination: (state, obj) => {
+      state.pagination = { ...state.pagination, ...obj };
+    },
+    updateCommentsSuccess: (state, { comments }) => {
+      // update pagination
+      const postID = state.pagination.postID;
+      const lastIndex = comments[postID].length - 1;
+      state.pagination.lastCreatedAt = comments[postID][lastIndex].createdAt;
+      if (state.pagination.sort === "points") {
+        state.pagination.lastVal = comments[postID][lastIndex].points;
+      } else {
+        state.pagination.lastVal = comments[postID][lastIndex].createdAt;
+      }
+
+      // set comments
       state.comments = { ...comments };
     },
     updateCommentPoints: (state, comment: Comment) => {
@@ -133,6 +216,32 @@ const module = {
     newCommentFail: (state, error) => {
       state.commentError = error;
       setTimeout(() => (state.commentError = null), 3000);
+    },
+    getNextCommentsSuccess: (
+      state,
+      newComments: Record<string, Array<Comment>>
+    ) => {
+      const postID = state.pagination.postID;
+
+      // update pagination
+      const lastIndex = newComments[state.pagination.postID].length - 1;
+      state.pagination.lastCreatedAt = newComments[postID][lastIndex].createdAt;
+      if (state.pagination.sort === "points") {
+        state.pagination.lastVal = newComments[postID][lastIndex].points;
+      } else {
+        state.pagination.lastVal = newComments[postID][lastIndex].createdAt;
+      }
+
+      // update comments
+      state.comments[postID] = state.comments[postID].concat(
+        newComments[postID]
+      );
+
+      delete newComments[postID];
+
+      state.comments = { ...state.comments, ...newComments };
+
+      // update pagination
     },
     commentError: (state, error) => {
       state.commentError = error;

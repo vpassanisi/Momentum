@@ -15,18 +15,19 @@
           >
             <DarkModeToggle />
           </div>
-          <button
-            v-if="isAuthenticated"
-            class="focus:outline-none rounded border border-blue-500 my-2 px-8 py-2 shadow"
-            @click="
+          <div class="flex flex-col h-full w-full">
+            <button
+              v-if="isAuthenticated"
+              class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
+              @click="
               () => {
                 handleLogout();
                 close();
               }
             "
-          >LOG OUT</button>
-          <div v-else class="flex flex-col h-full w-full">
+            >LOG OUT</button>
             <button
+              v-if="!isAuthenticated"
               class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
               @click="
                 () => {
@@ -36,6 +37,7 @@
               "
             >LOG IN</button>
             <button
+              v-if="!isAuthenticated"
               class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
             >SIGN UP</button>
             <Collapse>
@@ -43,17 +45,35 @@
                 <div
                   class="flex flex-row items-center justify-between focus:outline-none py-3 px-2"
                 >
-                  {{$router.currentRoute.name === "Sub" ? $router.currentRoute.params.sub : $router.currentRoute.name}}
+                  {{$router.currentRoute.params.sub ? $router.currentRoute.params.sub : $router.currentRoute.name}}
                   <i
                     class="material-icons"
                   >arrow_drop_down</i>
                 </div>
               </template>
               <template v-slot:content>
-                <button>123</button>
-                <button>123</button>
-                <button>123</button>
-                <button>123</button>
+                <button
+                  v-if="isAuthenticated"
+                  class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
+                >
+                  <i class="material-icons mr-2">create</i> New Post
+                </button>
+                <button
+                  v-if="isAuthenticated"
+                  class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
+                >
+                  <i class="material-icons mr-2">create</i> New Sub
+                </button>
+                <button
+                  v-if="$router.currentRoute.name !== 'Home'"
+                  class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
+                  @click="() =>{
+                    $router.push('/');
+                    close();
+                    }"
+                >
+                  <i class="material-icons mr-2">home</i> Home
+                </button>
               </template>
             </Collapse>
           </div>

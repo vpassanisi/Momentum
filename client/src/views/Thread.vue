@@ -2,7 +2,7 @@
   <div v-if="post !== null && sub !== null" class="flex justify-center mt-32">
     <div class="grid gap-6 grid-cols-1 md:grid-cols-3 w-90p max-w-screen-lg">
       <div
-        class="md:col-span-2 p-4 rounded bg-white dark:bg-dark-gray-800 shadow border border-gray-400 dark:border-gray-700"
+        class="md:col-span-2 p-4 rounded bg-white dark:bg-dark-gray-800 shadow border border-gray-400 dark:border-gray-700 mb-12"
       >
         <div class="flex flex-row">
           <div class="flex flex-col w-6">
@@ -73,8 +73,8 @@
             <select
               name="sort"
               class="focus:outline-none ml-2 bg-transparent border-b border-gray-700 dark:border-gray-300"
-              v-model="pagination.sort"
-              @change="handlePage"
+              v-model="sort"
+              @change="handleChangeSort"
             >
               <option value="points" class="focus:outline-none">Top</option>
               <option value="createdat" class="focus:outline-none">New</option>
@@ -89,6 +89,12 @@
           </div>
         </div>
         <Comment v-for="com in comments[post._id]" :key="com._id" :comment="com" :rootId="com._id" />
+        <div class="flex flex-row items-center justify-center mt-4">
+          <button
+            class="w-1/2 bg-blue-500 text-white shadow rounded p-2 focus:outline-none"
+            @click="handleNextComments"
+          >Load More Comments</button>
+        </div>
       </div>
       <About class="order-last" />
     </div>
@@ -124,11 +130,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      pagination: {
-        postID: this.$route.params.id,
-        sort: "points",
-        order: -1,
-      },
+      sort: "points",
       isActive: null as null | boolean,
       formatedTime: null,
       readOnlyEditor: new Editor({
@@ -154,14 +156,19 @@ export default Vue.extend({
   },
   computed: {
     ...mapState("PostState", ["post"]),
-    ...mapState("CommentState", ["comments"]),
+    ...mapState("CommentState", ["comments", "pagination"]),
     ...mapState("PointState", ["targetIds", "points"]),
     ...mapState("SubState", ["sub"]),
     ...mapState("AuthState", ["isAuthenticated"]),
   },
   methods: {
     ...mapActions("PostState", ["getPostAndComments", "clearPostState"]),
-    ...mapActions("CommentState", ["clearCommentState", "updatePagination"]),
+    ...mapActions("CommentState", [
+      "getNextComments",
+      "clearCommentState",
+      "updateComments",
+      "setPagination",
+    ]),
     ...mapActions("PointState", [
       "getPoints",
       "clearPointState",
@@ -193,21 +200,33 @@ export default Vue.extend({
         this.removePoint({ targetId: this.post._id, type: "post" });
       }
     },
-    async handlePage() {
-      this.updatePagination(this.pagination);
+    async handleChangeSort() {
+      await this.setPagination({
+        sort: this.sort,
+      });
+
+      await this.updateComments();
+      if (this.isAuthenticated) await this.getPoints();
     },
     async handleOrder() {
-      this.pagination.order === 1
-        ? (this.pagination.order = -1)
-        : (this.pagination.order = 1);
+      const order = this.pagination.order === 1 ? -1 : 1;
 
-      this.updatePagination(this.pagination);
+      await this.setPagination({
+        order: order,
+      });
+
+      await this.updateComments();
+      if (this.isAuthenticated) await this.getPoints();
+    },
+    async handleNextComments() {
+      await this.getNextComments();
+      if (this.isAuthenticated) await this.getPoints();
     },
   },
   mounted: async function () {
     await this.getPostAndComments(this.$route.params.id);
 
-    if (this.isAuthenticated) await this.getPoints(this.targetIds);
+    if (this.isAuthenticated) await this.getPoints();
 
     if (this.points[this.post._id] !== undefined) {
       this.isActive = this.points[this.post._id];

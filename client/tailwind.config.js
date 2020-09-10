@@ -39,6 +39,9 @@ module.exports = {
     },
     colors: materialPalette,
     extend: {
+      width: {
+        "max-content": "max-content",
+      },
       transitionProperty: {
         height: "height",
         "max-height": "max-height",

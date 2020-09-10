@@ -1,14 +1,6 @@
 <template>
-  <div
-    class="relative w-40 border border-blue-500 rounded"
-    @click="handleClick"
-  >
-    <button
-      class="flex flex-row items-center justify-between w-full h-full px-2 focus:outline-none shadow"
-    >
-      s/{{ $router.currentRoute.params.sub }}
-      <i class="material-icons">arrow_drop_down</i>
-    </button>
+  <div class="relative border border-blue-500 rounded" @click="handleClick">
+    <slot name="button" />
 
     <transition name="dropdown" @after-enter="isOpen = true">
       <slot v-if="isOpen" name="content"></slot>
@@ -18,14 +10,18 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapActions } from "vuex";
+
 export default Vue.extend({
   name: "DropDown",
-  data: function() {
+  data: function () {
     return {
       isOpen: false,
     };
   },
   methods: {
+    ...mapActions("EventState", ["openLoginModal"]),
+    ...mapActions("AuthState", ["logout"]),
     handleClick() {
       this.isOpen ? (this.isOpen = false) : (this.isOpen = true);
     },

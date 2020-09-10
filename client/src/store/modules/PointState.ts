@@ -19,13 +19,13 @@ const module = {
     clearPointState: ({ commit }) => {
       commit("clearPointState");
     },
-    getPoints: async ({ commit }, arr: Array<string>) => {
+    getPoints: async ({ commit, state }) => {
       commit("startLoading");
       try {
         const res = await fetch(`/api/v1/points`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids: arr }),
+          body: JSON.stringify({ ids: state.targetIds }),
         });
 
         const json = await res.json();
@@ -216,6 +216,9 @@ const module = {
     },
     setTargetIds: (state, arr) => {
       state.targetIds = arr;
+    },
+    addToTargetIds: (state, arr) => {
+      state.targetIds = [...state.targetIds, ...arr];
     },
   } as MutationTree<PointState>,
 };
