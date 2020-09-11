@@ -120,6 +120,7 @@ import {
   CodeBlock,
   HorizontalRule,
   Image,
+  Link,
 } from "tiptap-extensions";
 
 export default Vue.extend({
@@ -153,6 +154,7 @@ export default Vue.extend({
           new CodeBlock(),
           new HorizontalRule(),
           new Image(),
+          new Link(),
         ],
       }),
     };

@@ -19,6 +19,10 @@ blockquote {
   @apply italic;
 }
 
+a {
+  @apply underline cursor-pointer;
+}
+
 @tailwind components;
 @tailwind utilities;
 
