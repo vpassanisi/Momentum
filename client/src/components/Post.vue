@@ -88,6 +88,7 @@ import {
   CodeBlock,
   HorizontalRule,
   Image,
+  Link,
 } from "tiptap-extensions";
 
 interface User {
@@ -137,6 +138,7 @@ export default Vue.extend({
           new CodeBlock(),
           new HorizontalRule(),
           new Image(),
+          new Link(),
         ],
       }),
     };

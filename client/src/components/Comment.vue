@@ -109,6 +109,7 @@ import {
   Blockquote,
   CodeBlock,
   HorizontalRule,
+  Link,
 } from "tiptap-extensions";
 
 interface Comment {
@@ -155,6 +156,7 @@ export default Vue.extend({
           new Blockquote(),
           new CodeBlock(),
           new HorizontalRule(),
+          new Link(),
         ],
       }),
     };
