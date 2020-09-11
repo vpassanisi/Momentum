@@ -1,6 +1,8 @@
 import { MutationTree, ActionTree } from "vuex";
+import router from "@/router/index";
 
 interface AuthState {
+  name: string | null;
   isAuthenticated: boolean | null;
   isAuthLoading: boolean;
   authError: string | null;
@@ -14,6 +16,7 @@ interface Credencials {
 const module = {
   namespaced: true,
   state: {
+    name: null,
     isAuthenticated: null,
     isAuthLoading: false,
     authError: null,
@@ -31,7 +34,8 @@ const module = {
         const json = await res.json();
 
         if (json.success) {
-          commit("loginSuccess");
+          commit("loginSuccess", json.data.name);
+          router.go(0);
         } else {
           commit("loginFail", json.message);
         }
@@ -52,6 +56,7 @@ const module = {
 
         if (json.success) {
           commit("logoutSuccess");
+          router.go(0);
         } else {
           commit("logoutFail", json.message);
         }
@@ -70,7 +75,7 @@ const module = {
         const json = await res.json();
 
         if (json.success) {
-          commit("meSuccess");
+          commit("meSuccess", json.data.name);
         } else {
           commit("meFail");
         }
@@ -78,21 +83,60 @@ const module = {
         console.error(error);
       }
     },
+    register: async ({ commit }, newUser) => {
+      commit("startLoading");
+      try {
+        const res = await fetch(`/api/v1/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newUser),
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("registerSuccess", json.data.name);
+        } else {
+          commit("authError", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("authError", "Promise rejected with an error");
+      }
+      commit("endLoading");
+    },
   } as ActionTree<AuthState, any>,
   mutations: {
     startLoading: (state) => (state.isAuthLoading = true),
     endLoading: (state) => (state.isAuthLoading = false),
-    loginSuccess: (state) => (state.isAuthenticated = true),
+    loginSuccess: (state, name) => {
+      state.isAuthenticated = true;
+      state.name = name;
+    },
     loginFail: (state, error) => {
       state.authError = error;
       setTimeout(() => (state.authError = null), 3000);
     },
-    logoutSuccess: (state) => (state.isAuthenticated = false),
+    logoutSuccess: (state) => {
+      state.isAuthenticated = false;
+      state.name = null;
+    },
     logoutFail: (state, error) => {
       state.authError = error;
       setTimeout(() => (state.authError = null), 3000);
     },
-    meSuccess: (state) => (state.isAuthenticated = true),
+    registerSuccess: (state, name) => {
+      state.isAuthenticated = true;
+      state.name = name;
+    },
+    authError: (state, error) => {
+      state.authError = error;
+      setTimeout(() => (state.authError = null), 3000);
+    },
+    meSuccess: (state, name) => {
+      state.isAuthenticated = true;
+      state.name = name;
+    },
     meFail: (state) => (state.isAuthenticated = false),
   } as MutationTree<AuthState>,
 };

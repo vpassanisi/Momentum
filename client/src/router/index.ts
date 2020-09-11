@@ -4,6 +4,8 @@ import Home from "../views/Home.vue";
 import Sub from "@/views/Sub.vue";
 import Thread from "@/views/Thread.vue";
 import CreatePost from "@/views/CreatePost.vue";
+import CreateSub from "@/views/CreateSub.vue";
+import NotFound from "@/views/NotFound.vue";
 
 Vue.use(VueRouter);
 
@@ -27,6 +29,16 @@ const routes: Array<RouteConfig> = [
     path: "/s/:sub/comments/:id",
     name: "Comments",
     component: Thread,
+  },
+  {
+    path: "/subs/create",
+    name: "Create Sub",
+    component: CreateSub,
+  },
+  {
+    path: "/NotFound",
+    name: "Not Found",
+    component: NotFound,
   },
   // {
   //   path: "/about",

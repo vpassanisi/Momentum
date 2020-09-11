@@ -3,6 +3,7 @@ package comments
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -14,7 +15,7 @@ import (
 
 // GetComments //
 // @desc gets the post and comments for a given id
-// @route GET /api/v1/comments/?postID&sort&order
+// @route GET /api/v1/comments/?postID&sort&order&lastCreatedAt*&lastVal*&post*
 // @access Public
 func GetComments(c *fiber.Ctx) {
 
@@ -58,15 +59,45 @@ func GetComments(c *fiber.Ctx) {
 
 	// -- get root comments and populate user field and sort by query -- //
 
+	op := "$gte"
+	cop := "$gt"
 	order := 1
 	if c.Query("order") == "-1" {
 		order = -1
+		op = "$lte"
+		cop = "$lt"
 	}
 
-	matchStage = bson.D{{"$match", bson.M{"$and": bson.A{bson.M{"post": post.ID}, bson.M{"parent": post.ID}}}}}
-	sortStage := bson.D{{"$sort", bson.M{c.Query("sort"): order}}}
+	matchArr := bson.A{bson.M{"post": post.ID}, bson.M{"parent": post.ID}}
 
-	rootCommentsCursor, err := commentsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, sortStage, lookupStage, unwindStage})
+	if c.Query("lastVal") != "" {
+		lastVal, err := strconv.Atoi(c.Query("lastVal"))
+		if err != nil {
+			c.Status(400).JSON(respondM{
+				Success: false,
+				Message: "Please inlcude lastVal that can be parsed to int",
+			})
+			return
+		}
+		matchArr = append(matchArr, bson.M{c.Query("sort"): bson.M{op: lastVal}})
+
+		lastCreatedAt, err := strconv.Atoi(c.Query("lastCreatedAt"))
+		if err != nil {
+			c.Status(400).JSON(respondM{
+				Success: false,
+				Message: "Please inlcude lastCreatedAt that can be parsed to int",
+			})
+			return
+		}
+
+		matchArr = append(matchArr, bson.M{"createdat": bson.M{cop: lastCreatedAt}})
+	}
+
+	matchStage = bson.D{{"$match", bson.M{"$and": matchArr}}}
+	sortStage := bson.D{{"$sort", bson.M{c.Query("sort"): order, "createdat": order}}}
+	limitStage = bson.D{{"$limit", 10}}
+
+	rootCommentsCursor, err := commentsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, sortStage, limitStage, lookupStage, unwindStage})
 	if err != nil {
 		c.Status(500).JSON(respondM{
 			Success: false,
@@ -86,15 +117,28 @@ func GetComments(c *fiber.Ctx) {
 	}
 
 	if len(rootComments) == 0 {
-		c.Status(200).JSON(respondGC{
-			Success: true,
-			Data: getComments{
-				Post: post,
-				Comments: map[string][]commentPopulated{
-					post.ID.Hex(): []commentPopulated{},
+		if c.Query("post") == "true" {
+			c.Status(200).JSON(respondPCT{
+				Success: true,
+				Data: postCommentTarget{
+					Post: post,
+					Comments: map[string][]commentPopulated{
+						post.ID.Hex(): []commentPopulated{},
+					},
+					TargetIDs: []string{},
 				},
-			},
-		})
+			})
+		} else {
+			c.Status(200).JSON(respondCT{
+				Success: true,
+				Data: commentTarget{
+					Comments: map[string][]commentPopulated{
+						post.ID.Hex(): []commentPopulated{},
+					},
+					TargetIDs: []string{},
+				},
+			})
+		}
 		return
 	}
 
@@ -131,13 +175,30 @@ func GetComments(c *fiber.Ctx) {
 
 	mappedComments := mapComments(c, rootComments, comments)
 
-	c.Status(200).JSON(respondGC{
-		Success: true,
-		Data: getComments{
-			Post:     post,
-			Comments: mappedComments,
-		},
-	})
+	targetIds := []string{}
+
+	for k := range mappedComments {
+		targetIds = append(targetIds, k)
+	}
+
+	if c.Query("post") == "true" {
+		c.Status(200).JSON(respondPCT{
+			Success: true,
+			Data: postCommentTarget{
+				Post:      post,
+				Comments:  mappedComments,
+				TargetIDs: targetIds,
+			},
+		})
+	} else {
+		c.Status(200).JSON(respondCT{
+			Success: true,
+			Data: commentTarget{
+				Comments:  mappedComments,
+				TargetIDs: targetIds,
+			},
+		})
+	}
 }
 
 func mapComments(c *fiber.Ctx, rootComments []commentPopulated, comments []commentPopulated) map[string][]commentPopulated {

@@ -25,7 +25,7 @@ func Create(c *fiber.Ctx) {
 
 	sub.CreatedAt = time.Now().Unix()
 
-	id, objErr := primitive.ObjectIDFromHex(c.Locals("id").(string))
+	userID, objErr := primitive.ObjectIDFromHex(c.Locals("id").(string))
 	if objErr != nil {
 		c.Status(400).JSON(respondM{
 			Success: false,
@@ -33,7 +33,7 @@ func Create(c *fiber.Ctx) {
 		})
 	}
 
-	sub.Founder = id
+	sub.Founder = userID
 
 	subsCollection := config.GetCollection("Subs")
 
@@ -55,13 +55,10 @@ func Create(c *fiber.Ctx) {
 		return
 	}
 
+	sub.ID = result.InsertedID.(primitive.ObjectID)
+
 	c.Status(200).JSON(respondS{
 		Success: true,
-		Data: subSimple{
-			ID:          result.InsertedID.(primitive.ObjectID),
-			Name:        sub.Name,
-			Description: sub.Description,
-			CreatedAt:   sub.CreatedAt,
-		},
+		Data:    sub,
 	})
 }

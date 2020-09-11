@@ -5,6 +5,9 @@ import (
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/vpassanisi/Project-S/config"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/gofiber/fiber"
 )
@@ -42,15 +45,48 @@ func Me(c *fiber.Ctx) {
 	}
 
 	// if token is valid and claims are mapped set the users id to the context map with key "id" else abort
-	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		c.Status(200).JSON(respondM{
-			Success: true,
-			Message: "You are logged in",
-		})
-	} else {
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok || !token.Valid {
 		c.Status(401).JSON(respondM{
 			Success: false,
 			Message: "Claims not ok or token is not valid",
 		})
+		return
 	}
+
+	id, err := primitive.ObjectIDFromHex(claims["id"].(string))
+	if err != nil {
+		c.Status(400).JSON(respondM{
+			Success: false,
+			Message: "Bad id",
+		})
+		return
+	}
+
+	result := user{}
+
+	usersCollection := config.GetCollection("Users")
+
+	findOneErr := usersCollection.FindOne(c.Context(), bson.M{
+		"_id": id,
+	}).Decode(&result)
+	// if query error respond with wrong email
+	if findOneErr != nil {
+		c.Status(400).JSON(respondM{
+			Success: false,
+			Message: "That email does not exist",
+		})
+		return
+	}
+
+	c.Status(200).JSON(respondU{
+		Success: true,
+		Data: userSimple{
+			Name:      result.Name,
+			Email:     result.Email,
+			CreatedAt: result.CreatedAt,
+		},
+	})
+
 }

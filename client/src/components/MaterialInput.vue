@@ -1,21 +1,21 @@
 <template>
-  <div ref="wrapper" class="wrap" :class="[half ? 'w-50p' : 'w-full']">
+  <div ref="wrapper" class="wrap" :class="[half ? 'w-1/2' : 'w-full']">
     <input
       ref="input"
       :style="
-        `--hoverBorderColor: ${hoverBorderColor}; --borderColor: ${borderColor}; --focusBorderColor: ${focusBorderColor}; --autofillColor: ${autofillColor};`
+        `--hoverBorderColor: ${hoverBorderColor}; --borderColor: ${borderClr}; --focusBorderColor: ${focusBorderColor}; --autofillColor: ${autofillColor};`
       "
       placeholder=" "
       :type="type"
       :name="name"
       @input="handleInput"
+      @keydown.enter="handleEnter"
     />
     <label
       ref="label"
       for="input"
       :style="`--backgroundColor: ${backgroundColor};`"
-      >{{ placeholder }}</label
-    >
+    >{{ placeholder }}</label>
   </div>
 </template>
 
@@ -23,19 +23,21 @@
 export default {
   props: {
     half: Boolean,
-    borderColor: String,
+    borderClr: String,
     hoverBorderColor: String,
     placeholder: String,
     backgroundColor: String,
     focusBorderColor: String,
     autofillColor: String,
     type: String,
-    value: String,
     name: String,
   },
   methods: {
     handleInput(e) {
       this.$emit("input", e.target.value);
+    },
+    handleEnter() {
+      this.$emit("enter");
     },
   },
 };
@@ -45,15 +47,18 @@ export default {
 input:not(:placeholder-shown) ~ label,
 input:focus ~ label {
   transform: translateY(-85%) scale(0.85);
+  z-index: 20;
 }
 
 input {
+  position: relative;
   width: 100%;
   border-width: 1px;
   background-color: #ff000000;
   border-radius: 0.25rem;
   padding: 0.5rem;
   border-color: var(--borderColor);
+  z-index: 10;
 
   transition-property: border-color;
   transition-duration: 300ms;
@@ -81,15 +86,7 @@ label {
 
 .wrap {
   position: relative;
-  margin-top: 1rem;
-}
-
-.w-50p {
-  width: 50%;
-}
-
-.w-full {
-  width: 100%;
+  margin-top: 1.25rem;
 }
 
 outline-none:focus {

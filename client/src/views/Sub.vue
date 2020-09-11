@@ -20,12 +20,23 @@ export default Vue.extend({
     Header,
     Content,
   },
-  computed: mapState("SubState", ["sub"]),
+  computed: {
+    ...mapState("SubState", ["sub", "subError"]),
+    ...mapState("PointState", ["targetIds"]),
+    ...mapState("AuthState", ["isAuthenticated"]),
+  },
   methods: {
     ...mapActions("SubState", ["getPostsBySubName"]),
+    ...mapActions("PointState", ["getPoints"]),
   },
-  mounted: async function() {
-    await this.getPostsBySubName(this.$route.params.sub);
+  mounted: async function () {
+    await this.getPostsBySubName({
+      sub: this.$route.params.sub,
+      sort: "points",
+      order: -1,
+    });
+    if (this.subError) this.$router.push("/NotFound");
+    if (this.isAuthenticated) this.getPoints();
   },
 });
 </script>

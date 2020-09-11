@@ -8,7 +8,7 @@
             ? 'text-green-600 dark:text-green-500'
             : 'text-gray-900 dark:text-gray-400',
         ]"
-        @click="handleIncrement"
+        @click="handleUp"
       >
         <svg viewBox="100 14.653 300 168.661" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -26,7 +26,7 @@
             ? 'text-red-600 dark:text-red-500'
             : 'text-gray-900 dark:text-gray-400',
         ]"
-        @click="handleDecrement"
+        @click="handleDown"
       >
         <svg viewBox="100 14.112 300 168.65" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -84,9 +84,11 @@
     <button @click="open" class="flex pr-3">
       <i class="material-icons text-blue-700 dark:text-blue-100 text-3xl">add_circle</i>
     </button>
-    <span
-      class="text-sm text-gray-500 flex items-center justify-center"
-    >{{ `${comment.user.name} • ${comment.points} Points • ${formatedTime}` }}</span>
+    <span class="text-sm text-gray-500 flex items-center justify-center">
+      {{
+      `${comment.user.name} • ${comment.points} Points • ${formatedTime} ago`
+      }}
+    </span>
   </div>
 </template>
 
@@ -158,11 +160,17 @@ export default Vue.extend({
   },
   computed: {
     ...mapState("AuthState", ["isAuthenticated"]),
-    ...mapState("PostState", ["comments", "points"]),
+    ...mapState("PointState", ["points", "targetIds"]),
+    ...mapState("CommentState", ["comments"]),
   },
   methods: {
     ...mapActions("EventState", ["getTimeSince"]),
-    ...mapActions("PostState", ["incrementComment", "decrementComment"]),
+    ...mapActions("PointState", [
+      "getPoints",
+      "incrementComment",
+      "decrementComment",
+      "removePoint",
+    ]),
     close() {
       this.isOpen = false;
     },
@@ -175,13 +183,25 @@ export default Vue.extend({
     closeReply() {
       this.isReplyOpen = false;
     },
-    handleDecrement() {
-      this.decrementComment(this.comment._id);
-      this.isActive = false;
+    async handleUp() {
+      if (!this.isAuthenticated) return;
+      if (this.isActive === null || this.isActive === false) {
+        this.isActive = true;
+        await this.incrementComment(this.comment._id);
+      } else {
+        this.isActive = null;
+        await this.removePoint({ targetId: this.comment._id, type: "comment" });
+      }
     },
-    handleIncrement() {
-      this.incrementComment(this.comment._id);
-      this.isActive = true;
+    async handleDown() {
+      if (!this.isAuthenticated) return;
+      if (this.isActive === null || this.isActive === true) {
+        this.isActive = false;
+        await this.decrementComment(this.comment._id);
+      } else {
+        this.isActive = null;
+        await this.removePoint({ targetId: this.comment._id, type: "comment" });
+      }
     },
   },
   mounted: async function () {

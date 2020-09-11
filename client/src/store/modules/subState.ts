@@ -1,4 +1,5 @@
 import { MutationTree, ActionTree } from "vuex";
+import router from "@/router/index";
 
 interface Sub {
   _id: string;
@@ -7,6 +8,16 @@ interface Sub {
   founder: string;
   banner: string;
   createdatAt: number;
+  colorPrimary: string;
+  colorPrimaryLight: string;
+  colorPrimaryDark: string;
+}
+
+interface CreateSub {
+  name: string;
+  description: string;
+  banner: string;
+  icon: string;
   colorPrimary: string;
   colorPrimaryLight: string;
   colorPrimaryDark: string;
@@ -30,9 +41,16 @@ interface Post {
 
 interface CurrentSubState {
   sub: Sub | null;
+  subsArr: Array<Sub>;
   posts: Array<Post> | null;
   isSubLoading: boolean;
   subError: string | null;
+}
+
+interface GetPostsObj {
+  sub: string;
+  sort: string;
+  order: number;
 }
 
 const setColors = (
@@ -56,17 +74,19 @@ const module = {
   namespaced: true,
   state: {
     sub: null,
+    subsArr: [],
     posts: null,
     isSubLoading: false,
     subError: null,
   },
   actions: {
-    getPostsBySubName: async ({ commit }, sub: string) => {
+    getPostsBySubName: async ({ commit }, obj: GetPostsObj) => {
       commit("startLoading");
       try {
-        const req = await fetch(`/api/v1/posts/${sub}`, {
-          method: "GET",
-        });
+        const req = await fetch(
+          `/api/v1/posts/?sub=${obj.sub}&sort=${obj.sort}&order=${obj.order}`,
+          { method: "GET" }
+        );
 
         const json = await req.json();
 
@@ -75,16 +95,19 @@ const module = {
             posts: json.data.posts,
             sub: json.data.sub,
           });
+          commit("PointState/setTargetIds", json.data.targetIds, {
+            root: true,
+          });
           setColors(
             json.data.sub.colorPrimary,
             json.data.sub.colorPrimaryLight,
             json.data.sub.colorPrimaryDark
           );
         } else {
-          commit("getPostsBySubNameFail", json.data.message);
+          commit("subErrors", json.data.message);
         }
       } catch (error) {
-        commit("getPostsBySubNameFail", "Promise rejected with an error");
+        commit("subError", "Promise rejected with an error");
         console.log(error);
       }
       commit("endLoading");
@@ -106,11 +129,59 @@ const module = {
             json.data[0].colorPrimaryDark
           );
         } else {
-          commit("getSubByNameFail", json.message);
+          commit("subError", json.message);
         }
       } catch (error) {
-        commit("getSubByNameFail", "Promise rejected with an error");
+        commit("subError", "Promise rejected with an error");
         console.log(error);
+      }
+      commit("endLoading");
+    },
+    createSub: async ({ commit }, sub: CreateSub) => {
+      commit("startLoading");
+      try {
+        const req = await fetch(`/api/v1/subs/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(sub),
+        });
+
+        const json = await req.json();
+
+        if (json.success) {
+          commit("createSubSuccess", json.data);
+          setColors(
+            json.data.colorPrimary,
+            json.data.colorPrimaryLight,
+            json.data.colorPrimaryDark
+          );
+          router.push(`/s/${json.data.name}`);
+        } else {
+          commit("subError", json.message);
+        }
+      } catch (error) {
+        commit("subError", "Promise rejected with an error");
+        console.log(error);
+      }
+      commit("endLoading");
+    },
+    getSubs: async ({ commit }) => {
+      commit("startLoading");
+      try {
+        const res = await fetch(`/api/v1/subs/?key=name&order=asc`, {
+          method: "GET",
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          commit("setSubsArr", json.data);
+        } else {
+          commit("subError", json.message);
+        }
+      } catch (error) {
+        console.log(error);
+        commit("subError", "Promise rejected with an error");
       }
       commit("endLoading");
     },
@@ -122,12 +193,21 @@ const module = {
       state.posts = posts;
       state.sub = sub;
     },
-    getPostsBySubNameFail: (state, error) => {
-      state.subError = error;
-      setTimeout(() => (state.subError = null), 3000);
+    setSubsArr: (state, subs) => {
+      state.subsArr = subs;
     },
     getSubByNameSuccess: (state, sub) => (state.sub = sub),
-    getSubByNameFail: (state, error) => {
+    createSubSuccess: (state, sub) => (state.sub = sub),
+    updatePostPoints: (state, post) => {
+      if (state.posts) {
+        const index = state.posts.findIndex((v) => {
+          return v._id === post._id;
+        });
+
+        state.posts[index].points = post.points;
+      }
+    },
+    subError: (state, error) => {
       state.subError = error;
       setTimeout(() => (state.subError = null), 3000);
     },

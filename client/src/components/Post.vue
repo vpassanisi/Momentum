@@ -6,8 +6,18 @@
   >
     <div class="bg-gray-200 dark:bg-gray-900 p-3 rounded-l w-13">
       <button
-        class="flex w-full text-gray-900 dark:text-gray-400"
-        @click="(e) => e.stopPropagation()"
+        class="flex w-full focus:outline-none"
+        :class="[
+          isActive !== null && isActive
+            ? 'text-green-600 dark:text-green-500'
+            : 'text-gray-900 dark:text-gray-400',
+        ]"
+        @click="
+          (e) => {
+            e.stopPropagation();
+            handleUp();
+          }
+        "
       >
         <div class="w-full py-2">
           <svg
@@ -25,12 +35,24 @@
       </button>
       <div class="w-full text-center">
         {{
-          postData.points > 999 ? `${postData.points / 1000}k` : postData.points
+          postData.points > 999
+            ? `${(postData.points / 1000).toPrecision(2)}k`
+            : postData.points
         }}
       </div>
       <button
-        class="flex w-full text-gray-900 dark:text-gray-400 py-2"
-        @click="(e) => e.stopPropagation()"
+        class="flex w-full focus:outline-none py-2"
+        :class="[
+          isActive !== null && !isActive
+            ? 'text-red-600 dark:text-red-500'
+            : 'text-gray-900 dark:text-gray-400',
+        ]"
+        @click="
+          (e) => {
+            e.stopPropagation();
+            handleDown();
+          }
+        "
       >
         <div class="w-full">
           <svg
@@ -99,6 +121,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      isActive: null as null | boolean,
       formatedTime: null,
       readOnlyEditor: new Editor({
         content: JSON.parse(this.postData.body),
@@ -124,11 +147,38 @@ export default Vue.extend({
   },
   computed: {
     ...mapState("DarkMode", ["isDarkMode"]),
+    ...mapState("AuthState", ["isAuthenticated"]),
+    ...mapState("PointState", ["points"]),
   },
   methods: {
     ...mapActions("EventState", ["getTimeSince"]),
+    ...mapActions("PointState", [
+      "removePoint",
+      "incrementPost",
+      "decrementPost",
+    ]),
     handleClick() {
       this.$router.push(`/${this.postData._id}`);
+    },
+    async handleUp() {
+      if (!this.isAuthenticated) return;
+      if (this.isActive === null || this.isActive === false) {
+        this.isActive = true;
+        await this.incrementPost(this.postData._id);
+      } else {
+        this.isActive = null;
+        await this.removePoint({ targetId: this.postData._id, type: "post" });
+      }
+    },
+    async handleDown() {
+      if (!this.isAuthenticated) return;
+      if (this.isActive === null || this.isActive === true) {
+        this.isActive = false;
+        await this.decrementPost(this.postData._id);
+      } else {
+        this.isActive = null;
+        await this.removePoint({ targetId: this.postData._id, type: "post" });
+      }
     },
   },
   beforeDestroy() {
@@ -136,6 +186,19 @@ export default Vue.extend({
   },
   mounted: async function() {
     this.formatedTime = await this.getTimeSince(this.postData.createdAt);
+
+    if (this.points[this.postData._id] !== undefined) {
+      this.isActive = this.points[this.postData._id];
+    }
+  },
+  watch: {
+    points: function() {
+      if (this.points[this.postData._id] !== undefined) {
+        this.isActive = this.points[this.postData._id];
+      } else {
+        this.points[this.postData._id] = null;
+      }
+    },
   },
 });
 </script>
