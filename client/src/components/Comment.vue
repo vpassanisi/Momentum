@@ -58,6 +58,7 @@
             :postId="comment.post"
             :parentId="comment._id"
             :rootId="rootId"
+            :closeButton="true"
             @close="closeReply"
           />
         </div>

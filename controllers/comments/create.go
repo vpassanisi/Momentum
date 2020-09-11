@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber"
 	"github.com/vpassanisi/Project-S/config"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -64,10 +65,29 @@ func Create(c *fiber.Ctx) {
 		return
 	}
 
-	newComment.ID = id.InsertedID.(primitive.ObjectID)
+	matchStage := bson.D{{"$match", bson.M{"_id": id.InsertedID.(primitive.ObjectID)}}}
+	limitStage := bson.D{{"$limit", 1}}
+	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}
+	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$user"}, {"preserveNullAndEmptyArrays", false}}}}
 
-	c.Status(200).JSON(respondC{
+	cursor, err := commentsCollection.Aggregate(c.Context(), mongo.Pipeline{matchStage, limitStage, lookupStage, unwindStage})
+	if err != nil {
+		c.Status(500).JSON(respondM{
+			Success: false,
+			Message: "there was an error populating the comment",
+		})
+	}
+
+	comment := commentPopulated{}
+
+	for cursor.Next(c.Context()) {
+		if err := cursor.Decode(&comment); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	c.Status(200).JSON(respondCP{
 		Success: true,
-		Data:    newComment,
+		Data:    comment,
 	})
 }

@@ -165,15 +165,18 @@ const module = {
       if (state.comments[obj.post._id] === undefined) {
         state.comments[obj.post._id] = [];
       }
-      state.comments[obj.post._id] = [
-        ...state.comments[obj.post._id],
-        ...obj.comments[obj.post._id],
-      ];
-      delete obj.comments[obj.post._id];
 
-      state.comments = { ...state.comments, ...obj.comments };
+      state.comments = { ...obj.comments, ...state.comments };
 
+      state.comments[obj.post._id] = state.comments[obj.post._id].concat(
+        obj.comments[obj.post._id]
+      );
+
+      // set pagination
       const lastIndex = state.comments[obj.post._id].length - 1;
+      state.pagination.postID = obj.post._id;
+
+      if (obj.comments[obj.post._id].length === 0) return;
 
       if (obj.sort === "points") {
         state.pagination.lastVal =
@@ -182,8 +185,6 @@ const module = {
         state.pagination.lastVal =
           state.comments[obj.post._id][lastIndex].createdAt;
       }
-
-      state.pagination.postID = obj.post._id;
 
       state.pagination.lastCreatedAt =
         state.comments[obj.post._id][lastIndex].createdAt;
