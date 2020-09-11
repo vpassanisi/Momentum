@@ -20,24 +20,21 @@
         "
       >
         <div class="w-full py-2">
-          <svg
-            viewBox="100 14.653 300 168.661"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg viewBox="100 14.653 300 168.661" xmlns="http://www.w3.org/2000/svg">
             <path
               fill="currentColor"
               d="M 379.784 183.315 L 120.215 183.315 C 102.241 183.315 93.24 161.772 105.949 149.173 L 235.734 20.511 C 243.613 12.701 256.387 12.701 264.265 20.511 L 394.05 149.173 C 406.76 161.772 397.758 183.315 379.784 183.315 Z"
-              class=""
-              style=""
+              class
+              style
             />
           </svg>
         </div>
       </button>
       <div class="w-full text-center">
         {{
-          postData.points > 999
-            ? `${(postData.points / 1000).toPrecision(2)}k`
-            : postData.points
+        postData.points > 999
+        ? `${(postData.points / 1000).toPrecision(2)}k`
+        : postData.points
         }}
       </div>
       <button
@@ -55,24 +52,21 @@
         "
       >
         <div class="w-full">
-          <svg
-            viewBox="100 14.112 300 168.65"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg viewBox="100 14.112 300 168.65" xmlns="http://www.w3.org/2000/svg">
             <path
               fill="currentColor"
               d="M 120.186 14.112 L 379.814 14.112 C 397.775 14.112 406.756 35.612 394.042 48.212 L 264.278 176.912 C 256.408 184.712 243.593 184.712 235.722 176.912 L 105.958 48.212 C 93.244 35.612 102.225 14.112 120.186 14.112 Z"
-              class=""
-              style=""
+              class
+              style
             />
           </svg>
         </div>
       </button>
     </div>
     <div class="p-4">
-      <div class="text-sm text-gray-700 dark:text-gray-500">
-        Posted by {{ postData.user.name }} • {{ formatedTime }} ago
-      </div>
+      <div
+        class="text-sm text-gray-700 dark:text-gray-500"
+      >Posted by {{ postData.user.name }} • {{ formatedTime }} ago</div>
       <div class="text-2xl font-medium">{{ postData.title }}</div>
       <editor-content :editor="readOnlyEditor" />
     </div>
@@ -93,6 +87,7 @@ import {
   Blockquote,
   CodeBlock,
   HorizontalRule,
+  Image,
 } from "tiptap-extensions";
 
 interface User {
@@ -141,6 +136,7 @@ export default Vue.extend({
           new Blockquote(),
           new CodeBlock(),
           new HorizontalRule(),
+          new Image(),
         ],
       }),
     };
@@ -184,7 +180,7 @@ export default Vue.extend({
   beforeDestroy() {
     this.readOnlyEditor.destroy();
   },
-  mounted: async function() {
+  mounted: async function () {
     this.formatedTime = await this.getTimeSince(this.postData.createdAt);
 
     if (this.points[this.postData._id] !== undefined) {
@@ -192,7 +188,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    points: function() {
+    points: function () {
       if (this.points[this.postData._id] !== undefined) {
         this.isActive = this.points[this.postData._id];
       } else {

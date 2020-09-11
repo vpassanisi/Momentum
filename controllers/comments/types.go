@@ -80,6 +80,11 @@ type respondC struct {
 	Data    comment `json:"data"`
 }
 
+type respondCP struct {
+	Success bool             `json:"success"`
+	Data    commentPopulated `json:"data"`
+}
+
 type respondM struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`

@@ -119,6 +119,7 @@ import {
   Blockquote,
   CodeBlock,
   HorizontalRule,
+  Image,
 } from "tiptap-extensions";
 
 export default Vue.extend({
@@ -151,6 +152,7 @@ export default Vue.extend({
           new Blockquote(),
           new CodeBlock(),
           new HorizontalRule(),
+          new Image(),
         ],
       }),
     };

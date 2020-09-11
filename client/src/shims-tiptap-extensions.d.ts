@@ -59,6 +59,7 @@ declare module "tiptap-extensions" {
   export class HorizontalRule extends Node {}
   export class Link extends Node {}
   export class TodoList extends Node {}
+  export class Image extends Node {}
 
   export class Heading extends Node {
     constructor(options?: HeadingOptions);
