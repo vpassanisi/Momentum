@@ -2,7 +2,7 @@
   <section class="flex justify-center mt-32">
     <div class="grid gap-6 grid-cols-1 md:grid-cols-3 justify-center w-90p max-w-screen-lg">
       <div class="md:col-span-2">
-        <div class="bg-white dark:bg-dark-gray-800 rounded shadow p-4">
+        <div class="relative bg-white dark:bg-dark-gray-800 rounded shadow p-4">
           <input
             class="border bg-transparent border-gray-400 dark:border-gray-700 w-full rounded focus:outline-none focus:border-gray-700 placeholder-gray-600 dark:focus:border-gray-400 p-4 mb-4"
             type="text"
@@ -138,6 +138,16 @@
 
               <button
                 class="flex p-2"
+                :class="[
+                  isDarkMode ? 'focus:bg-gray-700' : 'focus:bg-gray-400',
+                ]"
+                @click="showImagePrompt(commands.image)"
+              >
+                <i class="material-icons">add_a_photo</i>
+              </button>
+
+              <button
+                class="flex p-2"
                 @click="commands.undo"
                 :class="[
                   isDarkMode ? 'focus:bg-gray-700' : 'focus:bg-gray-400',
@@ -157,6 +167,50 @@
               </button>
             </div>
           </editor-menu-bar>
+          <editor-menu-bubble
+            :editor="postEditor"
+            @hide="hideLinkMenu"
+            v-slot="{ commands, isActive, getMarkAttrs, menu }"
+          >
+            <div
+              class="absolute flex z-20 bg-black rounded p-1 mb-2 transform -translate-x-1/2 border border-white transition-bubblemenu duration-300 ease-in-out text-white"
+              :class="[ menu.isActive ? 'opacity-100 visible' : 'opacity-0 invisible' ]"
+              :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
+            >
+              <form
+                class="flex items-center"
+                v-if="linkMenuIsActive"
+                @submit.prevent="setLinkUrl(commands.link, linkUrl)"
+              >
+                <input
+                  class="border-none outline-none bg-transparent"
+                  type="text"
+                  v-model="linkUrl"
+                  placeholder="https://"
+                  ref="linkInput"
+                  @keydown.esc="hideLinkMenu"
+                />
+                <button
+                  class="inline-flex bg-transparent border-0 py-1 px-2 ml-1 rounded cursor-pointer"
+                  @click="setLinkUrl(commands.link, null)"
+                  type="button"
+                >
+                  <i class="material-icons">close</i>
+                </button>
+              </form>
+
+              <template v-else>
+                <button
+                  class="inline-flex bg-transparent border-0 py-1 px-2 rounded cursor-pointer"
+                  @click="showLinkMenu(getMarkAttrs('link'))"
+                  :class="{ 'is-active': isActive.link() }"
+                >
+                  <span>{{ isActive.link() ? 'Update Link' : 'Add Link'}}</span>
+                  <i class="material-icons ml-2">link</i>
+                </button>
+              </template>
+            </div>
+          </editor-menu-bubble>
           <editor-content :editor="postEditor" />
           <div class="flex flex-row justify-end mt-4">
             <Button
@@ -177,7 +231,7 @@
 import Vue from "vue";
 import { mapState, mapActions } from "vuex";
 import About from "@/components/About.vue";
-import { Editor, EditorContent, EditorMenuBar } from "tiptap";
+import { Editor, EditorContent, EditorMenuBar, EditorMenuBubble } from "tiptap";
 import {
   Placeholder,
   Bold,
@@ -191,7 +245,12 @@ import {
   HorizontalRule,
   History,
   Image,
+  Link,
 } from "tiptap-extensions";
+
+interface Attrs {
+  href: string;
+}
 
 export default Vue.extend({
   name: "CreatePost",
@@ -199,11 +258,14 @@ export default Vue.extend({
     About,
     EditorContent,
     EditorMenuBar,
+    EditorMenuBubble,
   },
   data() {
     return {
       title: "",
       postJSON: "",
+      linkUrl: null as string | null,
+      linkMenuIsActive: false,
       postEditor: new Editor({
         editorProps: {
           attributes: {
@@ -223,6 +285,7 @@ export default Vue.extend({
           new HorizontalRule(),
           new History(),
           new Image(),
+          new Link(),
           new Placeholder({
             emptyEditorClass:
               "text-gray-600 tiptap_placeholder is-editor-empty",
@@ -257,6 +320,28 @@ export default Vue.extend({
           body: this.postJSON,
         },
       });
+    },
+    showImagePrompt(command: Function) {
+      const src = prompt("Enter the url of your image here");
+      if (src !== null) {
+        command({ src });
+      }
+    },
+    showLinkMenu(attrs: Attrs) {
+      this.linkUrl = attrs.href;
+      this.linkMenuIsActive = true;
+      this.$nextTick(() => {
+        const el = this.$refs.linkInput as HTMLInputElement;
+        el.focus();
+      });
+    },
+    hideLinkMenu() {
+      this.linkUrl = null;
+      this.linkMenuIsActive = false;
+    },
+    setLinkUrl(command: Function, url: string) {
+      command({ href: url });
+      this.hideLinkMenu();
     },
   },
   mounted: function () {
