@@ -1,8 +1,6 @@
 <template>
   <section class="flex justify-center mt-32">
-    <div
-      class="grid gap-6 grid-cols-1 md:grid-cols-3  justify-center w-90p max-w-screen-lg"
-    >
+    <div class="grid gap-6 grid-cols-1 md:grid-cols-3 justify-center w-90p max-w-screen-lg">
       <div class="md:col-span-2">
         <div class="bg-white dark:bg-dark-gray-800 rounded shadow p-4">
           <input
@@ -45,7 +43,7 @@
                 }"
                 @click="commands.strike"
               >
-                <i class="material-icons">format_strikethrough </i>
+                <i class="material-icons">format_strikethrough</i>
               </button>
 
               <button
@@ -77,9 +75,7 @@
                   'bg-gray-700': isActive.paragraph() && isDarkMode,
                 }"
                 @click="commands.paragraph"
-              >
-                P
-              </button>
+              >P</button>
 
               <button
                 class="flex p-2"
@@ -88,9 +84,7 @@
                   'bg-gray-700': isActive.heading({ level: 1 }) && isDarkMode,
                 }"
                 @click="commands.heading({ level: 1 })"
-              >
-                H1
-              </button>
+              >H1</button>
 
               <button
                 class="flex p-2"
@@ -99,9 +93,7 @@
                   'bg-gray-700': isActive.heading({ level: 2 }) && isDarkMode,
                 }"
                 @click="commands.heading({ level: 2 })"
-              >
-                H2
-              </button>
+              >H2</button>
 
               <button
                 class="flex p-2"
@@ -110,9 +102,7 @@
                   'bg-gray-700': isActive.heading({ level: 3 }) && isDarkMode,
                 }"
                 @click="commands.heading({ level: 3 })"
-              >
-                H3
-              </button>
+              >H3</button>
 
               <button
                 class="flex p-2"
@@ -172,8 +162,7 @@
             <Button
               class="rounded bg-primary dark:bg-primary-dark py-2 px-4"
               @click="handlePost"
-              >POST</Button
-            >
+            >POST</Button>
           </div>
         </div>
       </div>
@@ -201,6 +190,7 @@ import {
   CodeBlock,
   HorizontalRule,
   History,
+  Image,
 } from "tiptap-extensions";
 
 export default Vue.extend({
@@ -232,6 +222,7 @@ export default Vue.extend({
           new CodeBlock(),
           new HorizontalRule(),
           new History(),
+          new Image(),
           new Placeholder({
             emptyEditorClass:
               "text-gray-600 tiptap_placeholder is-editor-empty",
@@ -268,11 +259,11 @@ export default Vue.extend({
       });
     },
   },
-  mounted: function() {
+  mounted: function () {
     this.getSubByName(this.$route.params.sub);
   },
   watch: {
-    isAuthenticated: function() {
+    isAuthenticated: function () {
       this.$router.push(`/s/${this.$route.params.sub}`);
     },
   },
