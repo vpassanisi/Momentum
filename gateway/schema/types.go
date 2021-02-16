@@ -2,11 +2,12 @@ package schema
 
 import "github.com/graphql-go/graphql"
 
-type user struct {
+type registerRes struct {
 	ID        string `json:"_id"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	CreatedAt int32  `json:"createdAt"`
+	Token     string `json:"token"`
 }
 
 var gqlUser = graphql.NewObject(graphql.ObjectConfig{

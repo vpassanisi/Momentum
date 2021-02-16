@@ -1,4 +1,9 @@
-import type { ParameterizedContext, DefaultState,DefaultContext, Next } from "koa";
+import type {
+  ParameterizedContext,
+  DefaultState,
+  DefaultContext,
+  Next,
+} from "koa";
 
 export async function handleErrors(
   ctx: ParameterizedContext<DefaultState, DefaultContext>,

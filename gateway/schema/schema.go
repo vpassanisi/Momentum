@@ -70,13 +70,17 @@ var mutations = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				reqBody, _ := json.Marshal(p.Args)
+				reqBody, err := json.Marshal(p.Args)
+				if err != nil {
+					return nil, err
+				}
 
 				res, err := http.Post("http://users:5000/register", "application/json", bytes.NewBuffer(reqBody))
 				if err != nil {
 					fmt.Println(err.Error())
 					return nil, err
 				}
+
 				defer res.Body.Close()
 
 				body, err := ioutil.ReadAll(res.Body)
@@ -85,15 +89,15 @@ var mutations = graphql.NewObject(graphql.ObjectConfig{
 					return nil, err
 				}
 
-				var parsed user
-				err = json.Unmarshal(body, &parsed)
-				if err != nil {
-					fmt.Println(err.Error())
+				if res.StatusCode != 200 {
+					err = errors.New(string(body))
 					return nil, err
 				}
 
-				if res.StatusCode != 200 {
-					err = errors.New(string(body))
+				var parsed registerRes
+				err = json.Unmarshal(body, &parsed)
+				if err != nil {
+					fmt.Println(err.Error())
 					return nil, err
 				}
 
