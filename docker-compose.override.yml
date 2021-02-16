@@ -1,0 +1,21 @@
+version: "3.3"
+
+services:
+  gateway: 
+    build:
+      target: base
+    ports: 
+      - 80:5000
+    environment: 
+      - PORT=5000
+    command: gin -i -p 80 -a 5000 run main.go
+    volumes:
+      - ./gateway:/go/src/app
+  users:
+    environment: 
+      - PORT=5000
+      - NODE_ENV=development
+      - FDB_SECRET=${FDB_SECRET}
+    command: ["npm", "run", "dev"]
+    volumes:
+      - ./users:/usr/src/app
