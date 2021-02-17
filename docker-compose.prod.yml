@@ -1,15 +1,15 @@
 version: "3.3"
 
 services:
-  gateway: 
-    build:
-      target: prod
-    ports: 
+  gateway:
+    ports:
       - 80:5000
-    environment: 
+    environment:
       - PORT=5000
-    command: ["./gateway"]
+      - NODE_ENV=production
+    command: ["node", "./dist/server.js"]
   users:
-    environment: 
-    - PORT=5000
-    - NODE_ENV=production
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+    command: ["node", "./dist/server.js"]

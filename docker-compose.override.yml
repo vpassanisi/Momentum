@@ -2,20 +2,20 @@ version: "3.3"
 
 services:
   gateway:
-    build:
-      target: base
     ports:
       - 80:5000
     environment:
       - PORT=5000
-    command: gin -i -p 80 -a 5000 run main.go
+      - NODE_ENV=development
+    command: ["npm", "run", "dev"]
     volumes:
-      - ./gateway:/go/src/app
+      - ./gateway:/usr/src/app
   users:
     environment:
       - PORT=5000
       - NODE_ENV=development
-      - FDB_SECRET=${FDB_SECRET}
+      - MONGO_URI=${MONGO_URI}
+      - MONGO_DB=${MONGO_DB}
       - JWT_SECRET=${JWT_SECRET}
     command: ["npm", "run", "dev"]
     volumes:

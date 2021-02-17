@@ -1,20 +1,40 @@
-import faunadb, { query as q, values } from "faunadb";
 import type Koa from "koa";
-import { NewUser, FaunaUserRes } from "./models";
-import type { registerBody } from "../util/reqValidator";
+import { NewUser, MongoUserType, MongoUser } from "./models";
+import type { registerBody, loginBody } from "../util/reqValidator";
+import type { Db, InsertOneWriteOpResult } from "mongodb";
 
 export async function register(
-  ctx: Koa.ParameterizedContext<Koa.DefaultState, { fdb: faunadb.Client }>
+  ctx: Koa.ParameterizedContext<Koa.DefaultState, { db: Db }>
 ) {
   const body = ctx.request.body as registerBody;
 
   const u = new NewUser(body);
   await u.encrypt(10);
-  const encryptedUser = u.getUser();
 
-  const res = await ctx.fdb.query<values.Document<typeof encryptedUser>>(
-    q.Create(q.Collection("Users"), { data: encryptedUser })
-  );
+  const x = (await ctx.db
+    .collection("Users")
+    .insertOne(u.getNewUser())) as InsertOneWriteOpResult<MongoUserType>;
 
-  return (ctx.body = new FaunaUserRes(res).userResponse());
+  const user = new MongoUser(x.ops[0]);
+
+  ctx.body = user.userResponse();
+}
+
+export async function login(
+  ctx: Koa.ParameterizedContext<Koa.DefaultState, { db: Db }>
+) {
+  const { email, password } = ctx.request.body as loginBody;
+
+  const x = (await ctx.db
+    .collection("Users")
+    .findOne({ email })) as MongoUserType;
+
+  const oldUser = new MongoUser(x);
+
+  console.log(await oldUser.checkPassword(password));
+
+  return {
+    name: "test",
+    email: "test",
+  };
 }

@@ -1,8 +1,15 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { env } from "../util/envValidator";
-import type { values } from "faunadb";
-import type { registerBody } from "../util/reqValidator";
+
+export interface MongoUserType {
+  _id: string;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: number;
+  lastLogin: number;
+}
 
 export class NewUser {
   name: string;
@@ -10,10 +17,18 @@ export class NewUser {
   password: string;
   createdAt: number;
   lastLogin: number;
-  constructor(userObj: registerBody) {
-    this.name = userObj.name;
-    this.email = userObj.email;
-    this.password = userObj.password;
+  constructor({
+    name,
+    email,
+    password,
+  }: {
+    name: string;
+    email: string;
+    password: string;
+  }) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
     this.createdAt = Math.trunc(Date.now() / 1000);
     this.lastLogin = Math.trunc(Date.now() / 1000);
   }
@@ -30,7 +45,7 @@ export class NewUser {
   /**
    * get an object of the users information for adding to db
    */
-  getUser() {
+  getNewUser() {
     return {
       name: this.name,
       email: this.email,
@@ -41,17 +56,30 @@ export class NewUser {
   }
 }
 
-export class FaunaUserRes extends NewUser {
+export class MongoUser {
   _id: string;
-  constructor(dbRes: values.Document<registerBody>) {
-    super(dbRes.data);
-    this._id = dbRes.ref.id;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: number;
+  lastLogin: number;
+  constructor(user: MongoUserType) {
+    this._id = user._id;
+    this.name = user.name;
+    this.email = user.email;
+    this.password = user.password;
+    this.createdAt = user.createdAt;
+    this.lastLogin = user.lastLogin;
   }
 
   /**
-   * return the object for responding the the graphql query
+   * return an object for responding the graphql query
    */
   userResponse() {
+    if (typeof this._id === "undefined") {
+      throw Error("id undefined");
+    }
+
     const payload = {
       name: this.name,
       email: this.email,
@@ -66,5 +94,12 @@ export class FaunaUserRes extends NewUser {
       email: this.email,
       createdAt: this.createdAt,
     };
+  }
+
+  /**
+   * return boolean describing if the password is correct
+   */
+  async checkPassword(password: string) {
+    return await bcrypt.compare(password, this.password);
   }
 }

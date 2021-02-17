@@ -1,25 +1,27 @@
 import Koa from "koa";
 import KoaRouter from "koa-router";
 import bodyParser from "koa-bodyparser";
-import {handleErrors} from "./util/handleErrors"
-import {env} from "./util/envValidator"
-import * as f from "faunadb"
-import * as Users from "./controller/users"
-import * as Validate from "./util/reqValidator"
-
-const client: f.Client = new f.Client({secret: env.FDB_SECRET, keepAlive: true})
+import { handleErrors } from "./util/handleErrors";
+import { env } from "./util/envValidator";
+import mongo from "koa-mongo";
+import * as Users from "./controller/users";
+import * as Validate from "./util/reqValidator";
 
 const app = new Koa();
 const router = new KoaRouter();
 
-app.use(handleErrors)
+app.use(handleErrors);
 app.use(bodyParser());
-app.use(async (ctx: Koa.ParameterizedContext<Koa.DefaultState, {fdb: f.Client}>, next: Koa.Next) => {
-  ctx.fdb = client
-  await next()
-})
 
-router.post("/register", Validate.register, Users.register)
+app.use(
+  mongo(
+    { uri: env.MONGO_URI, db: env.MONGO_DB, max: 100, min: 1 },
+    { useUnifiedTopology: true }
+  )
+);
+
+router.post("/register", Validate.register, Users.register);
+router.post("/login", Validate.login, Users.login);
 
 app.use(router.routes());
 app.use(router.allowedMethods());

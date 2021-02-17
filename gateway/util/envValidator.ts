@@ -60,9 +60,6 @@ interface Validator<T> {
 const env = getSanitizedEnv(process.env, {
   PORT: str(),
   NODE_ENV: str(),
-  JWT_SECRET: str(),
-  MONGO_URI: str(),
-  MONGO_DB: str(),
 });
 
 export { env };
