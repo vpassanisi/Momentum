@@ -12,6 +12,10 @@ export interface loginBody {
   password: string;
 }
 
+export interface meBody {
+  token: string;
+}
+
 export async function register(
   ctx: Koa.ParameterizedContext<Koa.DefaultState, { db: Db }>,
   next: Koa.Next
@@ -41,6 +45,19 @@ export async function login(
     ctx.throw(400, "user must provide an email");
   }
   if (!password && typeof password === "string") {
+    ctx.throw(400, "user must provide a password");
+  }
+
+  await next();
+}
+
+export async function me(
+  ctx: Koa.ParameterizedContext<Koa.DefaultState, { db: Db }>,
+  next: Koa.Next
+) {
+  const { token } = ctx.request.body as meBody;
+
+  if (!token && typeof token === "string") {
     ctx.throw(400, "user must provide a password");
   }
 

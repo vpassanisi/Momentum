@@ -1,14 +1,20 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { env } from "../util/envValidator";
+import type { WithId, ObjectID } from "mongodb";
 
-export interface MongoUserType {
-  _id: string;
+export interface UserType {
   name: string;
   email: string;
   password: string;
   createdAt: number;
   lastLogin: number;
+}
+
+export interface TokenPayload {
+  name: string;
+  email: string;
+  issuedAt: number;
 }
 
 export class NewUser {
@@ -46,24 +52,25 @@ export class NewUser {
    * get an object of the users information for adding to db
    */
   getNewUser() {
-    return {
+    const user: UserType = {
       name: this.name,
       email: this.email,
       password: this.password,
       createdAt: this.createdAt,
       lastLogin: this.lastLogin,
     };
+    return user;
   }
 }
 
 export class MongoUser {
-  _id: string;
+  _id: ObjectID;
   name: string;
   email: string;
   password: string;
   createdAt: number;
   lastLogin: number;
-  constructor(user: MongoUserType) {
+  constructor(user: WithId<UserType>) {
     this._id = user._id;
     this.name = user.name;
     this.email = user.email;
@@ -80,7 +87,7 @@ export class MongoUser {
       throw Error("id undefined");
     }
 
-    const payload = {
+    const payload: TokenPayload = {
       name: this.name,
       email: this.email,
       issuedAt: Date.now(),
@@ -89,7 +96,19 @@ export class MongoUser {
 
     return {
       token,
-      _id: this._id,
+      _id: this._id.toHexString(),
+      name: this.name,
+      email: this.email,
+      createdAt: this.createdAt,
+    };
+  }
+
+  /**
+   * returns user without a token
+   */
+  meRes() {
+    return {
+      _id: this._id.toHexString(),
       name: this.name,
       email: this.email,
       createdAt: this.createdAt,
@@ -101,5 +120,9 @@ export class MongoUser {
    */
   async checkPassword(password: string) {
     return await bcrypt.compare(password, this.password);
+  }
+
+  updateLastLogin() {
+    this.lastLogin = Math.trunc(Date.now() / 1000);
   }
 }

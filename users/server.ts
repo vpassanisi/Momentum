@@ -22,6 +22,7 @@ app.use(
 
 router.post("/register", Validate.register, Users.register);
 router.post("/login", Validate.login, Users.login);
+router.post("/me", Validate.me, Users.me);
 
 app.use(router.routes());
 app.use(router.allowedMethods());

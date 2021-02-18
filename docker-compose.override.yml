@@ -20,3 +20,11 @@ services:
     command: ["npm", "run", "dev"]
     volumes:
       - ./users:/usr/src/app
+  subs:
+    environment:
+      - PORT=5000
+    command: go run main.go
+    volumes:
+      - ./subs:/go/src/app
+    build:
+      target: prod

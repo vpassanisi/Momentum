@@ -1,7 +1,9 @@
 version: "3.3"
 
 services:
-  gateway: 
+  gateway:
     build: ./gateway
   users:
     build: ./users
+  subs:
+    build: ./subs
