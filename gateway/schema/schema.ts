@@ -5,10 +5,17 @@ import {
   GraphQLString,
   GraphQLBoolean,
   GraphQLNonNull,
-  graphql,
   GraphQLList,
+  GraphQLInt,
 } from "graphql";
-import { meRes, subsRes, subsReturnType, userReturnType } from "./types";
+import {
+  meRes,
+  subsRes,
+  subsReturnType,
+  userReturnType,
+  postType,
+  commentType,
+} from "./types";
 import { env } from "../util/envValidator";
 
 import type { registerRes, loginRes } from "./types";
@@ -85,14 +92,13 @@ const schema = new GraphQLSchema({
         },
       },
       subs: {
-        // type: GraphQLNonNull(GraphQLList(subsReturnType)),
-        type: GraphQLString,
+        type: GraphQLNonNull(GraphQLList(subsReturnType)),
         args: {
           name: { type: GraphQLString },
-          order: { type: GraphQLString },
+          order: { type: GraphQLInt },
           by: { type: GraphQLString },
         },
-        async resolve(parent, args, ctx) {
+        async resolve(parent, args, ctx, info) {
           const res = await fetch("http://subs:5000/subs", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -102,6 +108,25 @@ const schema = new GraphQLSchema({
           if (!res.ok) throw Error(await res.text());
 
           const json = (await res.json()) as subsRes;
+
+          return json;
+        },
+      },
+      post: {
+        type: postType,
+        args: {
+          ID: { type: GraphQLNonNull(GraphQLString) },
+        },
+        async resolve(parent, args, ctx, info) {
+          const res = await fetch("http://posts:5000/onePost", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args),
+          });
+
+          if (!res.ok) throw Error(await res.text());
+
+          const json = await res.json();
 
           return json;
         },
@@ -144,6 +169,7 @@ const schema = new GraphQLSchema({
       },
     },
   }),
+  types: [commentType, postType],
 });
 
 export { schema };

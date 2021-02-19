@@ -23,8 +23,27 @@ services:
   subs:
     environment:
       - PORT=5000
-    command: go run main.go
+      - MONGO_URI=${MONGO_URI}
+    command: air
     volumes:
       - ./subs:/go/src/app
     build:
-      target: prod
+      target: base
+  posts:
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}
+    command: air
+    volumes:
+      - ./posts:/go/src/app
+    build:
+      target: base
+  comments:
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}
+    command: air
+    volumes:
+      - ./comments:/go/src/app
+    build:
+      target: base

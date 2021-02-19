@@ -7,7 +7,8 @@ import (
 )
 
 type cleanEnv struct {
-	PORT string
+	PORT      string
+	MONGO_URI string
 }
 
 func getCleanEnv(specs cleanEnv) cleanEnv {
@@ -27,5 +28,6 @@ func getCleanEnv(specs cleanEnv) cleanEnv {
 }
 
 var Env = getCleanEnv(cleanEnv{
-	PORT: os.Getenv("PORT"),
+	PORT:      os.Getenv("PORT"),
+	MONGO_URI: os.Getenv("MONGO_URI"),
 })
