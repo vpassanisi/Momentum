@@ -18,13 +18,15 @@
           <div
             class="relative flex flex-col items-center md:items-start justify-center h-full w-full md:w-3/4 p-4"
           >
-            <button class="absolute flex top-0 right-0 p-2 m-2 focus:outline-none" @click="close">
+            <button
+              class="absolute flex top-0 right-0 p-2 m-2 focus:outline-none"
+              @click="close"
+            >
               <i class="material-icons">clear</i>
             </button>
             <div class="text-2xl">Sign Up</div>
             <MaterialInput
               class="shadow"
-              :half="mq === 'sm' || mq === 'md' ? false : true"
               borderClr="#BDBDBD"
               hoverBorderColor="#64B5F6"
               placeholder="name"
@@ -33,12 +35,11 @@
               focusBorderColor="#1976D2"
               type="text"
               name="name"
-              @input="handleNameInput"
+              @input="handleNameInput($event.target.value)"
               @enter="handleRegister"
             />
             <MaterialInput
               class="shadow"
-              :half="mq === 'sm' || mq === 'md' ? false : true"
               borderClr="#BDBDBD"
               hoverBorderColor="#64B5F6"
               placeholder="email"
@@ -47,12 +48,11 @@
               focusBorderColor="#1976D2"
               type="email"
               name="email"
-              @input="handleEmailInput"
+              @input="handleEmailInput($event.target.value)"
               @enter="handleRegister"
             />
             <MaterialInput
               class="shadow"
-              :half="mq === 'sm' || mq === 'md' ? false : true"
               borderClr="#BDBDBD"
               hoverBorderColor="#64B5F6"
               placeholder="pasword"
@@ -61,13 +61,15 @@
               focusBorderColor="#1976D2"
               type="password"
               name="password"
-              @input="handlePasswordInput"
+              @input="handlePasswordInput($event.target.value)"
               @enter="handleRegister"
             />
             <button
               class="bg-blue-100 dark:bg-blue-700 rounded shadow text-sm py-2 focus:outline-none mt-4 w-full md:w-1/2"
               @click="handleRegister"
-            >Sign Up</button>
+            >
+              Sign Up
+            </button>
           </div>
         </div>
       </transition>
@@ -76,8 +78,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from "vue";
-import { mapActions, mapState } from "vuex";
+import { defineComponent } from "vue";
 import MaterialInput from "./MaterialInput.vue";
 
 export default defineComponent({
@@ -85,7 +86,7 @@ export default defineComponent({
   components: {
     MaterialInput,
   },
-  data: function () {
+  data: function() {
     return {
       name: "",
       email: "",
@@ -94,12 +95,17 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("AuthState", ["isAuthenticated"]),
-    ...mapState("MediaQueryState", ["mq"]),
-    ...mapState("DarkMode", ["isDarkMode"]),
+    isAuthenticated(): boolean {
+      return this.$store.state.AuthState.isAuthenticated;
+    },
+    isDarkMode(): boolean {
+      return this.$store.state.DarkModeState.isDarkMode;
+    },
   },
   methods: {
-    ...mapActions("AuthState", ["register"]),
+    register(x: object) {
+      this.$store.dispatch("AuthState/register", x);
+    },
     close() {
       this.showModal = false;
       this.$emit("closeModal", false);
@@ -127,7 +133,7 @@ export default defineComponent({
     },
   },
   watch: {
-    isAuthenticated: function () {
+    isAuthenticated: function() {
       this.$emit("closeModal");
     },
   },

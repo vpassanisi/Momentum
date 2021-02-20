@@ -162,7 +162,7 @@ const actions: ActionTree<SubState, RootState>  = {
   getSubs: async ({ commit }) => {
     commit("startLoading");
     try {
-      const res = await fetch(`/gql`, {
+      const res = await fetch(`http://localhost/gql`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -185,17 +185,13 @@ const actions: ActionTree<SubState, RootState>  = {
         })
       });
 
-      if(!res.ok) throw Error(await res.text())
-
       const {errors, data} = await res.json();
 
-      console.log(data)
+      if(errors) throw Error(errors[0].message)
+      
+      if(!res.ok) throw Error(await res.text())
 
-      // if (json.success) {
-      //   commit("setSubsArr", json.data);
-      // } else {
-      //   commit("subError", json.message);
-      // }
+      commit("setSubsArr", data.subs)
     } catch (error) {
       console.log(error);
       commit("subError", error.message);

@@ -7,13 +7,13 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 import Banner from "../components/Banner.vue";
 import Header from "../components/Header.vue";
 import Content from "../components/Content.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "Sub",
   components: {
     Banner,
@@ -29,7 +29,7 @@ export default Vue.extend({
     ...mapActions("SubState", ["getPostsBySubName"]),
     ...mapActions("PointState", ["getPoints"]),
   },
-  mounted: async function () {
+  mounted: async function() {
     await this.getPostsBySubName({
       sub: this.$route.params.sub,
       sort: "points",

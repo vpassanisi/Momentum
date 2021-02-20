@@ -1,8 +1,10 @@
 module.exports = {
   devServer: {
+    port: 5000,
+    disableHostCheck: true,
     proxy: {
       "^/gql": {
-        target: "http://localhost:80",
+        target: "http://localhost",
       },
     },
   },

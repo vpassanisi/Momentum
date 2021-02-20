@@ -1,5 +1,5 @@
 <template>
-  <div ref="wrapper" class="wrap" :class="[half ? 'w-1/2' : 'w-full']">
+  <div ref="wrapper" class="wrap w-full md:w-1/2">
     <input
       ref="input"
       :style="
@@ -8,21 +8,20 @@
       placeholder=" "
       :type="type"
       :name="name"
-      @input="handleInput"
       @keydown.enter="handleEnter"
     />
     <label
       ref="label"
       for="input"
       :style="`--backgroundColor: ${backgroundColor};`"
-    >{{ placeholder }}</label>
+      >{{ placeholder }}</label
+    >
   </div>
 </template>
 
 <script>
 export default {
   props: {
-    half: Boolean,
     borderClr: String,
     hoverBorderColor: String,
     placeholder: String,
@@ -33,9 +32,6 @@ export default {
     name: String,
   },
   methods: {
-    handleInput(e) {
-      this.$emit("input", e.target.value);
-    },
     handleEnter() {
       this.$emit("enter");
     },

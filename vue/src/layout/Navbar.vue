@@ -62,7 +62,7 @@
               <button
                 class="flex flex-row items-center justify-between w-full h-full px-2 focus:outline-none shadow"
               >
-                {{routeText}}
+                {{ routeText }}
                 <i class="material-icons">arrow_drop_down</i>
               </button>
             </template>
@@ -71,14 +71,21 @@
                 class="absolute w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
               >
                 <router-link
-                  v-if="isAuthenticated && $router.currentRoute.name !== 'Create Sub'"
+                  v-if="
+                    isAuthenticated &&
+                      $router.currentRoute.name !== 'Create Sub'
+                  "
                   class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
                   :to="{ path: `/subs/create` }"
                 >
                   <i class="material-icons mr-2">create</i> Create Sub
                 </router-link>
                 <router-link
-                  v-if="isAuthenticated && $router.currentRoute.name !== 'Create Post' && $router.currentRoute.params.sub"
+                  v-if="
+                    isAuthenticated &&
+                      $router.currentRoute.name !== 'Create Post' &&
+                      $router.currentRoute.params.sub
+                  "
                   class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
                   :to="{ path: `/s/${$route.params.sub}/create` }"
                 >
@@ -102,7 +109,7 @@
                 class="flex flex-row items-center justify-between w-full h-full px-2 focus:outline-none shadow"
               >
                 <i v-if="!name" class="material-icons">person</i>
-                {{name ? name : ""}}
+                {{ name ? name : "" }}
                 <i class="material-icons">arrow_drop_down</i>
               </button>
             </template>
@@ -167,7 +174,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions } from "vuex";
+import { mapState } from "vuex";
 import DarkModeToggle from "@/components/DarkModeToggle.vue";
 import LoginModal from "@/components/LoginModal.vue";
 import RegisterModal from "@/components/RegisterModal.vue";
@@ -185,7 +192,7 @@ export default defineComponent({
     Error,
     DropDown,
   },
-  data: function () {
+  data: function() {
     return {
       routeText: "" as string | string[] | symbol,
       scroll: document.documentElement.scrollTop,
@@ -193,24 +200,60 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("AuthState", ["isAuthenticated", "isAuthLoading", "name"]),
     ...mapState("PostState", ["isPostLoading"]),
-    ...mapState("SubState", ["isSubLoading", "sub"]),
-    ...mapState("DarkMode", ["isDarkMode"]),
-    ...mapState("MediaQueryState", ["mq"]),
-    ...mapState("EventState", ["loginModal", "sidebar", "registerModal"]),
+    name(): string {
+      return this.$store.state.AuthState.name;
+    },
+    isAuthLoading(): boolean {
+      return this.$store.state.AuthState.isAuthLoading;
+    },
+    isAuthenticated(): boolean {
+      return this.$store.state.AuthState.isAuthenticated;
+    },
+    isSubLoading(): boolean {
+      return this.$store.state.SubState.isSubLoading;
+    },
+    isDarkMode(): boolean {
+      return this.$store.state.DarkModeState.isDarkMode;
+    },
+    registerModal(): boolean {
+      return this.$store.state.EventState.registerModal;
+    },
+    sidebar(): boolean {
+      return this.$store.state.EventState.sidebar;
+    },
+    loginModal(): boolean {
+      return this.$store.state.EventState.loginModal;
+    },
   },
   methods: {
-    ...mapActions("AuthState", ["logout", "me"]),
-    ...mapActions("DarkMode", ["turnOn"]),
-    ...mapActions("EventState", [
-      "openLoginModal",
-      "closeLoginModal",
-      "openRegisterModal",
-      "closeRegisterModal",
-      "openSidebar",
-      "closeSidebar",
-    ]),
+    me() {
+      this.$store.dispatch("AuthState/me");
+    },
+    logout() {
+      this.$store.dispatch("AuthState/logout");
+    },
+    turnOn() {
+      this.$store.dispatch("DarkModeState/turnOn");
+    },
+    closeSidebar() {
+      this.$store.dispatch("EventState/closeSidebar");
+    },
+    openSidebar() {
+      this.$store.dispatch("EventState/openSidebar");
+    },
+    closeRegisterModal() {
+      this.$store.dispatch("EventState/closeRegisterModal");
+    },
+    openRegisterModal() {
+      this.$store.dispatch("EventState/openRegisterModal");
+    },
+    closeLoginModal() {
+      this.$store.dispatch("EventState/closeLoginModal");
+    },
+    openLoginModal() {
+      this.$store.dispatch("EventState/openLoginModal");
+    },
     handleLogout() {
       this.logout;
     },
@@ -224,7 +267,7 @@ export default defineComponent({
       }
     },
   },
-  mounted: function () {
+  mounted: function() {
     document.addEventListener(
       "scroll",
       () => (this.scroll = document.documentElement.scrollTop)

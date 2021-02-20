@@ -16,9 +16,8 @@
 </template>
 
 <script>
-import { defineComponent} from "vue"
+import { defineComponent } from "vue";
 import Navbar from "@/layout/Navbar.vue";
-import { mapActions } from "vuex";
 import "./css/tailwind.src.css";
 export default defineComponent({
   name: "App",
@@ -29,12 +28,6 @@ export default defineComponent({
     return {
       colorsRef: this.$refs.colors,
     };
-  },
-  methods: {
-    ...mapActions("MediaQueryState", ["init"]),
-  },
-  created: function() {
-    this.init();
   },
 });
 </script>

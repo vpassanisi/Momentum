@@ -5,7 +5,6 @@ import PostState from "./modules/PostState";
 import CommentState from "./modules/CommentState";
 import PointState from "./modules/PointState";
 import AuthState from "./modules/AuthState";
-import MediaQueryState from "./modules/MediaQueryState";
 import EventState from "./modules/EventState";
 
 export interface RootState {
@@ -19,6 +18,9 @@ const store = createStore<RootState>({
   modules: {
     DarkModeState,
     SubState,
+    EventState,
+    AuthState,
+    PostState,
   },
 });
 
