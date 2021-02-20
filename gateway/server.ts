@@ -1,5 +1,6 @@
 import Koa from "koa";
 import KoaRouter from "koa-router";
+import cors from "@koa/cors";
 import bodyParser from "koa-bodyparser";
 import graphqlHTTP from "koa-graphql";
 import { schema } from "./schema/schema";
@@ -7,6 +8,8 @@ import { env } from "./util/envValidator";
 
 const app = new Koa();
 const router = new KoaRouter();
+
+app.use(cors());
 
 app.use(bodyParser());
 
