@@ -1,0 +1,13 @@
+version: "3.3"
+
+services:
+  gateway:
+    build: ./gateway
+  users:
+    build: ./users
+  subs:
+    build: ./subs
+  posts:
+    build: ./posts
+  comments:
+    build: ./comments
