@@ -21,6 +21,7 @@ const store = createStore<RootState>({
     EventState,
     AuthState,
     PostState,
+    PointState,
   },
 });
 

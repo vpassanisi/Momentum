@@ -7,7 +7,6 @@ import {
   GraphQLNonNull,
   GraphQLEnumType,
 } from "graphql";
-import { PossibleFragmentSpreads } from "graphql/validation/rules/PossibleFragmentSpreads";
 
 export interface postsBody {
   sub: string;
@@ -80,6 +79,13 @@ const commentType = new GraphQLObjectType({
   }),
 });
 
+const pointsType = new GraphQLObjectType({
+  name: "pointsType",
+  fields: {
+    points: { type: GraphQLString },
+  },
+});
+
 const orderEnumType = new GraphQLEnumType({
   name: "orderEnumType",
   values: {
@@ -98,6 +104,13 @@ const userReturnType = new GraphQLObjectType({
   },
 });
 
+const postUser = new GraphQLObjectType({
+  name: "postUser",
+  fields: {
+    name: { type: GraphQLString },
+  },
+});
+
 const postType = new GraphQLObjectType({
   name: "postType",
   fields: {
@@ -105,7 +118,7 @@ const postType = new GraphQLObjectType({
     title: { type: GraphQLString },
     body: { type: GraphQLString },
     points: { type: GraphQLInt },
-    user: { type: GraphQLString },
+    user: { type: postUser },
     sub: { type: GraphQLString },
     createdAt: { type: GraphQLInt },
     comments: {
@@ -173,4 +186,4 @@ const subsReturnType = new GraphQLObjectType({
   },
 });
 
-export { userReturnType, subsReturnType, postType, commentType };
+export { userReturnType, subsReturnType, postType, commentType, pointsType };

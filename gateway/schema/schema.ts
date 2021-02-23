@@ -15,6 +15,7 @@ import {
   userReturnType,
   postType,
   commentType,
+  pointsType,
 } from "./types";
 import { env } from "../util/envValidator";
 
@@ -131,6 +132,30 @@ const schema = new GraphQLSchema({
           return json;
         },
       },
+      points: {
+        type: GraphQLNonNull(GraphQLString),
+        args: {
+          targetIDs: { type: GraphQLNonNull(GraphQLList(GraphQLString)) },
+        },
+        async resolve(parent, args, ctx, info) {
+          const token = ctx.cookies.get("token");
+          if (!token) throw Error("not logged in");
+
+          args.token = token;
+
+          const res = await fetch("http://points:5000/points", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args),
+          });
+
+          if (!res.ok) throw Error(await res.text());
+
+          const json = await res.json();
+
+          return JSON.stringify(json);
+        },
+      },
     },
   }),
   mutation: new GraphQLObjectType({
@@ -167,6 +192,9 @@ const schema = new GraphQLSchema({
           return json;
         },
       },
+      // increment: {
+
+      // }
     },
   }),
   types: [commentType, postType],

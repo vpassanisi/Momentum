@@ -53,3 +53,10 @@ services:
     command: npm run serve
     volumes:
       - ./vue:/usr/src/app
+  points:
+    command: python3 run.py
+    volumes:
+      - ./points:/usr/src/app
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}

@@ -1,4 +1,4 @@
-import { MutationTree, ActionTree, Module } from "vuex";
+import { MutationTree, ActionTree, Module, GetterTree } from "vuex";
 import router from "@/router/index";
 import type {RootState} from "../index"
 
@@ -25,18 +25,16 @@ interface CreateSub {
 }
 
 interface User {
-  _id: string;
   name: string;
-  createdAt: string;
 }
 
-interface Post {
+export interface PostType {
   _id: string;
   title: string;
   body: string;
-  user: string;
+  user: User;
   points: number;
-  sub: User;
+  sub: string;
   createdAt: number;
 }
 
@@ -66,43 +64,87 @@ const setColors = (
 const state = () => ({
   sub: null as null | Sub,
   subsArr: [] as Array<Sub>,
-  posts: [] as Array<Post>,
+  posts: [] as Array<PostType>,
   isSubLoading: false,
   subError: "",
 });
 
 export type SubState = ReturnType<typeof state>;
 
+const getters: GetterTree<SubState, RootState> = {
+  targetIDs(state) {
+    return state.posts.map((post) => post._id)
+  }
+}
+
 const actions: ActionTree<SubState, RootState>  = {
-  getPostsBySubName: async ({ commit }, obj: GetPostsObj) => {
+  subAndPosts: async ({ commit }, obj: GetPostsObj) => {
     commit("startLoading");
     try {
-      const req = await fetch(
-        `/api/v1/posts/?sub=${obj.sub}&sort=${obj.sort}&order=${obj.order}`,
-        { method: "GET" }
-      );
+      const res = await fetch(`/gql`,{ 
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          query: `
+          query Input($name: String, $order: Int, $by: String) {
+            subs(name: $name, order: $order, by: $by){
+                _id
+                name
+                description
+                founder
+                banner
+                createdAt
+                icon
+                colorPrimary
+                colorPrimaryLight
+                colorPrimaryDark
+                posts {
+                    _id
+                    title
+                    body
+                    points
+                    user {
+                      name
+                    }
+                    sub
+                    createdAt
+                }
+            }
+        }`,
+        variables: {
+          name: obj.sub,
+          order: obj.order,
+          by: obj.sort
+        }
+        })
+       });
 
-      const json = await req.json();
+       const {errors, data} = await res.json();
 
-      if (json.success) {
-        commit("getPostsBySubNameSuccess", {
-          posts: json.data.posts,
-          sub: json.data.sub,
+      if(errors) throw Error(errors[0].message)
+      
+      if(!res.ok) throw Error(await res.text())
+
+      const posts = data.subs[0].posts
+      const sub = data.subs[0]
+      sub.posts = undefined
+
+        commit("subAndPostsSuccess", {
+          posts,
+          sub
         });
-        commit("PointState/setTargetIds", json.data.targetIds, {
-          root: true,
-        });
+        // commit("PointState/setTargetIds", json.data.targetIds, {
+        //   root: true,
+        // });
         setColors(
-          json.data.sub.colorPrimary,
-          json.data.sub.colorPrimaryLight,
-          json.data.sub.colorPrimaryDark
+          sub.colorPrimary,
+          sub.colorPrimaryLight,
+          sub.colorPrimaryDark
         );
-      } else {
-        commit("subErrors", json.data.message);
-      }
+      
     } catch (error) {
-      commit("subError", "Promise rejected with an error");
       console.log(error);
+      commit("subError", error.message)
     }
     commit("endLoading");
   },
@@ -203,7 +245,7 @@ const actions: ActionTree<SubState, RootState>  = {
 const mutations: MutationTree<SubState> = {
   startLoading: (state) => (state.isSubLoading = true),
   endLoading: (state) => (state.isSubLoading = false),
-  getPostsBySubNameSuccess: (state, { posts, sub }) => {
+  subAndPostsSuccess: (state, { posts, sub }) => {
     state.posts = posts;
     state.sub = sub;
   },
@@ -230,6 +272,7 @@ const mutations: MutationTree<SubState> = {
 const module: Module<SubState, RootState> = {
   namespaced: true,
   state,
+  getters,
   actions,
   mutations,
 };

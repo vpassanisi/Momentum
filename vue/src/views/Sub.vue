@@ -8,10 +8,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions } from "vuex";
+import { mapActions } from "vuex";
 import Banner from "../components/Banner.vue";
 import Header from "../components/Header.vue";
 import Content from "../components/Content.vue";
+import { Sub } from "../store/modules/SubState";
 
 export default defineComponent({
   name: "Sub",
@@ -21,22 +22,32 @@ export default defineComponent({
     Content,
   },
   computed: {
-    ...mapState("SubState", ["sub", "subError"]),
-    ...mapState("PointState", ["targetIds"]),
-    ...mapState("AuthState", ["isAuthenticated"]),
+    subError(): string {
+      return this.$store.state.SubState.subError;
+    },
+    sub(): Sub | null {
+      return this.$store.state.SubState.sub;
+    },
+    isAuthenticated(): boolean {
+      return this.$store.state.AuthState.isAuthenticated;
+    },
   },
   methods: {
-    ...mapActions("SubState", ["getPostsBySubName"]),
     ...mapActions("PointState", ["getPoints"]),
   },
   mounted: async function() {
-    await this.getPostsBySubName({
+    await this.$store.dispatch("SubState/subAndPosts", {
       sub: this.$route.params.sub,
       sort: "points",
       order: -1,
     });
+
     if (this.subError) this.$router.push("/NotFound");
-    if (this.isAuthenticated) this.getPoints();
+    if (this.isAuthenticated)
+      this.$store.dispatch(
+        "PointState/getPoints",
+        this.$store.getters["SubState/targetIDs"]
+      );
   },
 });
 </script>

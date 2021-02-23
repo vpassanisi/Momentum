@@ -19,3 +19,5 @@ services:
     build: ./posts
   comments:
     build: ./comments
+  points:
+    build: ./points

@@ -18,8 +18,17 @@ type post struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Title     string             `json:"title"`
 	Body      string             `json:"body"`
-	User      primitive.ObjectID `json:"user"`
+	User      user               `json:"user"`
 	Points    int32              `json:"points"`
 	Sub       primitive.ObjectID `json:"sub"`
 	CreatedAt int64              `json:"createdAt"`
+}
+
+type user struct {
+	ID        primitive.ObjectID `bson:"-" json:"-"`
+	Name      string             `json:"name"`
+	Email     string             `json:"-"`
+	Password  string             `json:"-"`
+	CreatedAt int64              `json:"-"`
+	UpdatedAt int64              `json:"-"`
 }

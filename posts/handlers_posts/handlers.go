@@ -8,7 +8,7 @@ import (
 	db "github.com/vpassanisi/Momentum/posts/db_posts"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func Posts(w http.ResponseWriter, req *http.Request) {
@@ -38,10 +38,13 @@ func Posts(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	opts := options.Find().SetSort(bson.D{{data.By, data.Order}})
-	filter := bson.M{"sub": subID}
+	matchStage := bson.D{{"$match", bson.M{"sub": subID}}}
+	limitStage := bson.D{{"$limit", 10}}
+	sortStage := bson.D{{"$sort", bson.M{data.By: data.Order}}}
+	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}
+	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$user"}, {"preserveNullAndEmptyArrays", false}}}}
 
-	cursor, err := db.Client.Database("Project-S").Collection("Posts").Find(req.Context(), filter, opts)
+	cursor, err := db.Client.Database("Project-S").Collection("Posts").Aggregate(req.Context(), mongo.Pipeline{matchStage, limitStage, sortStage, lookupStage, unwindStage})
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "query error", 500)
