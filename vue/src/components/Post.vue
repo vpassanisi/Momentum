@@ -81,7 +81,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapState, mapActions } from "vuex";
 import type {PostType} from "../store/modules/SubState"
 
 export default defineComponent({
@@ -100,19 +99,29 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("DarkMode", ["isDarkMode"]),
-    ...mapState("AuthState", ["isAuthenticated"]),
+    isAuthenticated(): boolean {
+      return this.$store.state.AuthState.isAuthenticated
+    },
+    isDarkMode(): boolean {
+      return this.$store.state.DarkModeState.isDarkMode
+    },
     points(): Record<string, boolean> {
       return this.$store.state.PointState.points;
     },
   },
   methods: {
-    ...mapActions("EventState", ["getTimeSince"]),
-    ...mapActions("PointState", [
-      "removePoint",
-      "incrementPost",
-      "decrementPost",
-    ]),
+    getTimeSince(n: number) {
+      return this.$store.dispatch("EventState/getTimeSince", n)
+    },
+    decrementPost(x: string) {
+      this.$store.dispatch("PointState/decrementPost", x)
+    },
+    incrementPost(x: string) {
+      this.$store.dispatch("PointState/incrementPost", x)
+    },
+    removePostPoint(x: string) {
+      this.$store.dispatch("PointState/removePostPoint", x)
+    },
     handleClick() {
       this.$router.push(`/${this.postData._id}`);
     },
@@ -120,7 +129,7 @@ export default defineComponent({
       if (!this.isAuthenticated) return;
       if (this.isActive === true) {
         this.isActive = undefined;
-        await this.removePoint({ targetId: this.postData._id, type: "post" });
+        await this.removePostPoint(this.postData._id);
       } else {
         this.isActive = true;
         await this.incrementPost(this.postData._id);
@@ -130,7 +139,7 @@ export default defineComponent({
       if (!this.isAuthenticated) return;
       if (this.isActive === false) {
         this.isActive = undefined;
-        await this.removePoint({ targetId: this.postData._id, type: "post" });
+        await this.removePostPoint(this.postData._id);
       } else {
         this.isActive = false;
         await this.decrementPost(this.postData._id);

@@ -10,6 +10,10 @@ app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
 mongo = PyMongo(app)
 
 from app.points.get_points import get_points
+from app.points.increment import increment
+from app.points.decrement import decrement
+from app.points.remove import remove
+
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -29,3 +33,6 @@ def not_allowed(error):
 
 
 app.register_blueprint(get_points)
+app.register_blueprint(increment)
+app.register_blueprint(decrement)
+app.register_blueprint(remove)

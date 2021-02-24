@@ -34,38 +34,55 @@ const actions: ActionTree<PostState, RootState> = {
   getPostAndComments: async ({ commit }, postID: string) => {
     commit("startLoading");
     try {
-      const res = await fetch(
-        `/api/v1/comments/?postID=${postID}&sort=points&order=-1&post=true`,
-        {
-          method: "GET",
-        }
-      );
+      const res = await fetch(`/gql`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+          query Input($postID: String!, ) {
+            post(postID: $postID,){
+                _id
+               title
+               body
+               points
+               user {
+                   name
+               }
+               sub
+               createdAt
+               commentsMap
+               targetIDs
+            }
+        }`,
+          variables: {
+            postID: postID,
+          },
+        }),
+      });
 
-      const json = await res.json();
+      const { errors, data } = await res.json();
 
-      if (json.success) {
-        const a = {
-          post: json.data.post,
-          comments: json.data.comments,
-          sort: "points",
-          order: -1,
-        };
+      if (errors) throw Error(errors[0].message);
 
-        commit("getPostByIdSuccess", a);
-        commit("CommentState/setComments", a, { root: true });
+      const a = {
+        post: data.post,
+        comments: data.post.commentsMap,
+        sort: "points",
+        order: -1,
+      };
 
-        if (a.comments[postID].length < 10) {
-          commit("CommentState/noMoreComments", null, { root: true });
-        }
+      commit("getPostByIdSuccess", a);
+      commit("CommentState/setComments", a, { root: true });
 
-        commit("PointState/setTargetIds", json.data.targetIds, {
-          root: true,
-        });
-      } else {
-        commit("getPostByIdFail", json.message);
+      if (a.comments[postID].length < 10) {
+        commit("CommentState/noMoreComments", null, { root: true });
       }
+
+      commit("PointState/setTargetIDs", data.post.targetIDs, {
+        root: true,
+      });
     } catch (error) {
-      commit("getPostByIdFail", "Promise rejected with error");
+      commit("getPostByIdFail", error.message);
       console.error(error);
     }
     commit("endLoading");
@@ -113,9 +130,9 @@ const mutations: MutationTree<PostState> = {
     state.postError = error;
     setTimeout(() => (state.postError = ""), 3000);
   },
-  updatePostPoints: (state, post: Post) => {
+  updatePostPoints: (state, points: number) => {
     if (state.post) {
-      state.post.points = post.points;
+      state.post.points = points;
     }
   },
   clearPostsState: (state) => {

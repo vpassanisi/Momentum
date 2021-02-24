@@ -123,8 +123,6 @@ const actions: ActionTree<SubState, RootState>  = {
 
       if(errors) throw Error(errors[0].message)
       
-      if(!res.ok) throw Error(await res.text())
-
       const posts = data.subs[0].posts
       const sub = data.subs[0]
       sub.posts = undefined
@@ -151,25 +149,44 @@ const actions: ActionTree<SubState, RootState>  = {
   getSubByName: async ({ commit }, sub: string) => {
     commit("startLoading");
     try {
-      const req = await fetch(`/api/v1/subs/?name=${sub}`, {
-        method: "GET",
+      const res = await fetch(`/gql`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          query:`
+          query Input($name: String) {
+            subs(name: $name){
+                _id
+                name
+                description
+                founder
+                banner
+                createdAt
+                icon
+                colorPrimary
+                colorPrimaryLight
+                colorPrimaryDark
+            }
+        }`,
+        variables: {
+          name: sub
+        }
+        })
       });
 
-      const json = await req.json();
+      const {errors, data} = await res.json();
 
-      if (json.success) {
-        commit("getSubByNameSuccess", json.data[0]);
-        setColors(
-          json.data[0].colorPrimary,
-          json.data[0].colorPrimaryLight,
-          json.data[0].colorPrimaryDark
-        );
-      } else {
-        commit("subError", json.message);
-      }
+      if(errors) throw Error(errors[0].message)
+
+      commit("getSubByNameSuccess", data.subs[0]);
+      setColors(
+        data.subs[0].colorPrimary,
+        data.subs[0].colorPrimaryLight,
+        data.subs[0].colorPrimaryDark
+      );
     } catch (error) {
-      commit("subError", "Promise rejected with an error");
       console.log(error);
+      commit("subError", error.message);
     }
     commit("endLoading");
   },
@@ -231,8 +248,6 @@ const actions: ActionTree<SubState, RootState>  = {
 
       if(errors) throw Error(errors[0].message)
       
-      if(!res.ok) throw Error(await res.text())
-
       commit("setSubsArr", data.subs)
     } catch (error) {
       console.log(error);

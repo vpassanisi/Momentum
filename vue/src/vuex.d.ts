@@ -6,6 +6,7 @@ import { EventState } from "./store/modules/EventState";
 import { AuthState } from "./store/modules/AuthState";
 import { PostState } from "./store/modules/PostState";
 import { PointState } from "./store/modules/PointState";
+import { CommentState } from "./store/modules/CommentState";
 
 declare module "@vue/runtime-core" {
   interface State {
@@ -15,6 +16,7 @@ declare module "@vue/runtime-core" {
     AuthState: AuthState;
     PostState: PostState;
     PointState: PointState;
+    CommentState: CommentState;
   }
   // provide typings for `this.$store`
   interface ComponentCustomProperties {

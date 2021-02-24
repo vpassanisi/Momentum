@@ -9,13 +9,16 @@
             <button
               class="w-full focus:outline-none py-2"
               :class="[
-                isActive !== null && isActive
+                isActive === true
                   ? 'text-green-600 dark:text-green-500'
                   : 'text-gray-900 dark:text-gray-400',
               ]"
               @click="handleUp"
             >
-              <svg viewBox="100 14.653 300 168.661" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                viewBox="100 14.653 300 168.661"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill="currentColor"
                   d="M 379.784 183.315 L 120.215 183.315 C 102.241 183.315 93.24 161.772 105.949 149.173 L 235.734 20.511 C 243.613 12.701 256.387 12.701 264.265 20.511 L 394.05 149.173 C 406.76 161.772 397.758 183.315 379.784 183.315 Z"
@@ -26,21 +29,24 @@
             </button>
             <div class="w-full text-center">
               {{
-              post.points > 999
-              ? `${(post.points / 1000).toPrecision(2)}k`
-              : post.points
+                post.points > 999
+                  ? `${(post.points / 1000).toPrecision(2)}k`
+                  : post.points
               }}
             </div>
             <button
               class="w-full focus:outline-none py-2"
               :class="[
-                isActive !== null && !isActive
+                isActive === false
                   ? 'text-red-600 dark:text-red-500'
                   : 'text-gray-900 dark:text-gray-400',
               ]"
               @click="handleDown"
             >
-              <svg viewBox="100 14.112 300 168.65" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                viewBox="100 14.112 300 168.65"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill="currentColor"
                   d="M 120.186 14.112 L 379.814 14.112 C 397.775 14.112 406.756 35.612 394.042 48.212 L 264.278 176.912 C 256.408 184.712 243.593 184.712 235.722 176.912 L 105.958 48.212 C 93.244 35.612 102.225 14.112 120.186 14.112 Z"
@@ -51,19 +57,26 @@
             </button>
           </div>
           <div>
-            <div
-              class="text-sm text-gray-700 dark:text-gray-500 pl-4"
-            >Posted by {{ post.user.name }} • {{ formatedTime }} ago</div>
+            <div class="text-sm text-gray-700 dark:text-gray-500 pl-4">
+              Posted by {{ post.user.name }} • {{ formatedTime }} ago
+            </div>
             <div class="text-xl font-medium pl-4">{{ post.title }}</div>
-            <editor-content :editor="readOnlyEditor" />
+            <div class="p-4">
+              <quill-editor
+                :value="post.body"
+                :theme="'bubble'"
+                :readOnly="true"
+                @input="() => console.log('input event')"
+              />
+            </div>
           </div>
         </div>
-        <NewCommentEditor
+        <!-- <NewCommentEditor
           :postId="post._id"
           :parentId="post._id"
           :rootId="null"
           :closeButton="false"
-        />
+        /> -->
         <div class="border-b border-gray-400 dark:border-gray-700 my-4" />
         <div class="inline-block">
           <div
@@ -84,17 +97,25 @@
               <i
                 class="material-icons transition-transform transform duration-300 ease-in-out"
                 :class="[pagination.order === 1 ? 'rotate-180' : '']"
-              >south</i>
+                >south</i
+              >
             </button>
           </div>
         </div>
-        <Comment v-for="com in comments[post._id]" :key="com._id" :comment="com" :rootId="com._id" />
+        <Comment
+          v-for="com in comments[post._id]"
+          :key="com._id"
+          :comment="com"
+          :rootId="com._id"
+        />
         <div class="flex flex-row items-center justify-center mt-4">
           <button
             v-show="moreComments"
             class="w-1/2 bg-blue-500 text-white shadow rounded p-2 focus:outline-none"
             @click="handleNextComments"
-          >Load More Comments</button>
+          >
+            Load More Comments
+          </button>
         </div>
       </div>
       <About class="order-last" />
@@ -103,68 +124,53 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { mapState, mapActions } from "vuex";
+import { defineComponent } from "vue";
+import { mapActions } from "vuex";
 import Comment from "../components/Comment.vue";
 import About from "../components/About.vue";
-import NewCommentEditor from "../components/NewCommentEditor.vue";
-import { Editor, EditorContent } from "tiptap";
-import {
-  Bold,
-  Italic,
-  Strike,
-  Underline,
-  Code,
-  Heading,
-  Blockquote,
-  CodeBlock,
-  HorizontalRule,
-  Image,
-  Link,
-} from "tiptap-extensions";
+import QuillEditor from "../components/QuillEditor.vue";
+import { Sub } from "../store/modules/SubState";
+// import NewCommentEditor from "../components/NewCommentEditor.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "Thread",
   components: {
-    EditorContent,
-    NewCommentEditor,
     About,
     Comment,
+    QuillEditor,
   },
   data() {
     return {
       sort: "points",
-      isActive: null as null | boolean,
+      isActive: undefined as undefined | boolean,
       formatedTime: null,
-      readOnlyEditor: new Editor({
-        editable: false,
-        editorProps: {
-          attributes: {
-            class: "p-4 position-inherit focus:outline-none",
-          },
-        },
-        extensions: [
-          new Bold(),
-          new Italic(),
-          new Strike(),
-          new Underline(),
-          new Code(),
-          new Heading({ levels: [1, 2, 3] }),
-          new Blockquote(),
-          new CodeBlock(),
-          new HorizontalRule(),
-          new Image(),
-          new Link(),
-        ],
-      }),
     };
   },
   computed: {
-    ...mapState("PostState", ["post"]),
-    ...mapState("CommentState", ["comments", "pagination", "moreComments"]),
-    ...mapState("PointState", ["targetIds", "points"]),
-    ...mapState("SubState", ["sub"]),
-    ...mapState("AuthState", ["isAuthenticated"]),
+    post() {
+      return this.$store.state.PostState.post;
+    },
+    moreComments(): boolean {
+      return this.$store.state.CommentState.moreComments;
+    },
+    pagination() {
+      return this.$store.state.CommentState.pagination;
+    },
+    comments() {
+      return this.$store.state.CommentState.comments;
+    },
+    points(): Record<string, boolean> {
+      return this.$store.state.PointState.points;
+    },
+    targetIDs(): string[] {
+      return this.$store.state.PointState.targetIDs;
+    },
+    sub(): Sub | null {
+      return this.$store.state.SubState.sub;
+    },
+    isAuthenticated(): boolean {
+      return this.$store.state.AuthState.isAuthenticated;
+    },
   },
   methods: {
     ...mapActions("PostState", ["getPostAndComments", "clearPostState"]),
@@ -174,35 +180,41 @@ export default Vue.extend({
       "updateComments",
       "setPagination",
     ]),
-    ...mapActions("PointState", [
-      "getPoints",
-      "clearPointState",
-      "incrementPost",
-      "decrementPost",
-      "removePoint",
-    ]),
+    ...mapActions("PointState", ["getPoints"]),
+    clearPointState() {
+      this.$store.dispatch("PointState/clearPointState");
+    },
+    decrementPost(postID: string) {
+      this.$store.dispatch("PointState/decrementPost", postID);
+    },
+    incrementPost(postID: string) {
+      this.$store.dispatch("PointState/incrementPost", postID);
+    },
+    removePostPoint(postID: string) {
+      this.$store.dispatch("PointState/removePostPoint", postID);
+    },
     ...mapActions("SubState", ["getSubByName"]),
     ...mapActions("EventState", ["getTimeSince"]),
     handleUp() {
-      if (!this.isAuthenticated) return;
+      if (!this.isAuthenticated || !this.post) return;
 
-      if (this.isActive === null || this.isActive === false) {
+      if (this.isActive === true) {
+        this.isActive = undefined;
+        this.removePostPoint(this.post._id);
+      } else {
         this.isActive = true;
         this.incrementPost(this.post._id);
-      } else {
-        this.isActive = null;
-        this.removePoint({ targetId: this.post._id, type: "post" });
       }
     },
     handleDown() {
-      if (!this.isAuthenticated) return;
+      if (!this.isAuthenticated || !this.post) return;
 
-      if (this.isActive === null || this.isActive === true) {
+      if (this.isActive === false) {
+        this.isActive = undefined;
+        this.removePostPoint(this.post._id);
+      } else {
         this.isActive = false;
         this.decrementPost(this.post._id);
-      } else {
-        this.isActive = null;
-        this.removePoint({ targetId: this.post._id, type: "post" });
       }
     },
     async handleChangeSort() {
@@ -228,32 +240,27 @@ export default Vue.extend({
       if (this.isAuthenticated) await this.getPoints();
     },
   },
-  mounted: async function () {
+  mounted: async function() {
     await this.getPostAndComments(this.$route.params.id);
 
-    if (this.isAuthenticated) await this.getPoints();
+    if (this.isAuthenticated) await this.getPoints(this.targetIDs);
 
-    if (this.points[this.post._id] !== undefined) {
+    if (this.post) {
       this.isActive = this.points[this.post._id];
-    }
 
-    this.readOnlyEditor.setContent(JSON.parse(this.post.body));
-    this.formatedTime = await this.getTimeSince(this.post.createdAt);
+      this.formatedTime = await this.getTimeSince(this.post.createdAt);
+    }
 
     await this.getSubByName(this.$route.params.sub);
   },
   watch: {
-    points: function () {
-      if (this.points[this.post._id] !== undefined) {
+    points: function() {
+      if (this.post) {
         this.isActive = this.points[this.post._id];
-      } else {
-        this.points[this.post._id] = null;
       }
     },
   },
-  beforeDestroy() {
-    this.readOnlyEditor.destroy();
-
+  beforeUnmount() {
     this.clearPostState();
     this.clearCommentState();
     this.clearPointState();

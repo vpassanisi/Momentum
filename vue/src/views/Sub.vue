@@ -8,7 +8,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
 import Banner from "../components/Banner.vue";
 import Header from "../components/Header.vue";
 import Content from "../components/Content.vue";
@@ -31,9 +30,14 @@ export default defineComponent({
     isAuthenticated(): boolean {
       return this.$store.state.AuthState.isAuthenticated;
     },
+    targetIDs(): Record<string, boolean> {
+      return this.$store.getters["SubState/targetIDs"];
+    },
   },
   methods: {
-    ...mapActions("PointState", ["getPoints"]),
+    getPoints(x: Record<string, boolean>) {
+      this.$store.dispatch("PointState/getPoints", x);
+    },
   },
   mounted: async function() {
     await this.$store.dispatch("SubState/subAndPosts", {
@@ -43,11 +47,7 @@ export default defineComponent({
     });
 
     if (this.subError) this.$router.push("/NotFound");
-    if (this.isAuthenticated)
-      this.$store.dispatch(
-        "PointState/getPoints",
-        this.$store.getters["SubState/targetIDs"]
-      );
+    if (this.isAuthenticated) this.getPoints(this.targetIDs);
   },
 });
 </script>

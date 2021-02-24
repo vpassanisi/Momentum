@@ -11,17 +11,19 @@ type postsReq struct {
 }
 
 type postReq struct {
-	ID string `json:"ID"`
+	PostID string `json:"postID"`
 }
 
 type post struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	Title     string             `json:"title"`
-	Body      string             `json:"body"`
-	User      user               `json:"user"`
-	Points    int32              `json:"points"`
-	Sub       primitive.ObjectID `json:"sub"`
-	CreatedAt int64              `json:"createdAt"`
+	ID          primitive.ObjectID            `bson:"_id,omitempty" json:"_id,omitempty"`
+	Title       string                        `json:"title"`
+	Body        string                        `json:"body"`
+	User        user                          `json:"user"`
+	Points      int32                         `json:"points"`
+	Sub         primitive.ObjectID            `json:"sub"`
+	CreatedAt   int64                         `json:"createdAt"`
+	CommentsMap map[string][]commentPopulated `json:"commentsMap"`
+	TargetIDs   []string                      `json:"targetIDs"`
 }
 
 type user struct {
@@ -31,4 +33,16 @@ type user struct {
 	Password  string             `json:"-"`
 	CreatedAt int64              `json:"-"`
 	UpdatedAt int64              `json:"-"`
+}
+
+type commentPopulated struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Body      string             `json:"body"`
+	Points    int64              `json:"points"`
+	User      user               `json:"user"`
+	Post      primitive.ObjectID `json:"post"`
+	Parent    primitive.ObjectID `json:"parent"`
+	Root      primitive.ObjectID `json:"root"`
+	CreatedAt int64              `json:"createdAt"`
+	Comments  []commentPopulated `json:"comments"`
 }

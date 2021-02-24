@@ -6,6 +6,7 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLEnumType,
+  GraphQLScalarType,
 } from "graphql";
 
 export interface postsBody {
@@ -61,23 +62,26 @@ interface comment {
 }
 
 // ts doesn't know that graphql will resolve the type at run time :(
-// @ts-expect-error
-const commentType = new GraphQLObjectType({
-  name: "commentType",
-  fields: () => ({
-    _id: { type: GraphQLString },
-    body: { type: GraphQLString },
-    points: { type: GraphQLInt },
-    user: { type: GraphQLString },
-    post: { type: GraphQLString },
-    parent: { type: GraphQLString },
-    root: { type: GraphQLString },
-    createdAt: { type: GraphQLInt },
-    comments: {
-      type: new GraphQLList(commentType),
-    },
-  }),
-});
+// // @ts-expect-error
+// const commentType = new GraphQLObjectType({
+//   name: "commentType",
+//   fields: () => ({
+//     _id: { type: GraphQLString },
+//     body: { type: GraphQLString },
+//     points: { type: GraphQLInt },
+//     user: { type: GraphQLString },
+//     post: { type: GraphQLString },
+//     parent: { type: GraphQLString },
+//     root: { type: GraphQLString },
+//     createdAt: { type: GraphQLInt },
+//     comments: {
+//       type: new GraphQLScalarType({
+//         name: "commentScalar",
+//         serialize: (value) => console.log(value),
+//       }),
+//     },
+//   }),
+// });
 
 const pointsType = new GraphQLObjectType({
   name: "pointsType",
@@ -111,6 +115,20 @@ const postUser = new GraphQLObjectType({
   },
 });
 
+const singleCommentType = new GraphQLObjectType({
+  name: "singleCommentType",
+  fields: {
+    _id: { type: GraphQLString },
+    body: { type: GraphQLString },
+    points: { type: GraphQLInt },
+    user: { type: GraphQLString },
+    post: { type: GraphQLString },
+    parent: { type: GraphQLString },
+    root: { type: GraphQLString },
+    reatedAt: { type: GraphQLString },
+  },
+});
+
 const postType = new GraphQLObjectType({
   name: "postType",
   fields: {
@@ -121,28 +139,21 @@ const postType = new GraphQLObjectType({
     user: { type: postUser },
     sub: { type: GraphQLString },
     createdAt: { type: GraphQLInt },
-    comments: {
-      type: GraphQLNonNull(GraphQLList(commentType)),
-      async resolve(parent, args, ctx, info) {
-        const body = {
-          postID: parent._id,
-          by: "points",
-          lastValue: 0,
-          lastCreatedAt: 0,
-        };
-        const res = await fetch("http://comments:5000/comments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-
-        if (!res.ok) throw Error(await res.text());
-
-        const json = await res.json();
-
-        return json;
-      },
+    targetIDs: { type: GraphQLList(GraphQLString) },
+    commentsMap: {
+      type: new GraphQLScalarType({
+        name: "commentsMapScalar",
+        serialize: (val) => val,
+      }),
     },
+  },
+});
+
+const incrementReturnType = new GraphQLObjectType({
+  name: "incrementReturnType",
+  fields: {
+    post: { type: postType },
+    comment: { type: singleCommentType },
   },
 });
 
@@ -186,4 +197,10 @@ const subsReturnType = new GraphQLObjectType({
   },
 });
 
-export { userReturnType, subsReturnType, postType, commentType, pointsType };
+export {
+  userReturnType,
+  subsReturnType,
+  postType,
+  pointsType,
+  incrementReturnType,
+};

@@ -3,6 +3,7 @@ import { RootState } from "..";
 
 const state = () => ({
   points: {} as Record<string, boolean>,
+  targetIDs: [] as Array<string>,
   isPointLoading: false,
   pointError: "",
 });
@@ -33,11 +34,7 @@ const actions: ActionTree<PointState, RootState> = {
 
       const { errors, data } = await res.json();
 
-      console.log(JSON.parse(data.points));
-
       if (errors) throw Error(errors[0].message);
-
-      if (!res.ok) throw Error(await res.text());
 
       commit("getPointsSuccess", JSON.parse(data.points));
     } catch (error) {
@@ -48,23 +45,30 @@ const actions: ActionTree<PointState, RootState> = {
   },
   incrementComment: async ({ commit }, id: string) => {
     try {
-      const res = await fetch(
-        `/api/v1/points/increment/?type=comment&id=${id}`,
-        {
-          method: "POST",
-        }
-      );
+      const res = await fetch(`/gql`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+          
+          `,
+        }),
+      });
 
-      const json = await res.json();
+      const { errors, data } = await res.json();
 
-      if (json.success) {
-        commit("incrementCommentSuccess", json.data.point);
-        commit("CommentState/updateCommentPoints", json.data.comment, {
-          root: true,
-        });
-      } else {
-        commit("incrementCommentFail", json.message);
-      }
+      console.log(data);
+
+      if (errors) throw Error(errors[0].message);
+
+      // if (json.success) {
+      //   commit("incrementCommentSuccess", json.data.point);
+      //   commit("CommentState/updateCommentPoints", json.data.comment, {
+      //     root: true,
+      //   });
+      // } else {
+      //   commit("incrementCommentFail", json.message);
+      // }
     } catch (error) {
       console.log(error);
       commit("incrementCommentFail", "Promise rejected with an error");
@@ -96,71 +100,107 @@ const actions: ActionTree<PointState, RootState> = {
   },
   incrementPost: async ({ commit }, id: string) => {
     try {
-      const res = await fetch(`/api/v1/points/increment/?type=post&id=${id}`, {
+      const res = await fetch(`/gql`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+          mutation Input($postID: String) {
+            increment(postID: $postID) {
+              post {
+                _id
+                points
+              }
+            }
+          }`,
+          variables: {
+            postID: id,
+          },
+        }),
       });
 
-      const json = await res.json();
+      const { errors, data } = await res.json();
 
-      if (json.success) {
-        commit("incrementPostSuccess", json.data.point);
-        commit("PostState/updatePostPoints", json.data.post, { root: true });
-        commit("SubState/updatePostPoints", json.data.post, { root: true });
-      } else {
-        commit("incrementPostFail", json.message);
-      }
+      if (errors) throw Error(errors[0].message);
+
+      commit("incrementPostSuccess", data.increment.post);
+      commit("PostState/updatePostPoints", data.increment.post.points, {
+        root: true,
+      });
+      commit("SubState/updatePostPoints", data.increment.post, { root: true });
     } catch (error) {
       console.log(error);
-      commit("incrementPostFail", "Promise rejected with an error");
+      commit("incrementPostFail", error.message);
     }
   },
-  decrementPost: async ({ commit }, id: string) => {
+  decrementPost: async ({ commit }, postID: string) => {
     try {
-      const res = await fetch(`/api/v1/points/decrement/?type=post&id=${id}`, {
+      const res = await fetch(`/gql`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+          mutation Input($postID: String) {
+            decrement(postID: $postID) {
+              post {
+                _id
+                points
+              }
+            }
+          }`,
+          variables: {
+            postID: postID,
+          },
+        }),
       });
 
-      const json = await res.json();
+      const { errors, data } = await res.json();
 
-      if (json.success) {
-        commit("decrementPostSuccess", json.data.point);
-        commit("PostState/updatePostPoints", json.data.post, { root: true });
-        commit("SubState/updatePostPoints", json.data.post, { root: true });
-      } else {
-        commit("decrementPostFail", json.message);
-      }
+      if (errors) throw Error(errors[0].message);
+
+      commit("decrementPostSuccess", data.decrement.post);
+      commit("PostState/updatePostPoints", data.decrement.post.points, {
+        root: true,
+      });
+      commit("SubState/updatePostPoints", data.decrement.post, { root: true });
     } catch (error) {
       console.log(error);
-      commit("decrementPostFail", "Promise rejected with an error");
+      commit("decrementPostFail", error.message);
     }
   },
-  removePoint: async ({ commit }, { targetId, type }) => {
+  removePostPoint: async ({ commit }, postID: string) => {
     try {
-      const res = await fetch(`/api/v1/points/${type}/${targetId}`, {
-        method: "DELETE",
+      const res = await fetch(`/gql`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+          mutation Input($postID: String) {
+            remove(postID: $postID) {
+              post {
+                _id
+                points
+              }
+            }
+          }`,
+          variables: {
+            postID: postID,
+          },
+        }),
       });
 
-      const json = await res.json();
+      const { errors, data } = await res.json();
 
-      if (json.success) {
-        commit("removePointSuccess", targetId);
-        if (type === "comment") {
-          commit("CommentState/updateCommentPoints", json.data, {
-            root: true,
-          });
-        }
-        if (type === "post") {
-          commit("PostState/updatePostPoints", json.data, {
-            root: true,
-          });
-          commit("SubState/updatePostPoints", json.data, { root: true });
-        }
-      } else {
-        commit("removePointFail", json.message);
-      }
+      if (errors) throw Error(errors[0].message);
+
+      commit("removePointSuccess", data.remove.post._id);
+      commit("SubState/updatePostPoints", data.remove.post, { root: true });
+      commit("PostState/updatePostPoints", data.remove.post.points, {
+        root: true,
+      });
     } catch (error) {
       console.log(error);
-      commit("removePointFail", "Promise rejected with an error");
+      commit("removePointFail", error.message);
     }
   },
 };
@@ -193,14 +233,16 @@ const mutations: MutationTree<PointState> = {
     setTimeout(() => (state.pointError = ""), 3000);
   },
   incrementPostSuccess: (state, obj) => {
-    state.points = { ...state.points, ...obj };
+    const id = obj._id;
+    state.points = { ...state.points, [id]: true };
   },
   incrementPostFail: (state, error) => {
     state.pointError = error;
     setTimeout(() => (state.pointError = ""), 3000);
   },
   decrementPostSuccess: (state, obj) => {
-    state.points = { ...state.points, ...obj };
+    const id = obj._id;
+    state.points = { ...state.points, [id]: false };
   },
   decrementPostFail: (state, error) => {
     state.pointError = error;
@@ -213,8 +255,12 @@ const mutations: MutationTree<PointState> = {
     state.pointError = error;
     setTimeout(() => (state.pointError = ""), 3000);
   },
-  // setTargetIds: (state, arr) => {},
-  // addToTargetIds: (state, arr) => {},
+  setTargetIDs: (state, arr) => {
+    state.targetIDs = arr;
+  },
+  addToTargetIDs: (state, arr) => {
+    state.targetIDs = [...state.targetIDs, ...arr];
+  },
 };
 
 const module: Module<PointState, RootState> = {

@@ -14,8 +14,7 @@ import {
   subsReturnType,
   userReturnType,
   postType,
-  commentType,
-  pointsType,
+  incrementReturnType,
 } from "./types";
 import { env } from "../util/envValidator";
 
@@ -116,7 +115,7 @@ const schema = new GraphQLSchema({
       post: {
         type: postType,
         args: {
-          ID: { type: GraphQLNonNull(GraphQLString) },
+          postID: { type: GraphQLNonNull(GraphQLString) },
         },
         async resolve(parent, args, ctx, info) {
           const res = await fetch("http://posts:5000/onePost", {
@@ -192,12 +191,102 @@ const schema = new GraphQLSchema({
           return json;
         },
       },
-      // increment: {
+      increment: {
+        type: incrementReturnType,
+        args: {
+          postID: { type: GraphQLString },
+          commentID: { type: GraphQLString },
+        },
+        async resolve(parent, args, ctx, info) {
+          if (args.postID && args.commentID)
+            throw Error("either postID or commentID");
 
-      // }
+          if (!args.postID && !args.commentID)
+            throw Error("either postID or commentID");
+
+          const token = ctx.cookies.get("token");
+          if (!token) throw Error("Unauthorized");
+
+          args.token = token;
+
+          const res = await fetch("http://points:5000/increment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args),
+          });
+
+          if (!res.ok) throw Error(await res.text());
+
+          const json = await res.json();
+
+          return json;
+        },
+      },
+      decrement: {
+        type: incrementReturnType,
+        args: {
+          postID: { type: GraphQLString },
+          commentID: { type: GraphQLString },
+        },
+        async resolve(parent, args, ctx, info) {
+          if (args.postID && args.commentID)
+            throw Error("either postID or commentID");
+
+          if (!args.postID && !args.commentID)
+            throw Error("either postID or commentID");
+
+          const token = ctx.cookies.get("token");
+          if (!token) throw Error("Unauthorized");
+
+          args.token = token;
+
+          const res = await fetch("http://points:5000/decrement", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args),
+          });
+
+          if (!res.ok) throw Error(await res.text());
+
+          const json = await res.json();
+
+          return json;
+        },
+      },
+      remove: {
+        type: incrementReturnType,
+        args: {
+          postID: { type: GraphQLString },
+          commentID: { type: GraphQLString },
+        },
+        async resolve(parent, args, ctx, info) {
+          if (args.postID && args.commentID)
+            throw Error("either postID or commentID");
+
+          if (!args.postID && !args.commentID)
+            throw Error("either postID or commentID");
+
+          const token = ctx.cookies.get("token");
+          if (!token) throw Error("Unauthorized");
+
+          args.token = token;
+
+          const res = await fetch("http://points:5000/remove", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args),
+          });
+
+          if (!res.ok) throw Error(await res.text());
+
+          const json = await res.json();
+
+          return json;
+        },
+      },
     },
   }),
-  types: [commentType, postType],
+  types: [postType],
 });
 
 export { schema };
