@@ -1,18 +1,9 @@
-import { MutationTree, ActionTree, Module, GetterTree } from "vuex";
 import router from "@/router/index";
-import type {RootState} from "../index"
+import { defineModule } from "direct-vuex";
+import { moduleActionContext } from "../index";
+import type {Post, Sub} from "./types"
 
-export interface Sub {
-  _id: string;
-  name: string;
-  description: string;
-  founder: string;
-  banner: string;
-  createdatAt: number;
-  colorPrimary: string;
-  colorPrimaryLight: string;
-  colorPrimaryDark: string;
-}
+
 
 interface CreateSub {
   name: string;
@@ -22,20 +13,6 @@ interface CreateSub {
   colorPrimary: string;
   colorPrimaryLight: string;
   colorPrimaryDark: string;
-}
-
-interface User {
-  name: string;
-}
-
-export interface PostType {
-  _id: string;
-  title: string;
-  body: string;
-  user: User;
-  points: number;
-  sub: string;
-  createdAt: number;
 }
 
 interface GetPostsObj {
@@ -63,99 +40,171 @@ const setColors = (
 
 const state = () => ({
   sub: null as null | Sub,
-  subsArr: [] as Array<Sub>,
-  posts: [] as Array<PostType>,
+  subsArr: [] as Sub[],
+  posts: [] as Post[],
   isSubLoading: false,
   subError: "",
 });
 
 export type SubState = ReturnType<typeof state>;
 
-const getters: GetterTree<SubState, RootState> = {
-  targetIDs(state) {
-    return state.posts.map((post) => post._id)
-  }
-}
-
-const actions: ActionTree<SubState, RootState>  = {
-  subAndPosts: async ({ commit }, obj: GetPostsObj) => {
-    commit("startLoading");
-    try {
-      const res = await fetch(`/gql`,{ 
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          query: `
-          query Input($name: String, $order: Int, $by: String) {
-            subs(name: $name, order: $order, by: $by){
-                _id
-                name
-                description
-                founder
-                banner
-                createdAt
-                icon
-                colorPrimary
-                colorPrimaryLight
-                colorPrimaryDark
-                posts {
-                    _id
-                    title
-                    body
-                    points
-                    user {
-                      name
-                    }
-                    sub
-                    createdAt
-                }
-            }
-        }`,
-        variables: {
-          name: obj.sub,
-          order: obj.order,
-          by: obj.sort
-        }
-        })
-       });
-
-       const {errors, data} = await res.json();
-
-      if(errors) throw Error(errors[0].message)
-      
-      const posts = data.subs[0].posts
-      const sub = data.subs[0]
-      sub.posts = undefined
-
-        commit("subAndPostsSuccess", {
-          posts,
-          sub
+const SubMod = defineModule({
+  state,
+  getters: {
+    targetIDs(state) {
+      return state.posts.map((post) => post._id);
+    },
+  },
+  actions: {
+    subAndPosts: async (context, obj: GetPostsObj) => {
+      const { commit } = subActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            query Input($name: String, $order: Int, $by: String) {
+              subs(name: $name, order: $order, by: $by){
+                  _id
+                  name
+                  description
+                  founder
+                  banner
+                  createdAt
+                  icon
+                  colorPrimary
+                  colorPrimaryLight
+                  colorPrimaryDark
+                  posts {
+                      _id
+                      title
+                      body
+                      points
+                      user {
+                        name
+                      }
+                      sub
+                      createdAt
+                  }
+              }
+          }`,
+            variables: {
+              name: obj.sub,
+              order: obj.order,
+              by: obj.sort,
+            },
+          }),
         });
-        // commit("PointState/setTargetIds", json.data.targetIds, {
-        //   root: true,
-        // });
+
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        const posts: Post[] = data.subs[0].posts;
+        delete data.sub.posts
+        const sub: Sub = data.subs[0];
+
+        commit.setSub(sub)
+        commit.setPosts(posts)
+
         setColors(
           sub.colorPrimary,
           sub.colorPrimaryLight,
           sub.colorPrimaryDark
         );
-      
-    } catch (error) {
-      console.log(error);
-      commit("subError", error.message)
-    }
-    commit("endLoading");
-  },
-  getSubByName: async ({ commit }, sub: string) => {
-    commit("startLoading");
-    try {
-      const res = await fetch(`/gql`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          query:`
-          query Input($name: String) {
-            subs(name: $name){
+      } catch (error) {
+        console.log(error);
+        commit.subError(error.message as string);
+      }
+      commit.endLoading();
+    },
+    getSubByName: async (context, subName: string) => {
+      const { commit } = subActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            query Input($name: String) {
+              subs(name: $name){
+                  _id
+                  name
+                  description
+                  founder
+                  banner
+                  createdAt
+                  icon
+                  colorPrimary
+                  colorPrimaryLight
+                  colorPrimaryDark
+              }
+          }`,
+            variables: {
+              name: subName,
+            },
+          }),
+        });
+
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        const sub: Sub = data.subs[0]
+
+        commit.setSub(sub)
+        setColors(
+          data.subs[0].colorPrimary,
+          data.subs[0].colorPrimaryLight,
+          data.subs[0].colorPrimaryDark
+        );
+      } catch (error) {
+        console.log(error);
+        commit.subError(error.message);
+      }
+      commit.endLoading();
+    },
+    createSub: async (context, sub: CreateSub) => {
+      const { commit } = subActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const req = await fetch(`/api/v1/subs/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(sub),
+        });
+
+        const json = await req.json();
+
+        if (json.success) {
+          // commit("createSubSuccess", json.data);
+          setColors(
+            json.data.colorPrimary,
+            json.data.colorPrimaryLight,
+            json.data.colorPrimaryDark
+          );
+          router.push(`/s/${json.data.name}`);
+        }
+      } catch (error) {
+        console.log(error);
+        commit.subError(error.message);
+      }
+      commit.endLoading();
+    },
+    getSubs: async (context) => {
+      const { commit } = subActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const res = await fetch(`http://localhost/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            query {
+              subs {
                 _id
                 name
                 description
@@ -166,130 +215,49 @@ const actions: ActionTree<SubState, RootState>  = {
                 colorPrimary
                 colorPrimaryLight
                 colorPrimaryDark
+              }
             }
-        }`,
-        variables: {
-          name: sub
-        }
-        })
-      });
+            `,
+          }),
+        });
 
-      const {errors, data} = await res.json();
+        const { errors, data } = await res.json();
 
-      if(errors) throw Error(errors[0].message)
+        if (errors) throw Error(errors[0].message);
 
-      commit("getSubByNameSuccess", data.subs[0]);
-      setColors(
-        data.subs[0].colorPrimary,
-        data.subs[0].colorPrimaryLight,
-        data.subs[0].colorPrimaryDark
-      );
-    } catch (error) {
-      console.log(error);
-      commit("subError", error.message);
-    }
-    commit("endLoading");
-  },
-  createSub: async ({ commit }, sub: CreateSub) => {
-    commit("startLoading");
-    try {
-      const req = await fetch(`/api/v1/subs/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sub),
-      });
+        const subs = data.subs as Sub[];
 
-      const json = await req.json();
-
-      if (json.success) {
-        commit("createSubSuccess", json.data);
-        setColors(
-          json.data.colorPrimary,
-          json.data.colorPrimaryLight,
-          json.data.colorPrimaryDark
-        );
-        router.push(`/s/${json.data.name}`);
-      } else {
-        commit("subError", json.message);
+        commit.setSubsArr(subs);
+      } catch (error) {
+        console.log(error);
+        commit.subError(error.message);
       }
-    } catch (error) {
-      commit("subError", "Promise rejected with an error");
-      console.log(error);
-    }
-    commit("endLoading");
+      commit.endLoading();
+    },
   },
-  getSubs: async ({ commit }) => {
-    commit("startLoading");
-    try {
-      const res = await fetch(`http://localhost/gql`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          query: `
-          query {
-            subs {
-              _id
-              name
-              description
-              founder
-              banner
-              createdAt
-              icon
-              colorPrimary
-              colorPrimaryLight
-              colorPrimaryDark
-            }
-          }
-          `
-        })
-      });
+  mutations: {
+    startLoading: (state) => (state.isSubLoading = true),
+    endLoading: (state) => (state.isSubLoading = false),
+    setPosts: (state, posts: Post[]) => state.posts = posts,
+    setSubsArr: (state, subs: Sub[]) => {
+      state.subsArr = subs;
+    },
+    setSub: (state, sub: Sub) => (state.sub = sub),
+    updatePostPoints: (state, post: Post) => {
+      if (state.posts) {
+        const index = state.posts.findIndex((v) => {
+          return v._id === post._id;
+        });
 
-      const {errors, data} = await res.json();
-
-      if(errors) throw Error(errors[0].message)
-      
-      commit("setSubsArr", data.subs)
-    } catch (error) {
-      console.log(error);
-      commit("subError", error.message);
-    }
-    commit("endLoading");
+        state.posts[index].points = post.points;
+      }
+    },
+    subError: (state, error: string) => {
+      state.subError = error;
+      setTimeout(() => (state.subError = ""), 3000);
+    },
   },
-};
+});
 
-const mutations: MutationTree<SubState> = {
-  startLoading: (state) => (state.isSubLoading = true),
-  endLoading: (state) => (state.isSubLoading = false),
-  subAndPostsSuccess: (state, { posts, sub }) => {
-    state.posts = posts;
-    state.sub = sub;
-  },
-  setSubsArr: (state, subs) => {
-    state.subsArr = subs;
-  },
-  getSubByNameSuccess: (state, sub) => (state.sub = sub),
-  createSubSuccess: (state, sub) => (state.sub = sub),
-  updatePostPoints: (state, post) => {
-    if (state.posts) {
-      const index = state.posts.findIndex((v) => {
-        return v._id === post._id;
-      });
-
-      state.posts[index].points = post.points;
-    }
-  },
-  subError: (state, error) => {
-    state.subError = error;
-    setTimeout(() => (state.subError = ""), 3000);
-  },
-}
-
-const module: Module<SubState, RootState> = {
-  namespaced: true,
-  state,
-  getters,
-  actions,
-  mutations,
-};
-
-export default module
+export default SubMod;
+const subActionContext = (context: any) => moduleActionContext(context, SubMod); // eslint-disable-line

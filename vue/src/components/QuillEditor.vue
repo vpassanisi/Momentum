@@ -1,5 +1,5 @@
 <template>
-  <div ref="container">
+  <div ref="container" class="relative">
     <div ref="editor" v-html="value"></div>
   </div>
 </template>
@@ -22,7 +22,7 @@ export default {
     },
     theme: {
       type: String,
-      default: "bubble",
+      default: "",
     },
   },
 
@@ -33,26 +33,35 @@ export default {
   },
   mounted() {
     this.editor = new Quill(this.$refs.editor, {
-      // modules: {
-      //     toolbar: [
-      //         [{ header: [1, 2, 3, 4, false] }],
-      //         ['bold', 'italic', 'underline']
-      //     ]
-      // },
+      modules: {
+        toolbar: this.$refs.toolbar,
+      },
       bounds: this.$refs.container,
       theme: this.theme,
       readOnly: this.readOnly,
-      // formats: ['bold', 'underline', 'header', 'italic']
     });
 
     this.editor.root.innerHTML = this.value;
 
     this.editor.on("text-change", () => {
-      this.$emit(
-        "input",
-        this.editor.getText() ? this.editor.root.innerHTML : ""
-      );
+      this.$emit("input", this.editor.root.innerHTML);
     });
   },
 };
 </script>
+
+<style>
+.dark .ql-toolbar .ql-stroke {
+  fill: none;
+  stroke: #fff;
+}
+
+.dark .ql-toolbar .ql-fill {
+  fill: #fff;
+  stroke: none;
+}
+
+.dark .ql-toolbar .ql-picker {
+  color: #fff;
+}
+</style>

@@ -96,22 +96,19 @@ export default defineComponent({
   },
   computed: {
     isAuthenticated(): boolean {
-      return this.$store.state.AuthState.isAuthenticated;
+      return this.$store.direct.state.AuthMod.isAuthenticated;
     },
     isDarkMode(): boolean {
-      return this.$store.state.DarkModeState.isDarkMode;
+      return this.$store.direct.state.DarkModeMod.isDarkMode;
     },
   },
   methods: {
-    register(x: object) {
-      this.$store.dispatch("AuthState/register", x);
-    },
     close() {
       this.showModal = false;
       this.$emit("closeModal", false);
     },
     handleRegister() {
-      this.register({
+      this.$store.direct.dispatch.register({
         name: this.name,
         email: this.email,
         password: this.password,

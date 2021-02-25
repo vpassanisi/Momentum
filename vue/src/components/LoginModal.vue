@@ -88,28 +88,25 @@ export default defineComponent({
   },
   computed: {
     isAuthenticated(): boolean {
-      return this.$store.state.AuthState.isAuthenticated;
+      return this.$store.direct.state.AuthMod.isAuthenticated;
     },
     isDarkMode(): boolean {
-      return this.$store.state.DarkModeState.isDarkMode;
+      return this.$store.direct.state.DarkModeMod.isDarkMode;
     },
   },
   methods: {
-    login(x: object) {
-      this.$store.dispatch("AuthState/login", x);
-    },
     close() {
       this.showModal = false;
       this.$emit("closeModal", false);
     },
     handleLogin() {
-      this.login({
+      this.$store.direct.dispatch.login({
         email: this.email,
         password: this.password,
       });
     },
     handleDemoLogin() {
-      this.login({
+      this.$store.direct.dispatch.login({
         email: "Demo@gmail.com",
         password: "123456",
       });

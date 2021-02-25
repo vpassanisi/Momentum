@@ -1,5 +1,12 @@
 <template>
-  <div class="relative w-full" style="max-width: 90%;" v-if="isAuthenticated">
+  <div class="relative w-full" v-if="isAuthenticated">
+    <button
+      v-if="closeButton"
+      class="absolute flex z-10 right-0 mt-2 mr-2"
+      @click="close"
+    >
+      <i class="material-icons">clear</i>
+    </button>
     <quill-editor :theme="'snow'" :readOnly="false" />
   </div>
   <div
@@ -73,6 +80,9 @@ export default defineComponent({
         parentId: this.parentId,
         rootId: this.rootId,
       });
+      this.$emit("close");
+    },
+    close() {
       this.$emit("close");
     },
   },

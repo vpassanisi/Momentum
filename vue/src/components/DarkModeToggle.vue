@@ -9,21 +9,21 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from "vue";
+import { defineComponent } from "vue";
 
 const Component = defineComponent({
   name: "DarkModeToggle",
   computed: {
     isDarkMode(): boolean {
-      return this.$store.state.DarkModeState.isDarkMode
-    }
+      return this.$store.direct.state.DarkModeMod.isDarkMode;
+    },
   },
   methods: {
     turnOn() {
-      this.$store.dispatch("DarkModeState/turnOn")
+      this.$store.direct.dispatch.turnOn();
     },
     turnOff() {
-      this.$store.dispatch("DarkModeState/turnOff")
+      this.$store.direct.dispatch.turnOff();
     },
     toggleDarkMode() {
       this.isDarkMode ? this.turnOff() : this.turnOn();

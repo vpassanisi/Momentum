@@ -1,6 +1,5 @@
-import { MutationTree, ActionTree, Module } from "vuex";
-import router from "@/router/index";
-import { RootState } from "../index";
+import { defineModule } from "direct-vuex";
+import { moduleActionContext } from "../index";
 
 interface Credencials {
   email: string;
@@ -16,83 +15,20 @@ const state = () => ({
 
 export type AuthState = ReturnType<typeof state>;
 
-const actions: ActionTree<AuthState, RootState> = {
-  login: async ({ commit }, cred: Credencials) => {
-    commit("startLoading");
-    try {
-      const res = await fetch("http://localhost/gql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-          query Input($email: String!, $password: String!) {
-            login(email: $email, password: $password) {
-              _id
-              name
-              email
-              createdAt
-            }
-          }
-          `,
-          variables: {
-            email: cred.email,
-            password: cred.password,
-          },
-        }),
-      });
-
-      const { errors, data } = await res.json();
-
-      if (errors) throw Error(errors[0].message);
-
-      if (!res.ok) throw Error(await res.text());
-
-      commit("loginSuccess", data.login.name);
-      // router.go(0);
-    } catch (error) {
-      console.error(error);
-      commit("loginFail", error.message);
-    }
-    commit("endLoading");
-  },
-  logout: async ({ commit }) => {
-    commit("startLoading");
-    try {
-      const res = await fetch("/gql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-            query {
-              logOut
-            }
-            `,
-        }),
-      });
-
-      const { errors, data } = await res.json();
-
-      if (errors) throw Error(errors[0].message);
-
-      if (!res.ok) throw Error(await res.text());
-
-      commit("logoutSuccess");
-      // router.go(0);
-    } catch (error) {
-      console.error(error);
-      commit("logoutFail", error.message);
-    }
-    commit("endLoading");
-  },
-  me: async ({ commit }) => {
-    try {
-      const res = await fetch("/gql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-            query {
-              me {
+const AuthMod = defineModule({
+  state,
+  actions: {
+    login: async (context, cred: Credencials) => {
+      const { commit } = authActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const res = await fetch("http://localhost/gql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            query Input($email: String!, $password: String!) {
+              login(email: $email, password: $password) {
                 _id
                 name
                 email
@@ -100,102 +36,156 @@ const actions: ActionTree<AuthState, RootState> = {
               }
             }
             `,
-        }),
-      });
+            variables: {
+              email: cred.email,
+              password: cred.password,
+            },
+          }),
+        });
 
-      const { errors, data } = await res.json();
+        const { errors, data } = await res.json();
 
-      if (errors) throw Error(errors[0].message);
+        if (errors) throw Error(errors[0].message);
 
-      if (!res.ok) throw Error(await res.text());
+        if (!res.ok) throw Error(await res.text());
 
-      commit("meSuccess", data.me.name);
-    } catch (error) {
-      console.error(error.message);
-      commit("meFail");
-    }
+        const name: string = data.login.name;
+
+        commit.login(name);
+        // router.go(0);
+      } catch (error) {
+        console.error(error);
+        commit.setAuthError(error.message);
+      }
+      commit.endLoading();
+    },
+    logout: async (context) => {
+      const { commit } = authActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const res = await fetch("/gql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+              query {
+                logOut
+              }
+              `,
+          }),
+        });
+
+        const { errors } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        if (!res.ok) throw Error(await res.text());
+
+        commit.logout();
+        // router.go(0);
+      } catch (error) {
+        console.error(error);
+        commit.setAuthError(error.message);
+      }
+      commit.endLoading();
+    },
+    me: async (context) => {
+      const { commit } = authActionContext(context); // eslint-disable-line
+      try {
+        const res = await fetch("/gql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+              query {
+                me {
+                  _id
+                  name
+                  email
+                  createdAt
+                }
+              }
+              `,
+          }),
+        });
+
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        if (!res.ok) throw Error(await res.text());
+
+        const name: string = data.me.name;
+
+        commit.login(name);
+      } catch (error) {
+        console.error(error.message);
+        commit.setAuthError(error.message);
+      }
+    },
+    register: async (
+      context,
+      newUser: { name: string; email: string; password: string }
+    ) => {
+      const { commit } = authActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            mutation Input($name: String!, $email: String!, $password: String!) {
+              register(name: $name, email: $email, password: $password){
+                  _id
+                  name
+                  email
+                  createdAt
+              }
+          }`,
+            variables: {
+              name: newUser.name,
+              email: newUser.email,
+              password: newUser.password,
+            },
+          }),
+        });
+
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        if (!res.ok) throw Error(await res.text());
+
+        const name: string = data.register.name;
+
+        commit.login(name);
+      } catch (error) {
+        console.log(error);
+        commit.setAuthError(error.message);
+      }
+      commit.endLoading();
+    },
   },
-  register: async (
-    { commit },
-    newUser: { name: string; email: string; password: string }
-  ) => {
-    commit("startLoading");
-    try {
-      const res = await fetch(`/gql`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-          mutation Input($name: String!, $email: String!, $password: String!) {
-            register(name: $name, email: $email, password: $password){
-                _id
-                name
-                email
-                createdAt
-            }
-        }`,
-          variables: {
-            name: newUser.name,
-            email: newUser.email,
-            password: newUser.password,
-          },
-        }),
-      });
+  mutations: {
+    startLoading: (state) => (state.isAuthLoading = true),
+    endLoading: (state) => (state.isAuthLoading = false),
+    login: (state, name: string) => {
+      state.isAuthenticated = true;
+      state.name = name;
+    },
+    logout: (state) => {
+      state.isAuthenticated = false;
+      state.name = "";
+    },
+    setAuthError: (state, error: string) => {
+      state.authError = error;
+      setTimeout(() => (state.authError = ""), 3000);
+    },
+  },
+});
 
-      const { errors, data } = await res.json();
-
-      if (errors) throw Error(errors[0].message);
-
-      if (!res.ok) throw Error(await res.text());
-
-      commit("registerSuccess", data.register.name);
-    } catch (error) {
-      console.log(error);
-      commit("authError", error.message);
-    }
-    commit("endLoading");
-  },
-};
-
-const mutations: MutationTree<AuthState> = {
-  startLoading: (state) => (state.isAuthLoading = true),
-  endLoading: (state) => (state.isAuthLoading = false),
-  loginSuccess: (state, name) => {
-    state.isAuthenticated = true;
-    state.name = name;
-  },
-  loginFail: (state, error) => {
-    state.authError = error;
-    setTimeout(() => (state.authError = ""), 3000);
-  },
-  logoutSuccess: (state) => {
-    state.isAuthenticated = false;
-    state.name = "";
-  },
-  logoutFail: (state, error) => {
-    state.authError = error;
-    setTimeout(() => (state.authError = ""), 3000);
-  },
-  registerSuccess: (state, name) => {
-    state.isAuthenticated = true;
-    state.name = name;
-  },
-  authError: (state, error) => {
-    state.authError = error;
-    setTimeout(() => (state.authError = ""), 3000);
-  },
-  meSuccess: (state, name) => {
-    state.isAuthenticated = true;
-    state.name = name;
-  },
-  meFail: (state) => (state.isAuthenticated = false),
-};
-
-const module: Module<AuthState, RootState> = {
-  namespaced: true,
-  state,
-  actions,
-  mutations,
-};
-
-export default module;
+export default AuthMod;
+const authActionContext = (
+  context: any // eslint-disable-line
+) => moduleActionContext(context, AuthMod);

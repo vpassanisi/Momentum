@@ -1,5 +1,5 @@
-import { GetterTree, MutationTree, ActionTree, Module } from "vuex";
-import type {RootState} from "../index"
+import { defineModule } from "direct-vuex";
+import { moduleActionContext } from "../index";
 
 const state = () => ({
   isDarkMode: false,
@@ -7,34 +7,29 @@ const state = () => ({
 
 export type DarkModeState = ReturnType<typeof state>;
 
-const getters: GetterTree<DarkModeState, RootState> = {
-  isDarkMode: (state) => state.isDarkMode,
-};
-
-const actions: ActionTree<DarkModeState, RootState> = {
-  turnOn: ({ commit }) => {
-    document.documentElement.classList.add("dark");
-
-    commit("setOn");
-  },
-  turnOff: ({ commit }) => {
-    document.documentElement.classList.remove("dark");
-
-    commit("setOff");
-  },
-};
-
-const mutations: MutationTree<DarkModeState> = {
-  setOn: (state) => (state.isDarkMode = true),
-  setOff: (state) => (state.isDarkMode = false),
-};
-
-const module: Module<DarkModeState, RootState> = {
-  namespaced: true,
+const DarkModeMod = defineModule({
   state,
-  getters,
-  actions,
-  mutations,
-};
+  actions: {
+    turnOn: (context) => {
+      const { commit } = darkModeActionContext(context); // eslint-disable-line
+      document.documentElement.classList.add("dark");
 
-export default module
+      commit.setOn();
+    },
+    turnOff: (context) => {
+      const { commit } = darkModeActionContext(context); // eslint-disable-line
+      document.documentElement.classList.remove("dark");
+
+      commit.setOff();
+    },
+  },
+  mutations: {
+    setOn: (state) => (state.isDarkMode = true),
+    setOff: (state) => (state.isDarkMode = false),
+  },
+});
+
+export default DarkModeMod;
+const darkModeActionContext = (
+  context: any // eslint-disable-line
+) => moduleActionContext(context, DarkModeMod);

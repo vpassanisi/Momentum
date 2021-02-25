@@ -1,6 +1,7 @@
-import { MutationTree, ActionTree, Module } from "vuex";
+import { defineModule } from "direct-vuex";
+import { moduleActionContext } from "../index";
 import router from "@/router/index";
-import { RootState } from "..";
+import type {Post, Comment} from "./types"
 
 interface NewPost {
   title: string;
@@ -12,16 +13,6 @@ interface CreatePostObj {
   post: NewPost;
 }
 
-interface Post {
-  _id: string;
-  title: string;
-  body: string;
-  points: number;
-  user: string;
-  sub: string;
-  createdAt: number;
-}
-
 const state = () => ({
   post: null as Post | null,
   isPostLoading: false,
@@ -30,121 +21,107 @@ const state = () => ({
 
 export type PostState = ReturnType<typeof state>;
 
-const actions: ActionTree<PostState, RootState> = {
-  getPostAndComments: async ({ commit }, postID: string) => {
-    commit("startLoading");
-    try {
-      const res = await fetch(`/gql`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-          query Input($postID: String!, ) {
-            post(postID: $postID,){
-                _id
-               title
-               body
-               points
-               user {
-                   name
-               }
-               sub
-               createdAt
-               commentsMap
-               targetIDs
-            }
-        }`,
-          variables: {
-            postID: postID,
-          },
-        }),
-      });
-
-      const { errors, data } = await res.json();
-
-      if (errors) throw Error(errors[0].message);
-
-      const a = {
-        post: data.post,
-        comments: data.post.commentsMap,
-        sort: "points",
-        order: -1,
-      };
-
-      commit("getPostByIdSuccess", a);
-      commit("CommentState/setComments", a, { root: true });
-
-      if (a.comments[postID].length < 10) {
-        commit("CommentState/noMoreComments", null, { root: true });
-      }
-
-      commit("PointState/setTargetIDs", data.post.targetIDs, {
-        root: true,
-      });
-    } catch (error) {
-      commit("getPostByIdFail", error.message);
-      console.error(error);
-    }
-    commit("endLoading");
-  },
-  createPost: async ({ commit }, obj: CreatePostObj) => {
-    commit("startLoading");
-    try {
-      const res = await fetch(`/api/v1/posts/${obj.subId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(obj.post),
-      });
-
-      const json = await res.json();
-
-      if (json.success) {
-        router.push(
-          `/s/${router.currentRoute.value.params.sub}/comments/${json.data._id}`
-        );
-      } else {
-        commit("createPostFail", json.message);
-      }
-    } catch (error) {
-      commit("createPostFail", "Promise rejected with an error");
-      console.error(error);
-    }
-    commit("endLoading");
-  },
-  clearPostState: ({ commit }) => {
-    commit("clearPostsState");
-  },
-};
-
-const mutations: MutationTree<PostState> = {
-  startLoading: (state) => (state.isPostLoading = true),
-  endLoading: (state) => (state.isPostLoading = false),
-  getPostByIdSuccess: (state, { post }) => {
-    state.post = post;
-  },
-  getPostByIdFail: (state, error) => {
-    state.postError = error;
-    setTimeout(() => (state.postError = ""), 3000);
-  },
-  createPostFail: (state, error) => {
-    state.postError = error;
-    setTimeout(() => (state.postError = ""), 3000);
-  },
-  updatePostPoints: (state, points: number) => {
-    if (state.post) {
-      state.post.points = points;
-    }
-  },
-  clearPostsState: (state) => {
-    state.post = null;
-  },
-};
-
-const module: Module<PostState, RootState> = {
-  namespaced: true,
+const PostMod = defineModule({
   state,
-  actions,
-  mutations,
-};
+  actions: {
+    getPostAndComments: async (context, postID: string) => {
+      const { commit, rootCommit } = postActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            query Input($postID: String!, ) {
+              post(postID: $postID,){
+                  _id
+                 title
+                 body
+                 points
+                 user {
+                     name
+                 }
+                 sub
+                 createdAt
+                 commentsMap
+                 targetIDs
+              }
+          }`,
+            variables: {
+              postID: postID,
+            },
+          }),
+        });
 
-export default module;
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        const comments: Record<string, Comment[]> = data.post.commentsMap
+        const sort = "points"
+        const targetIDs: string[] = data.post.targetIDs
+        delete data.post.commentsMap
+        delete data.post.targetIDs
+        const post: Post = data.post;
+
+        commit.setPost(post);
+        rootCommit.setComments({post, comments, sort})
+
+        if (comments[postID].length < 10) {
+          rootCommit.noMoreComments()
+        }
+
+        rootCommit.setTargetIDs(targetIDs)
+      } catch (error) {
+        console.error(error);
+        commit.setPostError(error.message);
+      }
+      commit.endLoading();
+    },
+    createPost: async (context, obj: CreatePostObj) => {
+      const { commit } = postActionContext(context); // eslint-disable-line
+      commit.startLoading();
+      try {
+        const res = await fetch(`/api/v1/posts/${obj.subId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(obj.post),
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          router.push(
+            `/s/${router.currentRoute.value.params.sub}/comments/${json.data._id}`
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        commit.setPostError(error.message);
+      }
+      commit.endLoading();
+    },
+  },
+  mutations: {
+    startLoading: (state) => (state.isPostLoading = true),
+    endLoading: (state) => (state.isPostLoading = false),
+    setPost: (state, post: Post) => (state.post = post),
+    setPostError: (state, error: string) => {
+      state.postError = error;
+      setTimeout(() => (state.postError = ""), 3000);
+    },
+    updatePostPoints: (state, points: number) => {
+      if (state.post) {
+        state.post.points = points;
+      }
+    },
+    clearPostsState: (state) => {
+      state.post = null;
+    },
+  },
+});
+
+export default PostMod;
+const postActionContext = (context: any) => // eslint-disable-line
+  moduleActionContext(context, PostMod);

@@ -9,7 +9,7 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import SubCard from "../components/SubCard.vue";
-import type {Sub} from "../store/modules/SubState"
+import type {Sub} from "../store/modules/types"
 
 export default defineComponent({
   name: "Home",
@@ -18,11 +18,11 @@ export default defineComponent({
   },
   computed: {
     subsArr(): Sub[] {
-      return this.$store.state.SubState.subsArr
+      return this.$store.direct.state.SubMod.subsArr
     },
   },
   mounted: async function () {
-    this.$store.dispatch("SubState/getSubs")
+    this.$store.direct.dispatch.getSubs()
   },
 });
 </script>

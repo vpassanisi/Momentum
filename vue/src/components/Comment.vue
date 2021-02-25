@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isOpen" class="flex flex-row py-4">
+  <div v-if="isOpen" class="flex flex-row py-4 w-full">
     <div class="flex flex-col w-6">
       <button
         class="w-full focus:outline-none py-2"
@@ -51,7 +51,6 @@
           `${comment.user.name} • ${comment.points} Points • ${formatedTime} ago`
         }}
       </span>
-      <!-- <editor-content :editor="readOnlyEditor" /> -->
       <quill-editor :value="comment.body" :readOnly="true" :theme="'bubble'" />
       <div v-if="isAuthenticated">
         <div v-if="isReplyOpen" class="flex flex-row">

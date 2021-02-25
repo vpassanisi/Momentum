@@ -71,12 +71,12 @@
             </div>
           </div>
         </div>
-        <!-- <NewCommentEditor
+        <NewCommentEditor
           :postId="post._id"
           :parentId="post._id"
           :rootId="null"
           :closeButton="false"
-        /> -->
+        />
         <div class="border-b border-gray-400 dark:border-gray-700 my-4" />
         <div class="inline-block">
           <div
@@ -129,8 +129,8 @@ import { mapActions } from "vuex";
 import Comment from "../components/Comment.vue";
 import About from "../components/About.vue";
 import QuillEditor from "../components/QuillEditor.vue";
-import { Sub } from "../store/modules/SubState";
-// import NewCommentEditor from "../components/NewCommentEditor.vue";
+import { Sub } from "../store/modules/types";
+import NewCommentEditor from "../components/NewCommentEditor.vue";
 
 export default defineComponent({
   name: "Thread",
@@ -138,72 +138,56 @@ export default defineComponent({
     About,
     Comment,
     QuillEditor,
+    NewCommentEditor,
   },
   data() {
     return {
       sort: "points",
       isActive: undefined as undefined | boolean,
-      formatedTime: null,
+      formatedTime: null as null | string,
     };
   },
   computed: {
     post() {
-      return this.$store.state.PostState.post;
+      return this.$store.direct.state.PostMod.post;
     },
     moreComments(): boolean {
-      return this.$store.state.CommentState.moreComments;
+      return this.$store.direct.state.CommentMod.moreComments;
     },
     pagination() {
-      return this.$store.state.CommentState.pagination;
+      return this.$store.direct.state.CommentMod.pagination;
     },
     comments() {
-      return this.$store.state.CommentState.comments;
+      return this.$store.direct.state.CommentMod.comments;
     },
     points(): Record<string, boolean> {
-      return this.$store.state.PointState.points;
+      return this.$store.direct.state.PointMod.points;
     },
     targetIDs(): string[] {
-      return this.$store.state.PointState.targetIDs;
+      return this.$store.direct.state.PointMod.targetIDs;
     },
     sub(): Sub | null {
-      return this.$store.state.SubState.sub;
+      return this.$store.direct.state.SubMod.sub;
     },
     isAuthenticated(): boolean {
-      return this.$store.state.AuthState.isAuthenticated;
+      return this.$store.direct.state.AuthMod.isAuthenticated;
     },
   },
   methods: {
-    ...mapActions("PostState", ["getPostAndComments", "clearPostState"]),
     ...mapActions("CommentState", [
       "getNextComments",
-      "clearCommentState",
       "updateComments",
       "setPagination",
     ]),
-    ...mapActions("PointState", ["getPoints"]),
-    clearPointState() {
-      this.$store.dispatch("PointState/clearPointState");
-    },
-    decrementPost(postID: string) {
-      this.$store.dispatch("PointState/decrementPost", postID);
-    },
-    incrementPost(postID: string) {
-      this.$store.dispatch("PointState/incrementPost", postID);
-    },
-    removePostPoint(postID: string) {
-      this.$store.dispatch("PointState/removePostPoint", postID);
-    },
-    ...mapActions("SubState", ["getSubByName"]),
-    ...mapActions("EventState", ["getTimeSince"]),
     handleUp() {
       if (!this.isAuthenticated || !this.post) return;
 
       if (this.isActive === true) {
         this.isActive = undefined;
-        this.removePostPoint(this.post._id);
+        this.$store.direct.dispatch.removePostPoint(this.post._id);
       } else {
         this.isActive = true;
-        this.incrementPost(this.post._id);
+        this.$store.direct.dispatch.incrementPost(this.post._id);
       }
     },
     handleDown() {
@@ -211,10 +195,10 @@ export default defineComponent({
 
       if (this.isActive === false) {
         this.isActive = undefined;
-        this.removePostPoint(this.post._id);
+        this.$store.direct.dispatch.removePostPoint(this.post._id);
       } else {
         this.isActive = false;
-        this.decrementPost(this.post._id);
+        this.$store.direct.dispatch.decrementPost(this.post._id);
       }
     },
     async handleChangeSort() {
@@ -223,7 +207,8 @@ export default defineComponent({
       });
 
       await this.updateComments();
-      if (this.isAuthenticated) await this.getPoints();
+      if (this.isAuthenticated)
+        await this.$store.direct.dispatch.getPoints(this.targetIDs);
     },
     async handleOrder() {
       const order = this.pagination.order === 1 ? -1 : 1;
@@ -233,25 +218,34 @@ export default defineComponent({
       });
 
       await this.updateComments();
-      if (this.isAuthenticated) await this.getPoints();
+      if (this.isAuthenticated)
+        await this.$store.direct.dispatch.getPoints(this.targetIDs);
     },
     async handleNextComments() {
       await this.getNextComments();
-      if (this.isAuthenticated) await this.getPoints();
+      if (this.isAuthenticated)
+        await this.$store.direct.dispatch.getPoints(this.targetIDs);
     },
   },
   mounted: async function() {
-    await this.getPostAndComments(this.$route.params.id);
+    await this.$store.direct.dispatch.getPostAndComments(
+      this.$route.params.id as string
+    );
 
-    if (this.isAuthenticated) await this.getPoints(this.targetIDs);
+    if (this.isAuthenticated)
+      await this.$store.direct.dispatch.getPoints(this.targetIDs);
 
     if (this.post) {
       this.isActive = this.points[this.post._id];
 
-      this.formatedTime = await this.getTimeSince(this.post.createdAt);
+      this.formatedTime = await this.$store.direct.dispatch.getTimeSince(
+        this.post.createdAt
+      );
     }
 
-    await this.getSubByName(this.$route.params.sub);
+    await this.$store.direct.dispatch.getSubByName(
+      this.$route.params.sub as string
+    );
   },
   watch: {
     points: function() {
@@ -261,9 +255,9 @@ export default defineComponent({
     },
   },
   beforeUnmount() {
-    this.clearPostState();
-    this.clearCommentState();
-    this.clearPointState();
+    this.$store.direct.commit.clearPostsState();
+    this.$store.direct.commit.clearCommentState();
+    this.$store.direct.commit.clearPointState();
   },
 });
 </script>

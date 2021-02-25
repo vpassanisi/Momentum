@@ -1,29 +1,53 @@
-import { createStore } from "vuex";
-import DarkModeState from "./modules/DarkMode";
-import SubState from "./modules/SubState";
-import PostState from "./modules/PostState";
-import CommentState from "./modules/CommentState";
-import PointState from "./modules/PointState";
-import AuthState from "./modules/AuthState";
-import EventState from "./modules/EventState";
+import DarkModeMod from "./modules/DarkMode";
+import SubMod from "./modules/SubState";
+import PostMod from "./modules/PostState";
+import CommentMod from "./modules/CommentState";
+import PointMod from "./modules/PointState";
+import AuthMod from "./modules/AuthState";
+import EventMod from "./modules/EventState";
+import { createDirectStore } from "direct-vuex";
+
+const {
+  store,
+  rootActionContext,
+  moduleActionContext,
+  rootGetterContext,
+  moduleGetterContext,
+} = createDirectStore({
+  state: {
+    version: 0.1,
+  },
+  modules: {
+    DarkModeMod,
+    SubMod,
+    AuthMod,
+    EventMod,
+    PostMod,
+    PointMod,
+    CommentMod,
+  },
+});
+
+export default store;
 
 export interface RootState {
   version: number;
 }
 
-const store = createStore<RootState>({
-  state: {
-    version: 0.1,
-  },
-  modules: {
-    DarkModeState,
-    SubState,
-    EventState,
-    AuthState,
-    PostState,
-    PointState,
-    CommentState,
-  },
-});
+export {
+  rootActionContext,
+  moduleActionContext,
+  rootGetterContext,
+  moduleGetterContext,
+};
 
-export default store;
+export type AppStore = typeof store;
+declare module "@vue/runtime-core" {
+  // provide typings for `this.$store`
+  interface Store {
+    direct: AppStore;
+  }
+  interface ComponentCustomProperties {
+    $store: Store;
+  }
+}

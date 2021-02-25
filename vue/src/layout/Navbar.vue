@@ -202,57 +202,51 @@ export default defineComponent({
   computed: {
     ...mapState("PostState", ["isPostLoading"]),
     name(): string {
-      return this.$store.state.AuthState.name;
+      return this.$store.direct.state.AuthMod.name;
     },
     isAuthLoading(): boolean {
-      return this.$store.state.AuthState.isAuthLoading;
+      return this.$store.direct.state.AuthMod.isAuthLoading;
     },
     isAuthenticated(): boolean {
-      return this.$store.state.AuthState.isAuthenticated;
+      return this.$store.direct.state.AuthMod.isAuthenticated;
     },
     isSubLoading(): boolean {
-      return this.$store.state.SubState.isSubLoading;
+      return this.$store.direct.state.SubMod.isSubLoading;
     },
     isDarkMode(): boolean {
-      return this.$store.state.DarkModeState.isDarkMode;
+      return this.$store.direct.state.DarkModeMod.isDarkMode;
     },
     registerModal(): boolean {
-      return this.$store.state.EventState.registerModal;
+      return this.$store.direct.state.EventMod.registerModal;
     },
     sidebar(): boolean {
-      return this.$store.state.EventState.sidebar;
+      return this.$store.direct.state.EventMod.sidebar;
     },
     loginModal(): boolean {
-      return this.$store.state.EventState.loginModal;
+      return this.$store.direct.state.EventMod.loginModal;
     },
   },
   methods: {
-    me() {
-      this.$store.dispatch("AuthState/me");
-    },
     logout() {
-      this.$store.dispatch("AuthState/logout");
-    },
-    turnOn() {
-      this.$store.dispatch("DarkModeState/turnOn");
+      this.$store.direct.dispatch.logout();
     },
     closeSidebar() {
-      this.$store.dispatch("EventState/closeSidebar");
+      this.$store.direct.commit.closeSidebar();
     },
     openSidebar() {
-      this.$store.dispatch("EventState/openSidebar");
+      this.$store.direct.commit.openSidebar();
     },
     closeRegisterModal() {
-      this.$store.dispatch("EventState/closeRegisterModal");
+      this.$store.direct.commit.closeRegisterModal();
     },
     openRegisterModal() {
-      this.$store.dispatch("EventState/openRegisterModal");
+      this.$store.direct.commit.openRegisterModal();
     },
     closeLoginModal() {
-      this.$store.dispatch("EventState/closeLoginModal");
+      this.$store.direct.commit.closeLoginModal();
     },
     openLoginModal() {
-      this.$store.dispatch("EventState/openLoginModal");
+      this.$store.direct.commit.openLoginModal();
     },
     handleLogout() {
       this.logout;
@@ -279,9 +273,9 @@ export default defineComponent({
       this.routeText = this.$route.name;
     }
 
-    if (this.perfersDark) this.turnOn();
+    if (this.perfersDark) this.$store.direct.dispatch.turnOn();
 
-    this.me();
+    this.$store.direct.dispatch.me();
   },
 });
 </script>
