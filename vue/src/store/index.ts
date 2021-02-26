@@ -18,8 +18,8 @@ const {
     version: 0.1,
   },
   modules: {
-    DarkModeMod,
     SubMod,
+    DarkModeMod,
     AuthMod,
     EventMod,
     PostMod,
@@ -29,10 +29,6 @@ const {
 });
 
 export default store;
-
-export interface RootState {
-  version: number;
-}
 
 export {
   rootActionContext,

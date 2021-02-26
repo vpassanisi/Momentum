@@ -45,7 +45,7 @@
             <div>Top</div>
           </button>
         </div>
-        <Post
+        <PostC
           v-for="postData in posts"
           :key="postData._id"
           :postData="postData"
@@ -59,14 +59,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import About from "./About.vue";
-import Post from "./Post.vue";
-import type { Sub, PostType } from "../store/modules/SubState";
+import PostC from "./Post.vue";
+import type { Sub, Post } from "../store/modules/types";
 
 export default defineComponent({
   name: "Content",
   components: {
     About,
-    Post,
+    PostC,
   },
   data: function() {
     return {
@@ -76,19 +76,19 @@ export default defineComponent({
   },
   computed: {
     sub(): Sub | null {
-      return this.$store.state.SubState.sub;
+      return this.$store.direct.state.SubMod.sub;
     },
-    posts(): PostType[] {
-      return this.$store.state.SubState.posts;
+    posts(): Post[] {
+      return this.$store.direct.state.SubMod.posts;
     },
   },
   watch: {
     sort: function() {
-      this.$store.dispatch("SubState/subAndPosts",{
-        sub: this.$route.params.sub,
+      this.$store.direct.dispatch.SubMod.subAndPosts({
+        sub: this.$route.params.sub as string,
         sort: this.sort,
         order: this.order,
-      } )
+      })
     },
   },
 });

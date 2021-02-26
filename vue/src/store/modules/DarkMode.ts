@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { defineModule } from "direct-vuex";
 import { moduleActionContext } from "../index";
 
@@ -11,13 +12,13 @@ const DarkModeMod = defineModule({
   state,
   actions: {
     turnOn: (context) => {
-      const { commit } = darkModeActionContext(context); // eslint-disable-line
+      const { commit } = darkModeActionContext(context);
       document.documentElement.classList.add("dark");
 
       commit.setOn();
     },
     turnOff: (context) => {
-      const { commit } = darkModeActionContext(context); // eslint-disable-line
+      const { commit } = darkModeActionContext(context);
       document.documentElement.classList.remove("dark");
 
       commit.setOff();

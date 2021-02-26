@@ -7,6 +7,7 @@ import {
   GraphQLNonNull,
   GraphQLList,
   GraphQLInt,
+  GraphQLInputObjectType,
 } from "graphql";
 import {
   meRes,
@@ -15,6 +16,7 @@ import {
   userReturnType,
   postType,
   incrementReturnType,
+  singleCommentType,
 } from "./types";
 import { env } from "../util/envValidator";
 
@@ -272,6 +274,33 @@ const schema = new GraphQLSchema({
           args.token = token;
 
           const res = await fetch("http://points:5000/remove", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args),
+          });
+
+          if (!res.ok) throw Error(await res.text());
+
+          const json = await res.json();
+
+          return json;
+        },
+      },
+      newComment: {
+        type: GraphQLNonNull(singleCommentType),
+        args: {
+          postID: { type: GraphQLNonNull(GraphQLString) },
+          parentID: { type: GraphQLNonNull(GraphQLString) },
+          rootID: { type: GraphQLNonNull(GraphQLString) },
+          body: { type: GraphQLNonNull(GraphQLString) },
+        },
+        async resolve(parent, args, ctx, info) {
+          const token = ctx.cookies.get("token");
+          if (!token) throw Error("Unauthorized");
+
+          args.token = token;
+
+          const res = await fetch("http://comments:5000/newComment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(args),

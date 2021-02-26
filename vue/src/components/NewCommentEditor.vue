@@ -7,7 +7,19 @@
     >
       <i class="material-icons">clear</i>
     </button>
-    <quill-editor :theme="'snow'" :readOnly="false" />
+    <div ref="newCommentContainer">
+      <div ref="newCommentEditor" style="min-height: 10rem;" />
+      <div
+        class="flex items-center justify-end border-l border-r border-b border-gray-400 p-1"
+      >
+        <button
+          class="bg-blue-100 dark:bg-blue-400 px-4 py-1 rounded"
+          @click="handleComment"
+        >
+          comment
+        </button>
+      </div>
+    </div>
   </div>
   <div
     v-else
@@ -42,49 +54,71 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
-import QuillEditor from "./QuillEditor.vue";
+import Quill from "quill";
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
 
 export default defineComponent({
   name: "NewCommentEditor",
   props: {
-    postId: String,
-    parentId: String,
-    rootId: String,
+    postId: {
+      type: String,
+      required: true,
+    },
+    parentId: {
+      type: String,
+      required: true,
+    },
+    rootId: {
+      type: String,
+      required: true,
+    },
     closeButton: Boolean,
-  },
-  components: {
-    QuillEditor,
   },
   data() {
     return {
-      linkMenuIsActive: false,
-      newCommentBounds: this.$refs.newCommentBounds,
+      editor: null as null | Quill,
+      body: "",
     };
   },
   computed: {
     isAuthenticated(): boolean {
-      return this.$store.state.AuthState.isAuthenticated;
+      return this.$store.direct.state.AuthMod.isAuthenticated;
     },
     isDarkMode(): boolean {
-      return this.$store.state.DarkModeState.isDarkMode;
+      return this.$store.direct.state.DarkModeMod.isDarkMode;
     },
   },
   methods: {
-    ...mapActions("EventState", ["openLoginModal"]),
-    ...mapActions("CommentState", ["newCommentByPost"]),
+    openLoginModal() {
+      this.$store.direct.commit.openLoginModal();
+    },
     async handleComment() {
-      await this.newCommentByPost({
-        postId: this.postId,
-        body: "",
-        parentId: this.parentId,
-        rootId: this.rootId,
+      await this.$store.direct.dispatch.newComment({
+        postID: this.postId,
+        body: this.body,
+        parentID: this.parentId,
+        rootID: this.rootId,
       });
       this.$emit("close");
     },
     close() {
       this.$emit("close");
     },
+  },
+  mounted() {
+    this.editor = new Quill(this.$refs.newCommentEditor as string, {
+      bounds: this.$refs.newCommentContainer as string,
+      theme: "snow",
+      readOnly: false,
+      placeholder: ". . .",
+    });
+
+    this.editor.on("text-change", () => {
+      if (this.editor) {
+        this.body = this.editor.root.innerHTML;
+      }
+    });
   },
 });
 </script>

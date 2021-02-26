@@ -7,6 +7,7 @@ import {
   GraphQLNonNull,
   GraphQLEnumType,
   GraphQLScalarType,
+  GraphQLInputObjectType,
 } from "graphql";
 
 export interface postsBody {
@@ -121,11 +122,18 @@ const singleCommentType = new GraphQLObjectType({
     _id: { type: GraphQLString },
     body: { type: GraphQLString },
     points: { type: GraphQLInt },
-    user: { type: GraphQLString },
+    user: {
+      type: new GraphQLObjectType({
+        name: "comemntUser",
+        fields: {
+          name: { type: GraphQLString },
+        },
+      }),
+    },
     post: { type: GraphQLString },
     parent: { type: GraphQLString },
     root: { type: GraphQLString },
-    reatedAt: { type: GraphQLString },
+    createdAt: { type: GraphQLString },
   },
 });
 
@@ -203,4 +211,5 @@ export {
   postType,
   pointsType,
   incrementReturnType,
+  singleCommentType,
 };

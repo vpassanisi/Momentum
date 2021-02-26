@@ -26,10 +26,10 @@ remove = Blueprint('remove', __name__, url_prefix='/remove')
 def index():
     token = request.json['token']
 
-    if request.json['postID']:
+    if 'postID' in request.json:
         target_id = ObjectId(request.json['postID'])
         collection = "Posts"
-    elif request.json['commentID']:
+    elif 'commentID' in request.json:
         target_id = ObjectId(request.json['commentID'])
         collection = "Comments"
 

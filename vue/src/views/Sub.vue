@@ -11,7 +11,8 @@ import { defineComponent } from "vue";
 import Banner from "../components/Banner.vue";
 import Header from "../components/Header.vue";
 import Content from "../components/Content.vue";
-import { Sub } from "../store/modules/SubState";
+import { Sub } from "../store/modules/types";
+import store from "@/store";
 
 export default defineComponent({
   name: "Sub",
@@ -22,32 +23,27 @@ export default defineComponent({
   },
   computed: {
     subError(): string {
-      return this.$store.state.SubState.subError;
+      return this.$store.direct.state.SubMod.subError;
     },
     sub(): Sub | null {
-      return this.$store.state.SubState.sub;
+      return this.$store.direct.state.SubMod.sub;
     },
     isAuthenticated(): boolean {
-      return this.$store.state.AuthState.isAuthenticated;
-    },
-    targetIDs(): Record<string, boolean> {
-      return this.$store.getters["SubState/targetIDs"];
-    },
-  },
-  methods: {
-    getPoints(x: Record<string, boolean>) {
-      this.$store.dispatch("PointState/getPoints", x);
+      return this.$store.direct.state.AuthMod.isAuthenticated;
     },
   },
   mounted: async function() {
-    await this.$store.dispatch("SubState/subAndPosts", {
-      sub: this.$route.params.sub,
+    await this.$store.direct.dispatch.SubMod.subAndPosts({
+      sub: this.$route.params.sub as string,
       sort: "points",
       order: -1,
     });
 
     if (this.subError) this.$router.push("/NotFound");
-    if (this.isAuthenticated) this.getPoints(this.targetIDs);
+    if (this.isAuthenticated)
+      this.$store.direct.dispatch.getPoints(
+        this.$store.direct.getters.SubMod.targetIDs
+      );
   },
 });
 </script>

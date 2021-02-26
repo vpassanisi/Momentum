@@ -1,7 +1,7 @@
 <template>
   <div
     @click="$router.push(`/s/${sub.name}`)"
-    class="flex flex-row mt-4 dark:bg-dark-gray-800 bg-gray-100 rounded shadow-default cursor-pointer"
+    class="flex flex-row mt-4 dark:bg-dark-gray-800 bg-white rounded shadow-default cursor-pointer"
   >
     <div
       v-if="sub.icon === ''"

@@ -26,10 +26,10 @@ increment = Blueprint('increment', __name__, url_prefix='/increment')
 def index():
     token = request.json['token']
 
-    if request.json['postID']:
+    if 'postID' in request.json:
         ID = ObjectId(request.json['postID'])
         collection = "Posts"
-    elif request.json['commentID']:
+    elif 'commentID' in request.json:
         ID = ObjectId(request.json['commentID'])
         collection = "Comments"
 

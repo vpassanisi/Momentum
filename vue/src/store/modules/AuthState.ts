@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 import { defineModule } from "direct-vuex";
 import { moduleActionContext } from "../index";
 

@@ -71,12 +71,14 @@
             </div>
           </div>
         </div>
-        <NewCommentEditor
-          :postId="post._id"
-          :parentId="post._id"
-          :rootId="null"
-          :closeButton="false"
-        />
+        <div class="flex">
+          <NewCommentEditor
+            :postId="post._id"
+            :parentId="post._id"
+            :rootId="'000000000000000000000000'"
+            :closeButton="false"
+          />
+        </div>
         <div class="border-b border-gray-400 dark:border-gray-700 my-4" />
         <div class="inline-block">
           <div
@@ -90,7 +92,7 @@
               @change="handleChangeSort"
             >
               <option value="points" class="focus:outline-none">Top</option>
-              <option value="createdat" class="focus:outline-none">New</option>
+              <option value="createdAt" class="focus:outline-none">New</option>
             </select>
 
             <button class="flex ml-4 focus:outline-none" @click="handleOrder">
@@ -174,11 +176,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("CommentState", [
-      "getNextComments",
-      "updateComments",
-      "setPagination",
-    ]),
+    ...mapActions("CommentState", ["getNextComments"]),
     handleUp() {
       if (!this.isAuthenticated || !this.post) return;
 
@@ -202,7 +200,7 @@ export default defineComponent({
       }
     },
     async handleChangeSort() {
-      await this.setPagination({
+      await this.$store.direct.commit.setPagination({
         sort: this.sort,
       });
 
@@ -243,7 +241,7 @@ export default defineComponent({
       );
     }
 
-    await this.$store.direct.dispatch.getSubByName(
+    await this.$store.direct.dispatch.SubMod.getSubByName(
       this.$route.params.sub as string
     );
   },

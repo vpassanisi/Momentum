@@ -55,7 +55,7 @@
             </g>
           </svg>
 
-          <button class="h-full mr-4">Project-S</button>
+          <button class="h-full mr-4">Momentum</button>
 
           <DropDown class="hidden md:inline-block">
             <template v-slot:button>
@@ -161,7 +161,6 @@
       <Error />
     </div>
     <div
-      ref="progressLine"
       class="progress-line mt-2"
       :class="[
         isAuthLoading || isPostLoading || isSubLoading
@@ -174,7 +173,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
 import DarkModeToggle from "@/components/DarkModeToggle.vue";
 import LoginModal from "@/components/LoginModal.vue";
 import RegisterModal from "@/components/RegisterModal.vue";
@@ -200,7 +198,9 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("PostState", ["isPostLoading"]),
+    isPostLoading(): boolean {
+      return this.$store.direct.state.PostMod.isPostLoading;
+    },
     name(): string {
       return this.$store.direct.state.AuthMod.name;
     },

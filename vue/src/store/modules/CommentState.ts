@@ -1,13 +1,9 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/member-delimiter-style */
+
 import { defineModule } from "direct-vuex";
 import { moduleActionContext } from "../index";
 import type {Post, Comment} from "./types"
-
-interface CreateCommentObj {
-  postId: string;
-  body: string;
-  parentId: string;
-  rootId: string;
-}
 
 const state = () => ({
   comments: {} as Record<string, Array<Comment>>,
@@ -28,25 +24,46 @@ export type CommentState = ReturnType<typeof state>;
 const CommentMod = defineModule({
   state,
   actions: {
-    newCommentByPost: async (context, obj: CreateCommentObj) => {
-      const {commit} = commentActionContext(context) // eslint-disable-line
+    newComment: async (context, obj: {postID: string, parentID: string, rootID: string, body: string}) => {
+      const {commit} = commentActionContext(context) 
       commit.startLoading()
       try {
-        const res = await fetch(`/api/v1/comments/${obj.postId}`, {
+        const res = await fetch(`/gql`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            body: obj.body,
-            parent: obj.parentId,
-            root: obj.rootId,
+            query: `
+              mutation Input($postID: String!, $parentID: String!, $rootID: String!, $body: String!) {
+                newComment(postID: $postID, parentID: $parentID, rootID: $rootID, body: $body) {
+                  _id
+                  body
+                  points
+                  user {
+                    name
+                  }
+                  post
+                  parent
+                  root
+                  createdAt
+                }
+              }`,
+            variables: {
+              postID: obj.postID,
+              parentID: obj.parentID,
+              rootID: obj.rootID,
+              body: obj.body,
+            }
           }),
         });
 
-        const json = await res.json();
+        const { errors, data } = await res.json();
 
-        if (json.success) {
-          // commit("newCommentSuccess", json.data);
-        }
+        if (errors) throw Error(errors[0].message);
+
+        const comment: Comment = data.newComment
+        
+        commit.newCommentSuccess(comment)
+      
       } catch (error) {
         console.error(error.message);
         commit.setcommentError(error.message)
@@ -54,14 +71,20 @@ const CommentMod = defineModule({
       commit.endLoading()
     },
     updateComments: async (context) => {
-      const {commit, state} = commentActionContext(context) // eslint-disable-line
+      const {commit, state} = commentActionContext(context) 
       commit.startLoading()
       commit.setMoreComments()
       try {
         const res = await fetch(
           `/api/v1/comments/?postID=${state.pagination.postID}&sort=${state.pagination.sort}&order=${state.pagination.order}&post=true`,
           {
-            method: "GET",
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: `
+              
+              `,
+            })
           }
         );
 
@@ -85,7 +108,7 @@ const CommentMod = defineModule({
       commit.endLoading()
     },
     getNextComments: async (context) => {
-      const {commit, state} = commentActionContext(context) // eslint-disable-line
+      const {commit, state} = commentActionContext(context) 
       commit.startLoading();
       try {
         const res = await fetch(
@@ -113,7 +136,7 @@ const CommentMod = defineModule({
     },
   },
   mutations: {
-    setComments: (state, {post, comments, sort}: {post: Post, comments: Record<string, Comment[]>, sort: string}) => { // eslint-disable-line
+    setComments: (state, {post, comments, sort}: {post: Post, comments: Record<string, Comment[]>, sort: string}) => { 
       if (state.comments[post._id] === undefined) {
         state.comments[post._id] = [];
       }
@@ -141,8 +164,8 @@ const CommentMod = defineModule({
       state.pagination.lastCreatedAt =
         state.comments[post._id][lastIndex].createdAt;
     },
-    setPagination: (state, obj) => {
-      state.pagination = { ...state.pagination, ...obj };
+    setPagination: (state, o: {sort?: string, order?: number}) => {
+      state.pagination = { ...state.pagination, ...o };
     },
     updateCommentsSuccess: (state, { comments }) => {
       // update pagination

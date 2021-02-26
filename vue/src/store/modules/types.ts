@@ -4,7 +4,7 @@ export interface Sub {
   description: string;
   founder: string;
   banner: string;
-  createdatAt: number;
+  createdAt: number;
   colorPrimary: string;
   colorPrimaryLight: string;
   colorPrimaryDark: string;

@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/member-delimiter-style */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 import router from "@/router/index";
 import { defineModule } from "direct-vuex";
 import { moduleActionContext } from "../index";
@@ -13,12 +17,6 @@ interface CreateSub {
   colorPrimary: string;
   colorPrimaryLight: string;
   colorPrimaryDark: string;
-}
-
-interface GetPostsObj {
-  sub: string;
-  sort: string;
-  order: number;
 }
 
 const setColors = (
@@ -49,15 +47,16 @@ const state = () => ({
 export type SubState = ReturnType<typeof state>;
 
 const SubMod = defineModule({
+  namespaced: true as true,
   state,
   getters: {
-    targetIDs(state) {
+    targetIDs: function(state): string[] {
       return state.posts.map((post) => post._id);
     },
   },
   actions: {
-    subAndPosts: async (context, obj: GetPostsObj) => {
-      const { commit } = subActionContext(context); // eslint-disable-line
+    subAndPosts: async (context, obj: {sub: string, sort: string, order: number}) => {
+      const { commit } = subActionContext(context);
       commit.startLoading();
       try {
         const res = await fetch(`/gql`, {
@@ -103,7 +102,7 @@ const SubMod = defineModule({
         if (errors) throw Error(errors[0].message);
 
         const posts: Post[] = data.subs[0].posts;
-        delete data.sub.posts
+        delete data.subs[0].posts
         const sub: Sub = data.subs[0];
 
         commit.setSub(sub)
@@ -121,7 +120,7 @@ const SubMod = defineModule({
       commit.endLoading();
     },
     getSubByName: async (context, subName: string) => {
-      const { commit } = subActionContext(context); // eslint-disable-line
+      const { commit } = subActionContext(context);
       commit.startLoading();
       try {
         const res = await fetch(`/gql`, {
@@ -168,7 +167,7 @@ const SubMod = defineModule({
       commit.endLoading();
     },
     createSub: async (context, sub: CreateSub) => {
-      const { commit } = subActionContext(context); // eslint-disable-line
+      const { commit } = subActionContext(context);
       commit.startLoading();
       try {
         const req = await fetch(`/api/v1/subs/`, {
@@ -195,7 +194,7 @@ const SubMod = defineModule({
       commit.endLoading();
     },
     getSubs: async (context) => {
-      const { commit } = subActionContext(context); // eslint-disable-line
+      const { commit } = subActionContext(context);
       commit.startLoading();
       try {
         const res = await fetch(`http://localhost/gql`, {
@@ -243,8 +242,8 @@ const SubMod = defineModule({
       state.subsArr = subs;
     },
     setSub: (state, sub: Sub) => (state.sub = sub),
-    updatePostPoints: (state, post: Post) => {
-      if (state.posts) {
+    Sub_updatePostPoints: (state, post: Post) => {
+      if (state.posts.length > 0) {
         const index = state.posts.findIndex((v) => {
           return v._id === post._id;
         });

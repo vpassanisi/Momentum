@@ -46,15 +46,17 @@ class Comment:
         self.post = comment_doc['post']
         self.parent = comment_doc['parent']
         self.root = comment_doc['root']
+        self.points = comment_doc['points']
         self.createdAt = comment_doc['createdAt']
 
     def get_comment(self):
         return {
-            '_id': self.id,
+            '_id': str(self.id),
             'body': self.body,
             'user': str(self.user),
             'post': str(self.post),
             'parent': str(self.parent),
             'root': str(self.root),
+            'points': self.points,
             'createdAt': self.createdAt
         }

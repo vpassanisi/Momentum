@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/member-delimiter-style */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 import { defineModule } from "direct-vuex";
 import { moduleActionContext } from "../index";
 import router from "@/router/index";
@@ -25,7 +29,7 @@ const PostMod = defineModule({
   state,
   actions: {
     getPostAndComments: async (context, postID: string) => {
-      const { commit, rootCommit } = postActionContext(context); // eslint-disable-line
+      const { commit, rootCommit } = postActionContext(context);
       commit.startLoading();
       try {
         const res = await fetch(`/gql`, {
@@ -79,8 +83,8 @@ const PostMod = defineModule({
       }
       commit.endLoading();
     },
-    createPost: async (context, obj: CreatePostObj) => {
-      const { commit } = postActionContext(context); // eslint-disable-line
+    createPost: async (context, obj: {subId: string, post: {title: string, body: string}}) => {
+      const { commit } = postActionContext(context);
       commit.startLoading();
       try {
         const res = await fetch(`/api/v1/posts/${obj.subId}`, {
@@ -111,7 +115,7 @@ const PostMod = defineModule({
       state.postError = error;
       setTimeout(() => (state.postError = ""), 3000);
     },
-    updatePostPoints: (state, points: number) => {
+    Post_updatePostPoints: (state, points: number) => {
       if (state.post) {
         state.post.points = points;
       }

@@ -81,73 +81,58 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import type {PostType} from "../store/modules/SubState"
+import type {Post} from "../store/modules/types"
 
 export default defineComponent({
   name: "Post",
   components: {},
   props: {
     postData: {
-      type: Object as PropType<PostType>,
+      type: Object as PropType<Post>,
       required: true,
     },
   },
   data() {
     return {
       isActive: undefined as boolean | undefined,
-      formatedTime: null,
+      formatedTime: null as string | null,
     };
   },
   computed: {
     isAuthenticated(): boolean {
-      return this.$store.state.AuthState.isAuthenticated
+      return this.$store.direct.state.AuthMod.isAuthenticated
     },
     isDarkMode(): boolean {
-      return this.$store.state.DarkModeState.isDarkMode
+      return this.$store.direct.state.DarkModeMod.isDarkMode
     },
     points(): Record<string, boolean> {
-      return this.$store.state.PointState.points;
+      return this.$store.direct.state.PointMod.points;
     },
   },
   methods: {
-    getTimeSince(n: number) {
-      return this.$store.dispatch("EventState/getTimeSince", n)
-    },
-    decrementPost(x: string) {
-      this.$store.dispatch("PointState/decrementPost", x)
-    },
-    incrementPost(x: string) {
-      this.$store.dispatch("PointState/incrementPost", x)
-    },
-    removePostPoint(x: string) {
-      this.$store.dispatch("PointState/removePostPoint", x)
-    },
-    handleClick() {
-      this.$router.push(`/${this.postData._id}`);
-    },
     async handleUp() {
       if (!this.isAuthenticated) return;
       if (this.isActive === true) {
         this.isActive = undefined;
-        await this.removePostPoint(this.postData._id);
+        await this.$store.direct.dispatch.removePostPoint(this.postData._id)
       } else {
         this.isActive = true;
-        await this.incrementPost(this.postData._id);
+        await this.$store.direct.dispatch.incrementPost(this.postData._id)
       }
     },
     async handleDown() {
       if (!this.isAuthenticated) return;
       if (this.isActive === false) {
         this.isActive = undefined;
-        await this.removePostPoint(this.postData._id);
+        await this.$store.direct.dispatch.removePostPoint(this.postData._id)
       } else {
         this.isActive = false;
-        await this.decrementPost(this.postData._id);
+        await this.$store.direct.dispatch.decrementPost(this.postData._id)
       }
     },
   },
   mounted: async function() {
-    this.formatedTime = await this.getTimeSince(this.postData.createdAt);
+    this.formatedTime = await this.$store.direct.dispatch.getTimeSince(this.postData.createdAt)
 
     this.isActive = this.points[this.postData._id];
   },

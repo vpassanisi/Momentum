@@ -13,13 +13,18 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
 export default defineComponent({
   name: "Error",
   computed: {
-    ...mapState("AuthState", ["authError"]),
-    ...mapState("SubState", ["subError"]),
-    ...mapState("PostState", ["postError"]),
+    authError(): string {
+      return this.$store.direct.state.AuthMod.authError;
+    },
+    subError(): string {
+      return this.$store.direct.state.SubMod.subError;
+    },
+    postError(): string {
+      return this.$store.direct.state.PostMod.postError;
+    },
   },
 });
 </script>

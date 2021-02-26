@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="relative">
+  <div ref="container" class="relative container placeholder-red-500">
     <div ref="editor" v-html="value"></div>
   </div>
 </template>
@@ -33,12 +33,10 @@ export default {
   },
   mounted() {
     this.editor = new Quill(this.$refs.editor, {
-      modules: {
-        toolbar: this.$refs.toolbar,
-      },
       bounds: this.$refs.container,
       theme: this.theme,
       readOnly: this.readOnly,
+      placeholder: ". . .",
     });
 
     this.editor.root.innerHTML = this.value;

@@ -22,8 +22,8 @@
 </template>
 
 <script lang="ts">
+import { Sub, Post } from "@/store/modules/types";
 import { defineComponent } from "vue";
-import { mapState, mapActions } from "vuex";
 
 export default defineComponent({
   name: "About",
@@ -33,14 +33,22 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("SubState", ["sub", "posts"]),
-    ...mapState("AuthState", ["isAuthenticated"]),
-  },
-  methods: {
-    ...mapActions("EventState", ["getTimeSince"]),
+    isAuthenticated(): boolean {
+      return this.$store.direct.state.AuthMod.isAuthenticated;
+    },
+    sub(): Sub | null {
+      return this.$store.direct.state.SubMod.sub;
+    },
+    posts(): Post[] {
+      return this.$store.direct.state.SubMod.posts;
+    },
   },
   mounted: async function() {
-    this.formatedTime = await this.getTimeSince(this.sub.createdAt);
+    if (this.sub) {
+      this.formatedTime = await this.$store.direct.dispatch.getTimeSince(
+        this.sub.createdAt
+      );
+    }
   },
 });
 </script>

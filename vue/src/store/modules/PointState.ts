@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 import { defineModule } from "direct-vuex";
 import { moduleActionContext } from "../index";
+import  type {Comment, Post} from "./types"
 
 const state = () => ({
   points: {} as Record<string, boolean>,
@@ -14,7 +17,7 @@ const PointMod = defineModule({
   state,
   actions: {
     getPoints: async (context, targetIDs) => {
-      const { commit } = pointActionContext(context); // eslint-disable-line
+      const { commit } = pointActionContext(context);
       commit.startLoading();
       try {
         const res = await fetch(`/gql`, {
@@ -46,15 +49,25 @@ const PointMod = defineModule({
       commit.endLoading();
     },
     incrementComment: async (context, id: string) => {
-      const { commit } = pointActionContext(context); // eslint-disable-line
+      const { commit, rootCommit } = pointActionContext(context);
       try {
         const res = await fetch(`/gql`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             query: `
-            
-            `,
+            mutation Input($commentID: String) {
+              increment(commentID: $commentID) {
+                comment {
+                  _id
+                  parent
+                  points
+                }
+              }
+            }`,
+            variables: {
+              commentID: id,
+            },
           }),
         });
 
@@ -62,44 +75,54 @@ const PointMod = defineModule({
 
         if (errors) throw Error(errors[0].message);
 
-        // if (json.success) {
-        //   commit("incrementCommentSuccess", json.data.point);
-        //   commit("CommentState/updateCommentPoints", json.data.comment, {
-        //     root: true,
-        //   });
-        // } else {
-        //   commit("incrementCommentFail", json.message);
-        // }
+        const comment: Comment = data.increment.comment
+
+        commit.updatePoints({[comment._id]: true})
+        rootCommit.updateCommentPoints(comment)
+       
       } catch (error) {
         console.log(error);
         commit.setPointError(error.message);
       }
     },
-    decrementComment: async ({ commit }, id: string) => {
+    decrementComment: async (context, id: string) => {
+      const { commit, rootCommit } = pointActionContext(context);
       try {
-        const res = await fetch(
-          `/api/v1/points/decrement/?type=comment&id=${id}`,
-          {
-            method: "POST",
-          }
-        );
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            mutation Input($commentID: String) {
+              decrement(commentID: $commentID) {
+                comment {
+                  _id
+                  parent
+                  points
+                }
+              }
+            }`,
+            variables: {
+              commentID: id,
+            },
+          }),
+        });
 
-        const json = await res.json();
+        const { errors, data } = await res.json();
 
-        if (json.success) {
-          commit("decrementCommentSuccess", json.data.point);
-          commit("CommentState/updateCommentPoints", json.data.comment, {
-            root: true,
-          });
-        } else {
-          commit("decrementCommentFail", json.message);
-        }
+        if (errors) throw Error(errors[0].message);
+
+        const comment: Comment = data.decrement.comment
+          
+        commit.updatePoints({[comment._id]: false})
+        rootCommit.updateCommentPoints(comment)
       } catch (error) {
-        console.log(error);
-        commit("decrementCommentFail", "Promise rejected with an error");
+        console.log(error.message);
+        commit.setPointError(error.message)
       }
     },
-    incrementPost: async ({ commit }, id: string) => {
+    incrementPost: async (context, id: string) => {
+      const { commit, rootCommit } = pointActionContext(context);
       try {
         const res = await fetch(`/gql`, {
           method: "POST",
@@ -124,19 +147,18 @@ const PointMod = defineModule({
 
         if (errors) throw Error(errors[0].message);
 
-        commit("incrementPostSuccess", data.increment.post);
-        commit("PostState/updatePostPoints", data.increment.post.points, {
-          root: true,
-        });
-        commit("SubState/updatePostPoints", data.increment.post, {
-          root: true,
-        });
+        const post: Post = data.increment.post
+
+        commit.updatePoints({[post._id]: true})
+        rootCommit.Post_updatePostPoints(post.points)
+        rootCommit.SubMod.Sub_updatePostPoints(post)
       } catch (error) {
         console.log(error);
-        commit("incrementPostFail", error.message);
+        commit.setPointError(error.message)
       }
     },
-    decrementPost: async ({ commit }, postID: string) => {
+    decrementPost: async (context, postID: string) => {
+      const { commit, rootCommit } = pointActionContext(context);
       try {
         const res = await fetch(`/gql`, {
           method: "POST",
@@ -161,19 +183,54 @@ const PointMod = defineModule({
 
         if (errors) throw Error(errors[0].message);
 
-        commit("decrementPostSuccess", data.decrement.post);
-        commit("PostState/updatePostPoints", data.decrement.post.points, {
-          root: true,
-        });
-        commit("SubState/updatePostPoints", data.decrement.post, {
-          root: true,
-        });
+        const post: Post = data.decrement.post
+
+        commit.updatePoints({[post._id]: false})
+        rootCommit.Post_updatePostPoints(post.points)
+        rootCommit.SubMod.Sub_updatePostPoints(post)
       } catch (error) {
         console.log(error);
-        commit("decrementPostFail", error.message);
+        commit.setPointError(error.message)
       }
     },
-    removePostPoint: async ({ commit }, postID: string) => {
+    removeCommentPoint: async (context, commentID: string) => {
+      const {commit, rootCommit} = pointActionContext(context)
+      try {
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            mutation Input($commentID: String) {
+              remove(commentID: $commentID) {
+                comment {
+                  _id
+                  parent
+                  points
+                }
+              }
+            }`,
+            variables: {
+              commentID: commentID,
+            },
+          }),
+        });
+
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        const comment: Comment = data.remove.comment
+
+        commit.deletePoint(comment._id)
+        rootCommit.updateCommentPoints(comment)
+      } catch (error) {
+        console.log(error.message)
+        commit.setPointError(error.message)
+      }
+    },
+    removePostPoint: async (context, postID: string) => {
+      const { commit, rootCommit } = pointActionContext(context);
       try {
         const res = await fetch(`/gql`, {
           method: "POST",
@@ -198,14 +255,14 @@ const PointMod = defineModule({
 
         if (errors) throw Error(errors[0].message);
 
-        commit("removePointSuccess", data.remove.post._id);
-        commit("SubState/updatePostPoints", data.remove.post, { root: true });
-        commit("PostState/updatePostPoints", data.remove.post.points, {
-          root: true,
-        });
+        const post: Post = data.remove.post
+
+        commit.deletePoint(post._id)
+        rootCommit.SubMod.Sub_updatePostPoints(post)
+        rootCommit.Post_updatePostPoints(post.points)
       } catch (error) {
         console.log(error);
-        commit("removePointFail", error.message);
+        commit.setPointError(error.message)
       }
     },
   },
@@ -222,10 +279,10 @@ const PointMod = defineModule({
       state.pointError = error;
       setTimeout(() => (state.pointError = ""), 3000);
     },
-    updatePoints: (state, obj: Record<string, boolean>) => {
-      state.points = { ...state.points, ...obj };
+    updatePoints: (state, newPoints: Record<string, boolean>) => {
+      state.points = { ...state.points, ...newPoints };
     },
-    removePointSuccess: (state, targetId) => {
+    deletePoint: (state, targetId: string) => {
       delete state.points[targetId];
     },
     setTargetIDs: (state, arr: string[]) => {

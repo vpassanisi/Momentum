@@ -22,7 +22,7 @@ export default defineComponent({
     },
   },
   mounted: async function () {
-    this.$store.direct.dispatch.getSubs()
+    this.$store.direct.dispatch.SubMod.getSubs()
   },
 });
 </script>

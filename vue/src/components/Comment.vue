@@ -102,8 +102,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions } from "vuex";
-import type {Comment} from "../store/modules/CommentState"
+import type {Comment} from "../store/modules/types"
 import NewCommentEditor from "./NewCommentEditor.vue";
 import QuillEditor from "./QuillEditor.vue";
 
@@ -123,33 +122,26 @@ export default defineComponent({
   data() {
     return {
       isActive: undefined as undefined | boolean,
-      formatedTime: null,
+      formatedTime: null as string | null,
       isReplyOpen: false,
       isOpen: true,
     };
   },
   computed: {
     isAuthenticated(): boolean {
-      return this.$store.state.AuthState.isAuthenticated
+      return this.$store.direct.state.AuthMod.isAuthenticated
     },
     targetIDs(): string[] {
-      return this.$store.state.PointState.targetIDs
+      return this.$store.direct.state.PointMod.targetIDs
     },
     points(): Record<string, boolean> {
-      return this.$store.state.PointState.points
+      return this.$store.direct.state.PointMod.points
     },
     comments(): Record<string, Comment[]> {
-      return this.$store.state.CommentState.comments
+      return this.$store.direct.state.CommentMod.comments
     }
   },
   methods: {
-    ...mapActions("EventState", ["getTimeSince"]),
-    ...mapActions("PointState", [
-      "getPoints",
-      "incrementComment",
-      "decrementComment",
-      "removePoint",
-    ]),
     close() {
       this.isOpen = false;
     },
@@ -166,25 +158,25 @@ export default defineComponent({
       if (!this.isAuthenticated) return;
       if (this.isActive === true) {
         this.isActive = undefined;
-        await this.removePoint({ targetId: this.comment._id, type: "comment" });
+        await this.$store.direct.dispatch.removeCommentPoint(this.comment._id)
         } else {
         this.isActive = true;
-        await this.incrementComment(this.comment._id);
+        await this.$store.direct.dispatch.incrementComment(this.comment._id)
       }
     },
     async handleDown() {
       if (!this.isAuthenticated) return;
       if (this.isActive === false) {
         this.isActive = undefined;
-        await this.removePoint({ targetId: this.comment._id, type: "comment" });
+        await this.$store.direct.dispatch.removeCommentPoint(this.comment._id)
       } else {
         this.isActive = false;
-        await this.decrementComment(this.comment._id);
+        await this.$store.direct.dispatch.decrementComment(this.comment._id)
       }
     },
   },
   mounted: async function() {
-    this.formatedTime = await this.getTimeSince(this.comment.createdAt);
+    this.formatedTime = await this.$store.direct.dispatch.getTimeSince(this.comment.createdAt)
 
     this.isActive = this.points[this.comment._id];
   },
