@@ -1,4 +1,5 @@
 import DarkModeMod from "./modules/DarkMode";
+import DataMod from "./modules/DataState";
 import SubMod from "./modules/SubState";
 import PostMod from "./modules/PostState";
 import CommentMod from "./modules/CommentState";
@@ -18,13 +19,11 @@ const {
     version: 0.1,
   },
   modules: {
-    SubMod,
+    DataMod,
+    PointMod,
     DarkModeMod,
     AuthMod,
     EventMod,
-    PostMod,
-    PointMod,
-    CommentMod,
   },
 });
 

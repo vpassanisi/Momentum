@@ -13,6 +13,120 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+func CommentsMap(w http.ResponseWriter, req *http.Request) {
+
+	var data commentsMapReq
+	err := json.NewDecoder(req.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, "failed to decode request body", 400)
+		return
+	}
+
+	postID, err := primitive.ObjectIDFromHex(data.PostID)
+	if err != nil {
+		http.Error(w, "not a valid objectID", 400)
+		return
+	}
+
+	var sortElements bson.D
+	if data.Order == -1 || data.Order != 1 {
+		data.Order = -1
+	}
+	if data.SortBy == "" {
+		data.SortBy = "points"
+	}
+	sortElements = append(sortElements, bson.E{data.SortBy, data.Order})
+	sortElements = append(sortElements, bson.E{"createdAt", -1})
+
+	// -- get root comments and populate user field and sort -- //
+	matchArr := bson.A{bson.M{"post": postID}, bson.M{"parent": postID}}
+	matchStage := bson.D{{"$match", bson.M{"$and": matchArr}}}
+	sortStage := bson.D{{"$sort", sortElements}}
+	limitStage := bson.D{{"$limit", 10}}
+	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}
+	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$user"}, {"preserveNullAndEmptyArrays", false}}}}
+
+	rootCommentsCursor, err := db.Client.Database("Project-S").Collection("Comments").Aggregate(req.Context(), mongo.Pipeline{matchStage, sortStage, limitStage, lookupStage, unwindStage})
+	if err != nil {
+		http.Error(w, "query error", 400)
+		return
+	}
+
+	rootComments := []commentPopulated{}
+
+	err = rootCommentsCursor.All(req.Context(), &rootComments)
+	if err != nil {
+		http.Error(w, "cursor loop", 400)
+		return
+	}
+
+	if len(rootComments) == 0 {
+		var res map[string]commentPopulated
+		json, err := json.Marshal(res)
+		if err != nil {
+			http.Error(w, "There was an error during json marshal", 500)
+			return
+		}
+		w.Write(json)
+		return
+	}
+
+	// -- get comments based on root comments and build comments map -- //
+	arr := bson.A{}
+
+	for _, v := range rootComments {
+		item := bson.M{"root": v.ID}
+		arr = append(arr, item)
+	}
+
+	matchStage = bson.D{{"$match", bson.M{"$or": arr}}}
+
+	nonRootComentsCursor, err := db.Client.Database("Project-S").Collection("Comments").Aggregate(req.Context(), mongo.Pipeline{matchStage, sortStage, lookupStage, unwindStage})
+	if err != nil {
+		http.Error(w, "comment tree query error", 500)
+		return
+	}
+
+	nonRootComents := []commentPopulated{}
+
+	err = nonRootComentsCursor.All(req.Context(), &nonRootComents)
+	if err != nil {
+		http.Error(w, "comment tree loop error", 500)
+		return
+	}
+
+	m := map[string][]commentPopulated{}
+
+	m[postID.Hex()] = rootComments
+
+	for _, v := range rootComments {
+		if m[v.ID.Hex()] == nil {
+			m[v.ID.Hex()] = []commentPopulated{}
+		}
+	}
+
+	for _, v := range nonRootComents {
+		if m[v.ID.Hex()] == nil {
+			m[v.ID.Hex()] = []commentPopulated{}
+		}
+
+		if m[v.Parent.Hex()] == nil {
+			m[v.Parent.Hex()] = []commentPopulated{}
+		}
+
+		m[v.Parent.Hex()] = append(m[v.Parent.Hex()], v)
+	}
+
+	// -- respond-- //
+	json, err := json.Marshal(m)
+	if err != nil {
+		http.Error(w, "There was an error during json marshal", 500)
+		return
+	}
+
+	w.Write(json)
+}
+
 func Comments(w http.ResponseWriter, req *http.Request) {
 
 	var data commentsReq

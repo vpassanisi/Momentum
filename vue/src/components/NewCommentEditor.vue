@@ -7,7 +7,10 @@
     >
       <i class="material-icons">clear</i>
     </button>
-    <div ref="newCommentContainer">
+    <small class="dark:text-gray-400 text-gray-500"
+      >comment as {{ name }}</small
+    >
+    <div ref="newCommentContainer" class="mt-2">
       <div ref="newCommentEditor" style="min-height: 10rem;" />
       <div
         class="flex items-center justify-end border-l border-r border-b border-gray-400 p-1"
@@ -88,13 +91,16 @@ export default defineComponent({
     isDarkMode(): boolean {
       return this.$store.direct.state.DarkModeMod.isDarkMode;
     },
+    name(): string {
+      return this.$store.direct.state.AuthMod.name;
+    },
   },
   methods: {
     openLoginModal() {
       this.$store.direct.commit.openLoginModal();
     },
     async handleComment() {
-      await this.$store.direct.dispatch.newComment({
+      await this.$store.direct.dispatch.DataMod.newComment({
         postID: this.postId,
         body: this.body,
         parentID: this.parentId,

@@ -10,6 +10,13 @@ type commentsReq struct {
 	LastCreatedAt int64  `json:"lastCreatedAt"`
 }
 
+type commentsMapReq struct {
+	PostID    string `json:"postID"`
+	SortBy    string `json:"sortBy"`
+	Order     int8   `json:"order"`
+	LastValue int64  `json:"lastValue"`
+}
+
 type user struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Name      string             `json:"name"`

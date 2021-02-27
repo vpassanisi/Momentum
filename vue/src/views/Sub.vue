@@ -12,7 +12,6 @@ import Banner from "../components/Banner.vue";
 import Header from "../components/Header.vue";
 import Content from "../components/Content.vue";
 import { Sub } from "../store/modules/types";
-import store from "@/store";
 
 export default defineComponent({
   name: "Sub",
@@ -22,27 +21,27 @@ export default defineComponent({
     Content,
   },
   computed: {
-    subError(): string {
-      return this.$store.direct.state.SubMod.subError;
+    dataError(): string {
+      return this.$store.direct.state.DataMod.error;
     },
-    sub(): Sub | null {
-      return this.$store.direct.state.SubMod.sub;
+    sub(): Sub {
+      return this.$store.direct.state.DataMod.subs[0];
     },
     isAuthenticated(): boolean {
       return this.$store.direct.state.AuthMod.isAuthenticated;
     },
   },
   mounted: async function() {
-    await this.$store.direct.dispatch.SubMod.subAndPosts({
-      sub: this.$route.params.sub as string,
-      sort: "points",
+    await this.$store.direct.dispatch.DataMod.subInit({
+      subName: this.$route.params.sub as string,
       order: -1,
+      sortBy: "points",
     });
 
-    if (this.subError) this.$router.push("/NotFound");
+    if (this.dataError) this.$router.push("/NotFound");
     if (this.isAuthenticated)
       this.$store.direct.dispatch.getPoints(
-        this.$store.direct.getters.SubMod.targetIDs
+        this.$store.direct.getters.DataMod.targetIDs
       );
   },
 });

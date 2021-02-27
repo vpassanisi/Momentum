@@ -1,5 +1,5 @@
 <template>
-  <div v-if="post !== null && sub !== null" class="flex justify-center mt-32">
+  <div v-if="post && sub" class="flex justify-center mt-32">
     <div class="grid gap-6 grid-cols-1 md:grid-cols-3 w-90p max-w-screen-lg">
       <div
         class="md:col-span-2 p-4 rounded bg-white dark:bg-dark-gray-800 shadow border border-gray-400 dark:border-gray-700 mb-12"
@@ -98,13 +98,13 @@
             <button class="flex ml-4 focus:outline-none" @click="handleOrder">
               <i
                 class="material-icons transition-transform transform duration-300 ease-in-out"
-                :class="[pagination.order === 1 ? 'rotate-180' : '']"
+                :class="[order === 1 ? 'rotate-180' : '']"
                 >south</i
               >
             </button>
           </div>
         </div>
-        <Comment
+        <comment-c
           v-for="com in comments[post._id]"
           :key="com._id"
           :comment="com"
@@ -128,48 +128,49 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions } from "vuex";
-import Comment from "../components/Comment.vue";
+import CommentC from "../components/Comment.vue";
 import About from "../components/About.vue";
 import QuillEditor from "../components/QuillEditor.vue";
-import { Sub } from "../store/modules/types";
+import { Sub, Post, Comment } from "../store/modules/types";
 import NewCommentEditor from "../components/NewCommentEditor.vue";
 
 export default defineComponent({
   name: "Thread",
   components: {
     About,
-    Comment,
+    CommentC,
     QuillEditor,
     NewCommentEditor,
   },
   data() {
     return {
       sort: "points",
+      order: -1,
       isActive: undefined as undefined | boolean,
       formatedTime: null as null | string,
     };
   },
   computed: {
-    post() {
-      return this.$store.direct.state.PostMod.post;
+    post(): Post | undefined {
+      return this.$store.direct.state.DataMod.subs?.[0]?.posts?.[0];
     },
     moreComments(): boolean {
-      return this.$store.direct.state.CommentMod.moreComments;
+      return false;
     },
-    pagination() {
-      return this.$store.direct.state.CommentMod.pagination;
-    },
-    comments() {
-      return this.$store.direct.state.CommentMod.comments;
+    comments(): Record<string, Comment[]> {
+      return (
+        this.$store.direct.state.DataMod.subs?.[0]?.posts?.[0]?.commentsMap ??
+        {}
+      );
     },
     points(): Record<string, boolean> {
       return this.$store.direct.state.PointMod.points;
     },
-    targetIDs(): string[] {
-      return this.$store.direct.state.PointMod.targetIDs;
+    targetIDs(): readonly string[] {
+      return this.$store.direct.getters.DataMod.targetIDs;
     },
-    sub(): Sub | null {
-      return this.$store.direct.state.SubMod.sub;
+    sub(): Sub | undefined {
+      return this.$store.direct.state.DataMod.subs?.[0];
     },
     isAuthenticated(): boolean {
       return this.$store.direct.state.AuthMod.isAuthenticated;
@@ -200,22 +201,27 @@ export default defineComponent({
       }
     },
     async handleChangeSort() {
-      await this.$store.direct.commit.setPagination({
-        sort: this.sort,
+      await this.$store.direct.dispatch.DataMod.threadInit({
+        subName: this.$route.params.sub as string,
+        postID: this.$route.params.id as string,
+        sortBy: this.sort,
+        order: this.order,
+        lastValue: this.$store.direct.getters.DataMod.lastValueCreatedAt,
       });
-
-      await this.updateComments();
       if (this.isAuthenticated)
         await this.$store.direct.dispatch.getPoints(this.targetIDs);
     },
     async handleOrder() {
-      const order = this.pagination.order === 1 ? -1 : 1;
+      this.order = this.order === 1 ? -1 : 1;
 
-      await this.setPagination({
-        order: order,
+      await this.$store.direct.dispatch.DataMod.threadInit({
+        subName: this.$route.params.sub as string,
+        postID: this.$route.params.id as string,
+        sortBy: this.sort,
+        order: this.order,
+        lastValue: this.$store.direct.getters.DataMod.lastValueCreatedAt,
       });
 
-      await this.updateComments();
       if (this.isAuthenticated)
         await this.$store.direct.dispatch.getPoints(this.targetIDs);
     },
@@ -226,9 +232,13 @@ export default defineComponent({
     },
   },
   mounted: async function() {
-    await this.$store.direct.dispatch.getPostAndComments(
-      this.$route.params.id as string
-    );
+    await this.$store.direct.dispatch.DataMod.threadInit({
+      subName: this.$route.params.sub as string,
+      postID: this.$route.params.id as string,
+      sortBy: this.sort,
+      order: this.order,
+      lastValue: this.$store.direct.getters.DataMod.lastValueCreatedAt,
+    });
 
     if (this.isAuthenticated)
       await this.$store.direct.dispatch.getPoints(this.targetIDs);
@@ -240,10 +250,6 @@ export default defineComponent({
         this.post.createdAt
       );
     }
-
-    await this.$store.direct.dispatch.SubMod.getSubByName(
-      this.$route.params.sub as string
-    );
   },
   watch: {
     points: function() {
@@ -253,8 +259,7 @@ export default defineComponent({
     },
   },
   beforeUnmount() {
-    this.$store.direct.commit.clearPostsState();
-    this.$store.direct.commit.clearCommentState();
+    this.$store.direct.commit.DataMod.clearDataState();
     this.$store.direct.commit.clearPointState();
   },
 });

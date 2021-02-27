@@ -25,15 +25,10 @@ const setColors = (
   colorPrimaryDark: string
 ) => {
   const colorsEl = document.getElementById("colors");
-  if (colorsEl && colorPrimary !== "") {
-    colorsEl.style.setProperty("--primary", colorPrimary);
-  }
-  if (colorsEl && colorPrimaryLight !== "") {
-    colorsEl.style.setProperty("--primary-light", colorPrimaryLight);
-  }
-  if (colorsEl && colorPrimaryDark !== "") {
-    colorsEl.style.setProperty("--primary-dark", colorPrimaryDark);
-  }
+  if(!colorsEl || !colorPrimary || !colorPrimaryLight || colorPrimaryDark) return
+  colorsEl.style.setProperty("--primary", colorPrimary);
+  colorsEl.style.setProperty("--primary-light", colorPrimaryLight);
+  colorsEl.style.setProperty("--primary-dark", colorPrimaryDark);
 };
 
 const state = () => ({

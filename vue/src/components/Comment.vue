@@ -131,14 +131,11 @@ export default defineComponent({
     isAuthenticated(): boolean {
       return this.$store.direct.state.AuthMod.isAuthenticated
     },
-    targetIDs(): string[] {
-      return this.$store.direct.state.PointMod.targetIDs
-    },
     points(): Record<string, boolean> {
       return this.$store.direct.state.PointMod.points
     },
     comments(): Record<string, Comment[]> {
-      return this.$store.direct.state.CommentMod.comments
+      return this.$store.direct.state.DataMod.subs[0]?.posts?.[0]?.commentsMap ?? {}
     }
   },
   methods: {

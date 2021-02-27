@@ -8,6 +8,7 @@ export interface Sub {
   colorPrimary: string;
   colorPrimaryLight: string;
   colorPrimaryDark: string;
+  posts?: Post[];
 }
 
 export interface User {
@@ -22,6 +23,7 @@ export interface Post {
   points: number;
   sub: string;
   createdAt: number;
+  commentsMap?: Record<string, Comment[]>;
 }
 
 export interface Comment {
@@ -31,5 +33,6 @@ export interface Comment {
   user: string;
   post: string;
   parent: string;
+  root: string;
   createdAt: number;
 }

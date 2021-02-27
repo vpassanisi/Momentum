@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { Sub, Post } from "@/store/modules/types";
+import { Sub } from "@/store/modules/types";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -36,11 +36,8 @@ export default defineComponent({
     isAuthenticated(): boolean {
       return this.$store.direct.state.AuthMod.isAuthenticated;
     },
-    sub(): Sub | null {
-      return this.$store.direct.state.SubMod.sub;
-    },
-    posts(): Post[] {
-      return this.$store.direct.state.SubMod.posts;
+    sub(): Sub {
+      return this.$store.direct.state.DataMod.subs[0];
     },
   },
   mounted: async function() {

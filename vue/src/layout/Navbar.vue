@@ -161,12 +161,9 @@
       <Error />
     </div>
     <div
-      class="progress-line mt-2"
-      :class="[
-        isAuthLoading || isPostLoading || isSubLoading
-          ? 'visible'
-          : 'invisible',
-      ]"
+      class="absolute progress-line"
+      style="bottom: -3px;"
+      :class="[isDataLoading || isAuthLoading ? 'visible' : 'invisible']"
     />
   </nav>
 </template>
@@ -198,8 +195,8 @@ export default defineComponent({
     };
   },
   computed: {
-    isPostLoading(): boolean {
-      return this.$store.direct.state.PostMod.isPostLoading;
+    isDataLoading(): boolean {
+      return this.$store.direct.state.DataMod.isLoading;
     },
     name(): string {
       return this.$store.direct.state.AuthMod.name;
@@ -209,9 +206,6 @@ export default defineComponent({
     },
     isAuthenticated(): boolean {
       return this.$store.direct.state.AuthMod.isAuthenticated;
-    },
-    isSubLoading(): boolean {
-      return this.$store.direct.state.SubMod.isSubLoading;
     },
     isDarkMode(): boolean {
       return this.$store.direct.state.DarkModeMod.isDarkMode;

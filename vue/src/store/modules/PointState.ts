@@ -6,7 +6,6 @@ import  type {Comment, Post} from "./types"
 
 const state = () => ({
   points: {} as Record<string, boolean>,
-  targetIDs: [] as Array<string>,
   isPointLoading: false,
   pointError: "",
 });
@@ -78,8 +77,7 @@ const PointMod = defineModule({
         const comment: Comment = data.increment.comment
 
         commit.updatePoints({[comment._id]: true})
-        rootCommit.updateCommentPoints(comment)
-       
+        rootCommit.DataMod.updateCommentPoints(comment)
       } catch (error) {
         console.log(error);
         commit.setPointError(error.message);
@@ -115,7 +113,7 @@ const PointMod = defineModule({
         const comment: Comment = data.decrement.comment
           
         commit.updatePoints({[comment._id]: false})
-        rootCommit.updateCommentPoints(comment)
+        rootCommit.DataMod.updateCommentPoints(comment)
       } catch (error) {
         console.log(error.message);
         commit.setPointError(error.message)
@@ -150,8 +148,7 @@ const PointMod = defineModule({
         const post: Post = data.increment.post
 
         commit.updatePoints({[post._id]: true})
-        rootCommit.Post_updatePostPoints(post.points)
-        rootCommit.SubMod.Sub_updatePostPoints(post)
+        rootCommit.DataMod.updatePostPoints(post)
       } catch (error) {
         console.log(error);
         commit.setPointError(error.message)
@@ -186,8 +183,7 @@ const PointMod = defineModule({
         const post: Post = data.decrement.post
 
         commit.updatePoints({[post._id]: false})
-        rootCommit.Post_updatePostPoints(post.points)
-        rootCommit.SubMod.Sub_updatePostPoints(post)
+        rootCommit.DataMod.updatePostPoints(post)
       } catch (error) {
         console.log(error);
         commit.setPointError(error.message)
@@ -223,7 +219,7 @@ const PointMod = defineModule({
         const comment: Comment = data.remove.comment
 
         commit.deletePoint(comment._id)
-        rootCommit.updateCommentPoints(comment)
+        rootCommit.DataMod.updateCommentPoints(comment)
       } catch (error) {
         console.log(error.message)
         commit.setPointError(error.message)
@@ -258,8 +254,7 @@ const PointMod = defineModule({
         const post: Post = data.remove.post
 
         commit.deletePoint(post._id)
-        rootCommit.SubMod.Sub_updatePostPoints(post)
-        rootCommit.Post_updatePostPoints(post.points)
+        rootCommit.DataMod.updatePostPoints(post)
       } catch (error) {
         console.log(error);
         commit.setPointError(error.message)
@@ -284,12 +279,6 @@ const PointMod = defineModule({
     },
     deletePoint: (state, targetId: string) => {
       delete state.points[targetId];
-    },
-    setTargetIDs: (state, arr: string[]) => {
-      state.targetIDs = arr;
-    },
-    updateTargetIDs: (state, arr: string[]) => {
-      state.targetIDs = [...state.targetIDs, ...arr];
     },
   },
 });

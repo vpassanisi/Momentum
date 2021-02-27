@@ -18,11 +18,12 @@ export default defineComponent({
   },
   computed: {
     subsArr(): Sub[] {
-      return this.$store.direct.state.SubMod.subsArr
+      return this.$store.direct.state.DataMod.subs
     },
   },
   mounted: async function () {
-    this.$store.direct.dispatch.SubMod.getSubs()
+     await this.$store.direct.dispatch.DataMod.homeInit()
+     console.log(this.$store.direct.state.DataMod)
   },
 });
 </script>

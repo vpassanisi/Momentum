@@ -5,9 +5,10 @@ import (
 )
 
 type postsReq struct {
-	Sub   string `json:"sub"`
-	By    string `json:"by"`
-	Order int8   `json:"order"`
+	Sub    string `json:"sub"`
+	By     string `json:"sortBy"`
+	Order  int8   `json:"order"`
+	PostID string `json:"postID"`
 }
 
 type postReq struct {

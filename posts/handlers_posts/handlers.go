@@ -3,6 +3,7 @@ package handlers_posts
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	db "github.com/vpassanisi/Momentum/posts/db_posts"
@@ -38,7 +39,18 @@ func Posts(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	matchStage := bson.D{{"$match", bson.M{"sub": subID}}}
+	matchElements := bson.D{{"sub", subID}}
+	if data.PostID != "" {
+		postID, err := primitive.ObjectIDFromHex(data.PostID)
+		if err != nil {
+			http.Error(w, "not a valid objectID", 400)
+			return
+		}
+		matchElements = append(matchElements, bson.E{"_id", postID})
+	}
+
+	log.Print(data.By)
+	matchStage := bson.D{{"$match", matchElements}}
 	limitStage := bson.D{{"$limit", 10}}
 	sortStage := bson.D{{"$sort", bson.M{data.By: data.Order}}}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}

@@ -8,9 +8,9 @@
           <button
             class="flex flex-row items-center justify-center h-full p-2 focus:outline-none rounded-full mr-4"
             :class="[
-              sort === 'createdat' ? 'bg-gray-200 dark:bg-dark-gray-700' : '',
+              sort === 'createdAt' ? 'bg-gray-200 dark:bg-dark-gray-700' : '',
             ]"
-            @click="sort = 'createdat'"
+            @click="sort = 'createdAt'"
           >
             <svg
               class="fill-current inline h-full w-8 mr-2"
@@ -60,7 +60,7 @@
 import { defineComponent } from "vue";
 import About from "./About.vue";
 import PostC from "./Post.vue";
-import type { Sub, Post } from "../store/modules/types";
+import type { Post } from "../store/modules/types";
 
 export default defineComponent({
   name: "Content",
@@ -75,20 +75,13 @@ export default defineComponent({
     };
   },
   computed: {
-    sub(): Sub | null {
-      return this.$store.direct.state.SubMod.sub;
-    },
     posts(): Post[] {
-      return this.$store.direct.state.SubMod.posts;
+      return this.$store.direct.state.DataMod.subs[0].posts ?? []
     },
   },
   watch: {
     sort: function() {
-      this.$store.direct.dispatch.SubMod.subAndPosts({
-        sub: this.$route.params.sub as string,
-        sort: this.sort,
-        order: this.order,
-      })
+      this.$store.direct.dispatch.DataMod.subInit({subName: this.$route.params.sub as string, order: this.order, sortBy: this.sort})
     },
   },
 });
