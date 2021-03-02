@@ -1,7 +1,7 @@
 <template>
   <div
     @click="$router.push(`/s/${$route.params.sub}/comments/${postData._id}`)"
-    class="flex flex-row w-full bg-white dark:bg-dark-gray-800 mb-8 shadow border border-gray-400 dark:border-gray-700 rounded"
+    class="flex flex-row w-full bg-white dark:bg-dark-gray-800 mb-8 shadow border border-gray-400 dark:border-gray-700 rounded cursor-pointer"
     :class="[isDarkMode ? 'hover:border-gray-400' : 'hover:border-gray-700']"
   >
     <div class="bg-gray-200 dark:bg-gray-900 p-3 rounded-l w-13">
@@ -74,18 +74,21 @@
         Posted by {{ postData.user.name }} • {{ formatedTime }} ago
       </div>
       <div class="text-2xl font-medium">{{ postData.title }}</div>
-      <!-- <editor-content :editor="readOnlyEditor" /> -->
+      <read-only-editor :value="postData.body" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import ReadOnlyEditor from "./ReadOnlyEditor.vue"
 import type {Post} from "../store/modules/types"
 
 export default defineComponent({
   name: "Post",
-  components: {},
+  components: {
+    ReadOnlyEditor
+  },
   props: {
     postData: {
       type: Object as PropType<Post>,

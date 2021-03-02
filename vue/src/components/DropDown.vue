@@ -9,19 +9,22 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from "vue";
-import { mapActions } from "vuex";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "DropDown",
-  data: function () {
+  data: function() {
     return {
       isOpen: false,
     };
   },
   methods: {
-    ...mapActions("EventState", ["openLoginModal"]),
-    ...mapActions("AuthState", ["logout"]),
+    openLoginModal() {
+      this.$store.direct.commit.openLoginModal();
+    },
+    logOut() {
+      this.$store.direct.dispatch.logout();
+    },
     handleClick() {
       this.isOpen ? (this.isOpen = false) : (this.isOpen = true);
     },
@@ -30,14 +33,14 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.dropdown-enter,
+.dropdown-enter-from,
 .dropdown-leave-active {
   opacity: 0;
-  transform: translateY(-25%);
+  transform: translate(4%, -4%);
 }
 
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+  transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
 }
 </style>

@@ -50,19 +50,25 @@
         />
       </div>
       <div class="p-4 shadow bg-white dark:bg-dark-gray-800 rounded mt-8">
-        <div class="text-2xl font-thin mt-8">Theme</div>
-        <div class="flex flex-wrap">
-          <div class="mr-4">
-            <div class="text-2xl font-thin">Color: Primary-Light</div>
-            <chrome-picker v-model="primaryLight" />
+        <div class="text-2xl font-thin">Theme</div>
+        <div class="flex flex-wrap items-center justify-center">
+          <div class="flex flex-col items-center justify-center">
+            <div>Light Theme Color</div>
+            <div
+              class="h-20 w-20"
+              :style="`background-color: ${colorPrimaryLight};`"
+            />
           </div>
-          <div class="mr-4">
-            <div class="text-2xl font-thin">Color: Primary</div>
-            <chrome-picker v-model="primary" />
+          <div class="mx-8">
+            <div class="text-center text-2xl font-thin">Primary</div>
+            <div ref="colorPicker" />
           </div>
-          <div>
-            <div class="text-2xl font-thin">Color: Primary-Dark</div>
-            <chrome-picker v-model="primaryDark" />
+          <div class="flex flex-col items-center justify-center">
+            <div>Dark Theme Color</div>
+            <div
+              class="h-20 w-20"
+              :style="`background-color: ${colorPrimaryDark};`"
+            />
           </div>
         </div>
       </div>
@@ -79,45 +85,58 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Chrome } from "vue-color";
+import { defineComponent } from "vue";
 import { mapActions } from "vuex";
+import Picker from "vanilla-picker";
+import colorTransformer from "./util/colorTransform";
 
-export default Vue.extend({
+export default defineComponent({
   name: "CreateSub",
-  components: {
-    "chrome-picker": Chrome,
-  },
+  components: {},
   data: function() {
     return {
       name: "",
       description: "",
       banner: "",
       icon: "",
-      primary: {
-        hex: "#ffffff",
-      },
-      primaryLight: {
-        hex: "#ffffff",
-      },
-      primaryDark: {
-        hex: "#ffffff",
-      },
+      colorPrimary: "",
+      colorPrimaryLight: "",
+      colorPrimaryDark: "",
+      picker: {} as Picker,
     };
   },
   methods: {
     ...mapActions("SubState", ["createSub"]),
     handleCreate() {
-      this.createSub({
-        name: this.name,
-        description: this.description,
-        banner: this.banner,
-        icon: this.icon,
-        colorPrimary: this.primary.hex,
-        colorPrimaryLight: this.primaryLight.hex,
-        colorPrimaryDark: this.primaryDark.hex,
-      });
+      console.log(this.colorPrimaryDark);
+      // this.createSub({
+      //   name: this.name,
+      //   description: this.description,
+      //   banner: this.banner,
+      //   icon: this.icon,
+      //   colorPrimary: this.colorPrimary,
+      //   colorPrimaryLight: this.primaryLight,
+      //   colorPrimaryDark: this.primaryDark,
+      // });
     },
+    setColorPrimary(color: { hex: string }) {
+      this.colorPrimary = color.hex;
+      const l = colorTransformer.pSBC(0.5, color.hex, "", true);
+      const d = colorTransformer.pSBC(-0.5, color.hex, "", true);
+      if (l && d) {
+        this.colorPrimaryLight = l;
+        this.colorPrimaryDark = d;
+      }
+    },
+  },
+  mounted() {
+    this.picker = new Picker({
+      parent: this.$refs.colorPicker as HTMLElement,
+      color: "gold",
+      popup: false,
+      alpha: false,
+      onChange: this.setColorPrimary,
+    });
   },
 });
 </script>

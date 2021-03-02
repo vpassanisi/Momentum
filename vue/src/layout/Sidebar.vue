@@ -20,12 +20,14 @@
               v-if="isAuthenticated"
               class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
               @click="
-              () => {
-                handleLogout();
-                close();
-              }
-            "
-            >LOG OUT</button>
+                () => {
+                  handleLogout();
+                  close();
+                }
+              "
+            >
+              LOG OUT
+            </button>
             <button
               v-if="!isAuthenticated"
               class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
@@ -35,20 +37,22 @@
                   openLoginModal();
                 }
               "
-            >LOG IN</button>
+            >
+              LOG IN
+            </button>
             <button
               v-if="!isAuthenticated"
               class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
-            >SIGN UP</button>
+            >
+              SIGN UP
+            </button>
             <Collapse>
               <template v-slot:main>
                 <div
                   class="flex flex-row items-center justify-between focus:outline-none py-3 px-2"
                 >
-                  {{$router.currentRoute.params.sub ? $router.currentRoute.params.sub : $router.currentRoute.name}}
-                  <i
-                    class="material-icons"
-                  >arrow_drop_down</i>
+                  {{ $route.params.sub ? $route.params.sub : $route.name }}
+                  <i class="material-icons">arrow_drop_down</i>
                 </div>
               </template>
               <template v-slot:content>
@@ -65,12 +69,14 @@
                   <i class="material-icons mr-2">create</i> New Sub
                 </button>
                 <button
-                  v-if="$router.currentRoute.name !== 'Home'"
+                  v-if="$route.name !== 'Home'"
                   class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
-                  @click="() =>{
-                    $router.push('/');
-                    close();
-                    }"
+                  @click="
+                    () => {
+                      $router.push('/');
+                      close();
+                    }
+                  "
                 >
                   <i class="material-icons mr-2">home</i> Home
                 </button>

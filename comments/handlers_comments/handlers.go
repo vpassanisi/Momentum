@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -28,25 +29,27 @@ func CommentsMap(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var sortElements bson.D
-	if data.Order == -1 || data.Order != 1 {
-		data.Order = -1
+	op := "$lt"
+	if data.Order == 1 {
+		op = "$gt"
 	}
-	if data.SortBy == "" {
-		data.SortBy = "points"
+	matchArr := bson.A{bson.M{"post": postID}, bson.M{"parent": postID}}
+
+	if data.LastCreatedAt != 0 {
+		matchArr = append(matchArr, bson.M{"$or": bson.A{bson.M{data.SortBy: bson.M{op: data.LastValue}}, bson.M{data.SortBy: data.LastValue, "createdAt": bson.M{op: data.LastCreatedAt}}}})
 	}
-	sortElements = append(sortElements, bson.E{data.SortBy, data.Order})
-	sortElements = append(sortElements, bson.E{"createdAt", -1})
 
 	// -- get root comments and populate user field and sort -- //
-	matchArr := bson.A{bson.M{"post": postID}, bson.M{"parent": postID}}
+
 	matchStage := bson.D{{"$match", bson.M{"$and": matchArr}}}
-	sortStage := bson.D{{"$sort", sortElements}}
+	sortStage := bson.D{{"$sort", bson.M{data.SortBy: data.Order, "createdAt": data.Order}}}
 	limitStage := bson.D{{"$limit", 10}}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}
 	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$user"}, {"preserveNullAndEmptyArrays", false}}}}
 
-	rootCommentsCursor, err := db.Client.Database("Project-S").Collection("Comments").Aggregate(req.Context(), mongo.Pipeline{matchStage, sortStage, limitStage, lookupStage, unwindStage})
+	log.Print(sortStage)
+
+	rootCommentsCursor, err := db.Client.Database("Project-S").Collection("Comments").Aggregate(req.Context(), mongo.Pipeline{sortStage, matchStage, limitStage, lookupStage, unwindStage})
 	if err != nil {
 		http.Error(w, "query error", 400)
 		return
@@ -61,7 +64,7 @@ func CommentsMap(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if len(rootComments) == 0 {
-		var res map[string]commentPopulated
+		res := map[string][]commentPopulated{}
 		json, err := json.Marshal(res)
 		if err != nil {
 			http.Error(w, "There was an error during json marshal", 500)

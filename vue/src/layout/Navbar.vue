@@ -68,13 +68,10 @@
             </template>
             <template v-slot:content>
               <div
-                class="absolute w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
+                class="absolute left-0 w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
               >
                 <router-link
-                  v-if="
-                    isAuthenticated &&
-                      $router.currentRoute.name !== 'Create Sub'
-                  "
+                  v-if="isAuthenticated && $route.name !== 'Create Sub'"
                   class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
                   :to="{ path: `/subs/create` }"
                 >
@@ -83,8 +80,8 @@
                 <router-link
                   v-if="
                     isAuthenticated &&
-                      $router.currentRoute.name !== 'Create Post' &&
-                      $router.currentRoute.params.sub
+                      $route.name !== 'Create Post' &&
+                      $route.params.sub
                   "
                   class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
                   :to="{ path: `/s/${$route.params.sub}/create` }"
@@ -92,7 +89,7 @@
                   <i class="material-icons mr-2">create</i> Create Post
                 </router-link>
                 <router-link
-                  v-if="$router.currentRoute.name !== 'Home'"
+                  v-if="$route.name !== 'Home'"
                   class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
                   :to="{ path: `/` }"
                 >
@@ -115,7 +112,7 @@
             </template>
             <template v-slot:content>
               <div
-                class="absolute w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
+                class="absolute right-0 w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
               >
                 <button
                   v-if="!isAuthenticated"
@@ -141,7 +138,7 @@
               </div>
             </template>
           </DropDown>
-          <DarkModeToggle class="px-4" />
+          <DarkModeToggle />
         </div>
         <button
           class="flex md:hidden h-full items-center justify-center focus:outline-none px-2"

@@ -24,7 +24,7 @@ export default defineComponent({
     dataError(): string {
       return this.$store.direct.state.DataMod.error;
     },
-    sub(): Sub {
+    sub(): Sub | undefined {
       return this.$store.direct.state.DataMod.subs[0];
     },
     isAuthenticated(): boolean {

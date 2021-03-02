@@ -60,7 +60,7 @@
 import { defineComponent } from "vue";
 import About from "./About.vue";
 import PostC from "./Post.vue";
-import type { Post } from "../store/modules/types";
+import type { Post, Sub } from "../store/modules/types";
 
 export default defineComponent({
   name: "Content",

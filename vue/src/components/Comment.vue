@@ -51,7 +51,7 @@
           `${comment.user.name} • ${comment.points} Points • ${formatedTime} ago`
         }}
       </span>
-      <quill-editor :value="comment.body" :readOnly="true" :theme="'bubble'" />
+      <read-only-editor :value="comment.body" />
       <div v-if="isAuthenticated">
         <div v-if="isReplyOpen" class="flex flex-row">
           <div class="flex flex-col min-w-6">
@@ -104,13 +104,13 @@
 import { defineComponent, PropType } from "vue";
 import type {Comment} from "../store/modules/types"
 import NewCommentEditor from "./NewCommentEditor.vue";
-import QuillEditor from "./QuillEditor.vue";
+import ReadOnlyEditor from "./ReadOnlyEditor.vue";
 
 export default defineComponent({
   name: "Comment",
   components: {
     NewCommentEditor,
-    QuillEditor
+    ReadOnlyEditor
   },
   props: {
     comment: {

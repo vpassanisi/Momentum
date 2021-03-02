@@ -11,10 +11,11 @@ type commentsReq struct {
 }
 
 type commentsMapReq struct {
-	PostID    string `json:"postID"`
-	SortBy    string `json:"sortBy"`
-	Order     int8   `json:"order"`
-	LastValue int64  `json:"lastValue"`
+	PostID        string `json:"postID"`
+	SortBy        string `json:"sortBy"`
+	Order         int8   `json:"order"`
+	LastValue     int64  `json:"lastValue"`
+	LastCreatedAt int64  `json:"lastCreatedAt"`
 }
 
 type user struct {

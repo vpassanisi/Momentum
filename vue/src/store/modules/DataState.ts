@@ -2,12 +2,14 @@
 /* eslint-disable @typescript-eslint/member-delimiter-style */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
+import router from "@/router";
 import { defineModule } from "direct-vuex";
 import { moduleActionContext } from "../index";
 import { Sub, Comment, Post } from "./types";
 
 const state = () => ({
   subs: [] as Sub[],
+  moreComments: false,
   isLoading: false,
   error: "",
 });
@@ -58,7 +60,18 @@ const DataMod = defineModule({
 
       if (!postArr) return 0;
 
-      return Math.max(...postArr.map((comment) => comment.createdAt));
+      return postArr[postArr.length - 1].createdAt;
+    },
+    lastValuePoints: function(state): number {
+      const postID = state.subs[0]?.posts?.[0]?._id;
+
+      if (!postID) return 0;
+
+      const postArr = state.subs[0]?.posts?.[0]?.commentsMap?.[postID];
+
+      if (!postArr) return 0;
+
+      return postArr[postArr.length - 1].points;
     },
   },
   actions: {
@@ -94,6 +107,90 @@ const DataMod = defineModule({
         const subs: Sub[] = data.subs;
 
         commit.setSubs(subs);
+      } catch (error) {
+        console.log(error.message);
+        commit.error(error.message);
+      }
+      commit.endLoading();
+    },
+    async createPostInit(context, subName: string) {
+      const { commit } = dataActionContext(context);
+      commit.startLoading();
+      try {
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+            query Input($name: String) {
+                subs(name: $name) {
+                _id
+                name
+                description
+                banner
+                icon
+                createdAt
+                colorPrimary
+                colorPrimaryLight
+                colorPrimaryDark
+                }
+            }`,
+            variables: {
+              name: subName,
+            },
+          }),
+        });
+
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        const subs: Sub[] = data.subs;
+
+        commit.setSubs(subs);
+        setColors(subs[0]);
+      } catch (error) {
+        console.log(error.message);
+        commit.error(error.message);
+      }
+      commit.endLoading();
+    },
+    async createPost(
+      context,
+      x: { title: string; body: string; subID: string }
+    ) {
+      const { commit } = dataActionContext(context);
+      commit.startLoading();
+      try {
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+                  mutation Input($title: String, $body: String, $subID: String) {
+                    newPost(title: $title, body: $body, subID: $subID) {
+                      postID
+                    }
+                  }`,
+            variables: {
+              title: x.title,
+              body: x.body,
+              subID: x.subID,
+            },
+          }),
+        });
+
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        const postID: string = data.newPost.postID;
+
+        if (!postID) throw Error("failed to get new post ID");
+
+        router.push(
+          `/s/${router.currentRoute.value.params.sub}/comments/${postID}`
+        );
       } catch (error) {
         console.log(error.message);
         commit.error(error.message);
@@ -166,6 +263,7 @@ const DataMod = defineModule({
         sortBy: string;
         order: number;
         lastValue: number;
+        lastCreatedAt: number;
       }
     ) {
       const { commit } = dataActionContext(context);
@@ -176,7 +274,7 @@ const DataMod = defineModule({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             query: `
-            query Input($name: String, $postID: String, $sortBy: String, $order: Int, $lastValue: Int) {
+            query Input($name: String, $postID: String, $sortBy: String!, $order: Int!, $lastValue: Int!, $lastCreatedAt: Int!) {
                 subs(name: $name) {
                 _id
                 name
@@ -197,7 +295,7 @@ const DataMod = defineModule({
                       name
                     }
                     createdAt
-                    commentsMap(sortBy: $sortBy, order: $order, lastValue: $lastValue)
+                    commentsMap(sortBy: $sortBy, order: $order, lastValue: $lastValue, lastCreatedAt: $lastCreatedAt)
                     }
                 }
             }`,
@@ -207,6 +305,7 @@ const DataMod = defineModule({
               sortBy: x.sortBy,
               order: x.order,
               lastValue: x.lastValue,
+              lastCreatedAt: x.lastCreatedAt,
             },
           }),
         });
@@ -216,9 +315,14 @@ const DataMod = defineModule({
         if (errors) throw Error(errors[0].message);
 
         const subs: Sub[] = data.subs;
+        const commentsMap = subs?.[0]?.posts?.[0]?.commentsMap?.[x.postID];
 
         commit.setSubs(subs);
         setColors(subs[0]);
+
+        if (commentsMap && commentsMap.length === 10) {
+          commit.yesMoreComments();
+        }
       } catch (error) {
         console.log(error.message);
         commit.error(error.message);
@@ -273,6 +377,61 @@ const DataMod = defineModule({
       }
       commit.endLoading();
     },
+    loadMoreComments: async (
+      context,
+      x: {
+        subName: string;
+        postID: string;
+        sortBy: string;
+        order: number;
+        lastValue: number;
+        lastCreatedAt: number;
+      }
+    ) => {
+      const { commit } = dataActionContext(context);
+      commit.startLoading();
+      try {
+        const res = await fetch(`/gql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+              query Input($name: String, $postID: String, $sortBy: String!, $order: Int!, $lastValue: Int!, $lastCreatedAt: Int!) {
+                  subs(name: $name) {
+                    posts(postID: $postID) {
+                      commentsMap(sortBy: $sortBy, order: $order, lastValue: $lastValue, lastCreatedAt: $lastCreatedAt)
+                      }
+                  }
+              }`,
+            variables: {
+              name: x.subName,
+              postID: x.postID,
+              sortBy: x.sortBy,
+              order: x.order,
+              lastValue: x.lastValue,
+              lastCreatedAt: x.lastCreatedAt,
+            },
+          }),
+        });
+
+        const { errors, data } = await res.json();
+
+        if (errors) throw Error(errors[0].message);
+
+        const commentsMap: Record<string, Comment[]> =
+          data.subs?.[0]?.posts?.[0]?.commentsMap;
+
+        if (commentsMap && commentsMap[x.postID].length < 10) {
+          commit.noMoreComments();
+        }
+
+        commit.addMoreComments(commentsMap);
+      } catch (error) {
+        console.log(error.message);
+        commit.error(error.message);
+      }
+      commit.endLoading();
+    },
   },
   mutations: {
     startLoading(state) {
@@ -286,6 +445,7 @@ const DataMod = defineModule({
     },
     error(state, error: string) {
       state.error = error;
+      setTimeout(() => (state.error = ""), 3000);
     },
     updatePostPoints(state, post: Post) {
       if (state.subs[0]?.posts) {
@@ -331,6 +491,8 @@ const DataMod = defineModule({
 
       state.subs[0].posts[0].commentsMap = { ...commentsMap, ...newComments };
     },
+    yesMoreComments: (state) => (state.moreComments = true),
+    noMoreComments: (state) => (state.moreComments = false),
     clearDataState: (state) => (state.subs = []),
   },
 });

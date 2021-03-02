@@ -47,9 +47,11 @@ module.exports = {
     },
   },
   variants: {
-    backgroundColor: ["dark", "hover", "focus"],
-    textColor: ["dark"],
-    borderColor: ["dark", "hover", "focus"],
+    extend: {
+      backgroundColor: ["dark", "hover", "focus"],
+      textColor: ["dark"],
+      borderColor: ["dark", "hover", "focus"],
+    },
   },
   plugins: [],
 };

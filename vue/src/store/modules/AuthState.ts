@@ -113,7 +113,10 @@ const AuthMod = defineModule({
 
         const { errors, data } = await res.json();
 
-        if (errors) throw Error(errors[0].message);
+        if (errors) {
+          console.log(errors[0].message);
+          return;
+        }
 
         if (!res.ok) throw Error(await res.text());
 

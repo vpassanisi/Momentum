@@ -62,12 +62,7 @@
             </div>
             <div class="text-xl font-medium pl-4">{{ post.title }}</div>
             <div class="p-4">
-              <quill-editor
-                :value="post.body"
-                :theme="'bubble'"
-                :readOnly="true"
-                @input="() => console.log('input event')"
-              />
+              <read-only-editor :value="post.body" />
             </div>
           </div>
         </div>
@@ -127,10 +122,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
 import CommentC from "../components/Comment.vue";
 import About from "../components/About.vue";
-import QuillEditor from "../components/QuillEditor.vue";
+import ReadOnlyEditor from "../components/ReadOnlyEditor.vue";
 import { Sub, Post, Comment } from "../store/modules/types";
 import NewCommentEditor from "../components/NewCommentEditor.vue";
 
@@ -139,7 +133,7 @@ export default defineComponent({
   components: {
     About,
     CommentC,
-    QuillEditor,
+    ReadOnlyEditor,
     NewCommentEditor,
   },
   data() {
@@ -151,11 +145,17 @@ export default defineComponent({
     };
   },
   computed: {
+    lastValueCreatedAt(): number {
+      return this.$store.direct.getters.DataMod.lastValueCreatedAt;
+    },
+    lastValuePoints(): number {
+      return this.$store.direct.getters.DataMod.lastValuePoints;
+    },
     post(): Post | undefined {
       return this.$store.direct.state.DataMod.subs?.[0]?.posts?.[0];
     },
     moreComments(): boolean {
-      return false;
+      return this.$store.direct.state.DataMod.moreComments;
     },
     comments(): Record<string, Comment[]> {
       return (
@@ -177,7 +177,6 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("CommentState", ["getNextComments"]),
     handleUp() {
       if (!this.isAuthenticated || !this.post) return;
 
@@ -206,7 +205,8 @@ export default defineComponent({
         postID: this.$route.params.id as string,
         sortBy: this.sort,
         order: this.order,
-        lastValue: this.$store.direct.getters.DataMod.lastValueCreatedAt,
+        lastValue: 0,
+        lastCreatedAt: 0,
       });
       if (this.isAuthenticated)
         await this.$store.direct.dispatch.getPoints(this.targetIDs);
@@ -219,14 +219,25 @@ export default defineComponent({
         postID: this.$route.params.id as string,
         sortBy: this.sort,
         order: this.order,
-        lastValue: this.$store.direct.getters.DataMod.lastValueCreatedAt,
+        lastValue: 0,
+        lastCreatedAt: 0,
       });
 
       if (this.isAuthenticated)
         await this.$store.direct.dispatch.getPoints(this.targetIDs);
     },
     async handleNextComments() {
-      await this.getNextComments();
+      await this.$store.direct.dispatch.DataMod.loadMoreComments({
+        subName: this.$route.params.sub as string,
+        postID: this.$route.params.id as string,
+        sortBy: this.sort,
+        order: this.order,
+        lastValue:
+          this.sort === "points"
+            ? this.lastValuePoints
+            : this.lastValueCreatedAt,
+        lastCreatedAt: this.$store.direct.getters.DataMod.lastValueCreatedAt,
+      });
       if (this.isAuthenticated)
         await this.$store.direct.dispatch.getPoints(this.targetIDs);
     },
@@ -237,7 +248,8 @@ export default defineComponent({
       postID: this.$route.params.id as string,
       sortBy: this.sort,
       order: this.order,
-      lastValue: this.$store.direct.getters.DataMod.lastValueCreatedAt,
+      lastValue: 0,
+      lastCreatedAt: 0,
     });
 
     if (this.isAuthenticated)

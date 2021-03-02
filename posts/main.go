@@ -13,7 +13,7 @@ func main() {
 	db.ConnectDB()
 
 	http.HandleFunc("/posts", handlers.Posts)
-	http.HandleFunc("/onePost", handlers.OnePost)
+	http.HandleFunc("/newPost", handlers.NewPost)
 
 	fmt.Printf("Posts service is listening on port: %s\n", util.Env.PORT)
 	http.ListenAndServe(":"+util.Env.PORT, nil)
