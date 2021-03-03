@@ -16,6 +16,6 @@ func main() {
 	http.HandleFunc("/newComment", handlers.NewComment)
 	http.HandleFunc("/commentsMap", handlers.CommentsMap)
 
-	fmt.Printf("Posts service is listening on port: %s\n", util.Env.PORT)
+	fmt.Printf("Comments service is listening on port: %s\n", util.Env.PORT)
 	http.ListenAndServe(":"+util.Env.PORT, nil)
 }

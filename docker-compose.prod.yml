@@ -1,15 +1,55 @@
 version: "3.3"
 
 services:
-  gateway:
+  nginx:
     ports:
-      - 80:5000
+      - 80:80
+      - 443:443
+    depends_on:
+      - gateway
+      - vue
+  gateway:
     environment:
       - PORT=5000
       - NODE_ENV=production
-    command: ["node", "./dist/server.js"]
+    command: node ./dist/server.js
   users:
     environment:
       - PORT=5000
       - NODE_ENV=production
-    command: ["node", "./dist/server.js"]
+      - MONGO_URI=${MONGO_URI}
+      - MONGO_DB=${MONGO_DB}
+      - JWT_SECRET=${JWT_SECRET}
+    command: node ./dist/server.js
+  subs:
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}
+    command: go run main.go
+    build:
+      target: base
+  posts:
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}
+    command: go run main.go
+    build:
+      target: base
+  comments:
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}
+    command: go run main.go
+    build:
+      target: base
+  vue:
+    build: ./vue
+    command: node ./dist/server.js
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+  points:
+    command: python3 run.py
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}

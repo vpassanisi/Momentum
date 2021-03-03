@@ -3,12 +3,6 @@ version: "3.3"
 services:
   nginx:
     build: ./nginx
-    ports:
-      - 80:80
-      - 443:443
-    depends_on:
-      - gateway
-      - vue
   gateway:
     build: ./gateway
   users:
