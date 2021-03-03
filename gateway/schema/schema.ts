@@ -546,6 +546,43 @@ const schema = new GraphQLSchema({
           return json;
         },
       },
+      newSub: {
+        type: GraphQLNonNull(
+          new GraphQLObjectType({
+            name: "newSubReturnType",
+            fields: {
+              subName: { type: GraphQLNonNull(GraphQLString) },
+            },
+          })
+        ),
+        args: {
+          name: { type: GraphQLNonNull(GraphQLString) },
+          description: { type: GraphQLNonNull(GraphQLString) },
+          banner: { type: GraphQLNonNull(GraphQLString) },
+          icon: { type: GraphQLNonNull(GraphQLString) },
+          colorPrimary: { type: GraphQLNonNull(GraphQLString) },
+          colorPrimaryLight: { type: GraphQLNonNull(GraphQLString) },
+          colorPrimaryDark: { type: GraphQLNonNull(GraphQLString) },
+        },
+        async resolve(parent, args, ctx, info) {
+          const token = ctx.cookies.get("token");
+          if (!token) throw Error("Unauthorized");
+
+          args.token = token;
+
+          const res = await fetch("http://subs:5000/newSub", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args),
+          });
+
+          if (!res.ok) throw Error(await res.text());
+
+          const json = await res.json();
+
+          return json;
+        },
+      },
     },
   }),
 });

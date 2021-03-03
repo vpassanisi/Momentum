@@ -1,0 +1,122 @@
+/*! @import */
+@tailwind base;
+
+h1 {
+  @apply text-2xl;
+}
+
+h2 {
+  @apply text-xl;
+}
+
+h3 {
+  @apply text-lg;
+}
+
+blockquote {
+  @apply ml-4;
+  @apply pl-2;
+  @apply border-l-2;
+  @apply italic;
+}
+
+a {
+  @apply underline;
+  @apply cursor-pointer;
+}
+
+@tailwind components;
+@tailwind utilities;
+
+.min-w-12 {
+  min-width: 3rem;
+}
+
+.min-w-6 {
+  min-width: 1.5rem;
+}
+
+.modal-bg-fade-enter-from,
+.modal-bg-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-bg-fade-enter-active,
+.modal-bg-fade-leave-active {
+  transition: opacity 0.15s ease-in-out;
+}
+
+.modal-content-fade-enter-from,
+.modal-content-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-content-fade-enter-active,
+.modal-content-fade-leave-active {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateX(-45vw);
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.15s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease-in-out;
+}
+
+.progress-line,
+.progress-line:before {
+  height: 3px;
+  width: 100%;
+}
+.progress-line {
+  background-color: #90caf9;
+  display: -webkit-flex;
+  display: flex;
+}
+.progress-line:before {
+  background-color: #1976d2;
+  content: "";
+  -webkit-animation: running-progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: running-progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@-webkit-keyframes running-progress {
+  0% {
+    margin-left: 0px;
+    margin-right: 100%;
+  }
+  50% {
+    margin-left: 25%;
+    margin-right: 0%;
+  }
+  100% {
+    margin-left: 100%;
+    margin-right: 0;
+  }
+}
+@keyframes running-progress {
+  0% {
+    margin-left: 0px;
+    margin-right: 100%;
+  }
+  50% {
+    margin-left: 25%;
+    margin-right: 0%;
+  }
+  100% {
+    margin-left: 100%;
+    margin-right: 0;
+  }
+}
