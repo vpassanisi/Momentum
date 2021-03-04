@@ -201,7 +201,7 @@ const schema = new GraphQLSchema({
             sameSite: "strict",
           };
 
-          if (env.NODE_ENV === "production") options.secure = true;
+          // if (env.NODE_ENV === "production") options.secure = true;
 
           ctx.cookies.set("token", "", options);
 
