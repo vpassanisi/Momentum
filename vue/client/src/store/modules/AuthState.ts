@@ -25,7 +25,7 @@ const AuthMod = defineModule({
       const { commit } = authActionContext(context); // eslint-disable-line
       commit.startLoading();
       try {
-        const res = await fetch("http://localhost/gql", {
+        const res = await fetch("/gql", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
