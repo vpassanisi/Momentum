@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
@@ -46,8 +45,6 @@ func CommentsMap(w http.ResponseWriter, req *http.Request) {
 	limitStage := bson.D{{"$limit", 10}}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Users"}, {"localField", "user"}, {"foreignField", "_id"}, {"as", "user"}}}}
 	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$user"}, {"preserveNullAndEmptyArrays", false}}}}
-
-	log.Print(sortStage)
 
 	rootCommentsCursor, err := db.Client.Database("Project-S").Collection("Comments").Aggregate(req.Context(), mongo.Pipeline{sortStage, matchStage, limitStage, lookupStage, unwindStage})
 	if err != nil {
