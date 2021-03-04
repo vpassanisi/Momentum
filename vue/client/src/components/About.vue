@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { Sub } from "@/store/modules/types";
+import { Sub } from "../store/modules/types";
 import { defineComponent } from "vue";
 
 export default defineComponent({
