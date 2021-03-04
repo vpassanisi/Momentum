@@ -3,10 +3,6 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
 COPY . .
-WORKDIR /usr/src/app/client
-RUN npm install
-WORKDIR /usr/src/app
-RUN npm run buildClient
 RUN npx tsc -p ./tsconfig.json
 
 FROM node:12
