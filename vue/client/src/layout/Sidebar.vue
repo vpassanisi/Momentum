@@ -11,7 +11,7 @@
           @click="(e) => e.stopPropagation()"
         >
           <div
-            class="flex items-center justify-center h-20 border-b broder-gray-400 dark:border-gray-700 w-full"
+            class="flex items-center justify-center h-20 border-b broder-gray-400 dark:border-gray-700 w-full py-2"
           >
             <DarkModeToggle />
           </div>
@@ -19,30 +19,21 @@
             <button
               v-if="isAuthenticated"
               class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
-              @click="
-                () => {
-                  handleLogout();
-                  close();
-                }
-              "
+              @click="logout"
             >
               LOG OUT
             </button>
             <button
               v-if="!isAuthenticated"
               class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
-              @click="
-                () => {
-                  close();
-                  openLoginModal();
-                }
-              "
+              @click="openLoginModal"
             >
               LOG IN
             </button>
             <button
               v-if="!isAuthenticated"
               class="flex flex-row items-center justify-start focus:outline-none py-3 px-2 border-b border-gray-300 dark:border-gray-600"
+              @click="openRegisterModal"
             >
               SIGN UP
             </button>
@@ -56,18 +47,26 @@
                 </div>
               </template>
               <template v-slot:content>
-                <button
-                  v-if="isAuthenticated"
+                <router-link
+                  v-if="
+                    isAuthenticated &&
+                      $route.name !== 'Create Post' &&
+                      $route.params.sub
+                  "
                   class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
+                  @click="close"
+                  :to="{ path: `/s/${$route.params.sub}/create` }"
                 >
-                  <i class="material-icons mr-2">create</i> New Post
-                </button>
-                <button
-                  v-if="isAuthenticated"
+                  <i class="material-icons mr-2">create</i> Create Post
+                </router-link>
+                <router-link
+                  v-if="isAuthenticated && $route.name !== 'Create Sub'"
                   class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
+                  @click="close"
+                  :to="{ path: `/subs/create` }"
                 >
-                  <i class="material-icons mr-2">create</i> New Sub
-                </button>
+                  <i class="material-icons mr-2">create</i> Create Sub
+                </router-link>
                 <button
                   v-if="$route.name !== 'Home'"
                   class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
@@ -91,9 +90,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
-import DarkModeToggle from "@/components/DarkModeToggle.vue";
-import Collapse from "@/components/Collapse.vue";
+import DarkModeToggle from "../components/DarkModeToggle.vue";
+import Collapse from "../components/Collapse.vue";
 
 export default defineComponent({
   name: "Sidebar",
@@ -107,19 +105,29 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("AuthState", ["isAuthenticated"]),
-    ...mapState("DarkMode", ["isDarkMode"]),
+    isAuthenticated(): boolean {
+      return this.$store.direct.state.AuthMod.isAuthenticated;
+    },
+    sidebar(): boolean {
+      return this.$store.direct.state.EventMod.sidebar;
+    },
   },
   methods: {
     close() {
       this.showSidebar = false;
-      this.$emit("closeSidebar");
+      this.$store.direct.commit.closeSidebar();
     },
     openLoginModal() {
-      this.$emit("openLoginModal");
+      this.$store.direct.commit.openLoginModal();
+      this.close();
     },
-    handleLogout() {
-      this.$emit("logout");
+    openRegisterModal() {
+      this.$store.direct.commit.openRegisterModal();
+      this.close();
+    },
+    logout() {
+      this.$store.direct.dispatch.logout();
+      this.close();
     },
   },
 });

@@ -2,12 +2,11 @@
   <div class="flex items-center justify-center px-1 toggleWrapper">
     <input
       type="checkbox"
-      class="dn"
-      id="dn"
-      v-model="checked"
-      @change="handleInputChange($event.target.checked)"
+      :id="id"
+      :checked="isDarkMode"
+      @change="toggleDarkMode"
     />
-    <label for="dn" class="toggle">
+    <label :for="id" class="toggle">
       <span class="toggle__handler">
         <span class="crater crater--1"></span>
         <span class="crater crater--2"></span>
@@ -30,7 +29,7 @@ const Component = defineComponent({
   name: "DarkModeToggle",
   data() {
     return {
-      checked: this.$store.direct.state.DarkModeMod.isDarkMode,
+      id: "",
     };
   },
   computed: {
@@ -48,9 +47,9 @@ const Component = defineComponent({
     toggleDarkMode() {
       this.isDarkMode ? this.turnOff() : this.turnOn();
     },
-    handleInputChange(e: boolean) {
-      this.isDarkMode ? this.turnOff() : this.turnOn();
-    },
+  },
+  mounted() {
+    this.id = Math.random().toString();
   },
 });
 export default Component;

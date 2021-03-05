@@ -149,12 +149,7 @@
       </div>
       <LoginModal v-show="loginModal" @closeModal="closeLoginModal" />
       <RegisterModal v-show="registerModal" @closeModal="closeRegisterModal" />
-      <Sidebar
-        v-show="sidebar"
-        @logout="handleLogout"
-        @openLoginModal="openLoginModal"
-        @closeSidebar="closeSidebar"
-      />
+      <Sidebar v-show="sidebar" />
       <Error />
     </div>
     <div
@@ -167,12 +162,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import DarkModeToggle from "@/components/DarkModeToggle.vue";
-import LoginModal from "@/components/LoginModal.vue";
-import RegisterModal from "@/components/RegisterModal.vue";
-import Sidebar from "@/layout/Sidebar.vue";
-import Error from "@/layout/Error.vue";
-import DropDown from "@/components/DropDown.vue";
+import DarkModeToggle from "../components/DarkModeToggle.vue";
+import LoginModal from "../components/LoginModal.vue";
+import RegisterModal from "../components/RegisterModal.vue";
+import Sidebar from "../layout/Sidebar.vue";
+import Error from "../layout/Error.vue";
+import DropDown from "../components/DropDown.vue";
 
 export default defineComponent({
   name: "Navbar",
@@ -237,7 +232,7 @@ export default defineComponent({
       this.$store.direct.commit.openLoginModal();
     },
     handleLogout() {
-      this.logout;
+      this.$store.direct.commit.logout();
     },
   },
   watch: {
