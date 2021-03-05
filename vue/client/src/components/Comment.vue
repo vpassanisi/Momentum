@@ -46,7 +46,7 @@
       />
     </div>
     <div class="w-full">
-      <span class="pl-4 text-sm text-gray-500">
+      <span class="inline-block pl-4 text-sm text-gray-500">
         {{
           `${comment.user.name} • ${comment.points} Points • ${formatedTime} ago`
         }}

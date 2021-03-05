@@ -53,7 +53,7 @@
                       $route.name !== 'Create Post' &&
                       $route.params.sub
                   "
-                  class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
+                  class="flex flex-row items-center justify-start no-underline w-full py-3 px-2"
                   @click="close"
                   :to="{ path: `/s/${$route.params.sub}/create` }"
                 >
@@ -61,7 +61,7 @@
                 </router-link>
                 <router-link
                   v-if="isAuthenticated && $route.name !== 'Create Sub'"
-                  class="flex flex-row items-center justify-start focus:outline-none w-full py-3 px-2"
+                  class="flex flex-row items-center justify-start no-underline w-full py-3 px-2"
                   @click="close"
                   :to="{ path: `/subs/create` }"
                 >

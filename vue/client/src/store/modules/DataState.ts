@@ -523,8 +523,13 @@ const DataMod = defineModule({
     },
     addNewComment: (state, newComment: Comment) => {
       const commentsMap = state.subs[0]?.posts?.[0]?.commentsMap;
+      const post = state.subs[0]?.posts?.[0];
 
-      if (!commentsMap) return;
+      if (!commentsMap || !post) return;
+
+      if (!commentsMap[post._id]) {
+        commentsMap[post._id] = [];
+      }
 
       commentsMap[newComment._id] = [];
 

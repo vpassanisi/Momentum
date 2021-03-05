@@ -72,7 +72,7 @@
               >
                 <router-link
                   v-if="isAuthenticated && $route.name !== 'Create Sub'"
-                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  class="flex flex-row items-center justify-start w-full p-4 no-underline"
                   :to="{ path: `/subs/create` }"
                 >
                   <i class="material-icons mr-2">create</i> Create Sub
@@ -83,14 +83,14 @@
                       $route.name !== 'Create Post' &&
                       $route.params.sub
                   "
-                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  class="flex flex-row items-center justify-start w-full p-4 no-underline"
                   :to="{ path: `/s/${$route.params.sub}/create` }"
                 >
                   <i class="material-icons mr-2">create</i> Create Post
                 </router-link>
                 <router-link
                   v-if="$route.name !== 'Home'"
-                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  class="flex flex-row items-center justify-start w-full p-4 no-underline"
                   :to="{ path: `/` }"
                 >
                   <i class="material-icons mr-2">home</i>Home
