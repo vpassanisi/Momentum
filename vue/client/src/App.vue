@@ -29,5 +29,10 @@ export default defineComponent({
       colorsRef: this.$refs.colors,
     };
   },
+  watch: {
+    $route(to, from) {
+      document.title = to.params.sub || to.meta.title || "Momentum";
+    },
+  },
 });
 </script>

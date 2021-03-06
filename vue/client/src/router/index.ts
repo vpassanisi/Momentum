@@ -1,41 +1,42 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import Home from "../views/Home.vue";
-import Sub from "../views/Sub.vue";
-import Thread from "../views/Thread.vue";
-import CreatePost from "../views/CreatePost.vue";
-import CreateSub from "../views/CreateSub.vue";
 import NotFound from "../views/NotFound.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "Home",
-    component: Home,
+    component: () => import("../views/Home.vue"),
+    meta: {
+      title: "Home",
+    },
   },
   {
     path: "/s/:sub",
     name: "Sub",
-    component: Sub,
+    component: () => import("../views/Sub.vue"),
   },
   {
     path: "/s/:sub/comments/:id",
     name: "Comments",
-    component: Thread,
+    component: () => import("../views/Thread.vue"),
   },
   {
     path: "/s/:sub/create",
     name: "Create Post",
-    component: CreatePost,
+    component: () => import("../views/CreatePost.vue"),
   },
   {
     path: "/subs/create",
     name: "Create Sub",
-    component: CreateSub,
+    component: () => import("../views/CreateSub.vue"),
   },
   {
     path: "/NotFound",
     name: "Not Found",
     component: NotFound,
+    meta: {
+      title: "Not Found",
+    },
   },
 ];
 
