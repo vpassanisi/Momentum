@@ -26,5 +26,6 @@ This is a full stack application using Vue, TypeScript, Go, Python, Node, Graphq
 ### Todo
 
 - sometimes the comments service does not order the comments correctly. I have tested the problem down to the mongodb go driver. The output of the dirver is not always stable. It is a rare problem but it could be a problem with how the driver handles aggregation.
+- points service needs a WSGI porduction server
 - users need roles for subdirectories and the ability to delete and edit posts/comments
 - ai inference for sentiment of comments and posts
