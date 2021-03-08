@@ -55,7 +55,7 @@
             </g>
           </svg>
 
-          <button class="h-full mr-4">Momentum</button>
+          <button class="h-full mr-4 focus:outline-none">Momentum</button>
 
           <DropDown class="hidden md:inline-block">
             <template v-slot:button>
@@ -68,11 +68,11 @@
             </template>
             <template v-slot:content>
               <div
-                class="absolute left-0 w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
+                class="absolute left-0 w-max-content bg-gray-50 dark:bg-dark-gray-800 rounded mt-1 shadow-default"
               >
                 <router-link
                   v-if="isAuthenticated && $route.name !== 'Create Sub'"
-                  class="flex flex-row items-center justify-start w-full p-4 no-underline"
+                  class="flex flex-row items-center justify-start w-full p-4 no-underline hover:text-gray-400 dark:hover:text-gray-600 transition-text-color duration-200 ease-in-out"
                   :to="{ path: `/subs/create` }"
                 >
                   <i class="material-icons mr-2">create</i> Create Sub
@@ -83,14 +83,14 @@
                       $route.name !== 'Create Post' &&
                       $route.params.sub
                   "
-                  class="flex flex-row items-center justify-start w-full p-4 no-underline"
+                  class="flex flex-row items-center justify-start w-full p-4 no-underline hover:text-gray-400 dark:hover:text-gray-600 transition-text-color duration-200 ease-in-out"
                   :to="{ path: `/s/${$route.params.sub}/create` }"
                 >
                   <i class="material-icons mr-2">create</i> Create Post
                 </router-link>
                 <router-link
                   v-if="$route.name !== 'Home'"
-                  class="flex flex-row items-center justify-start w-full p-4 no-underline"
+                  class="flex flex-row items-center justify-start w-full p-4 no-underline hover:text-gray-400 dark:hover:text-gray-600 transition-text-color duration-200 ease-in-out"
                   :to="{ path: `/` }"
                 >
                   <i class="material-icons mr-2">home</i>Home
@@ -112,25 +112,25 @@
             </template>
             <template v-slot:content>
               <div
-                class="absolute right-0 w-max-content bg-white dark:bg-dark-gray-900 rounded mt-1 border border-blue-500"
+                class="absolute right-0 w-max-content bg-gray-50 dark:bg-dark-gray-800 rounded mt-1"
               >
                 <button
                   v-if="!isAuthenticated"
-                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none hover:text-gray-400 dark:hover:text-gray-600 transition-text-color duration-200 ease-in-out"
                   @click="openLoginModal"
                 >
                   <i class="material-icons mr-2">login</i> Login
                 </button>
                 <button
                   v-if="!isAuthenticated"
-                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none hover:text-gray-400 dark:hover:text-gray-600 transition-text-color duration-200 ease-in-out"
                   @click="openRegisterModal"
                 >
                   <i class="material-icons mr-2">person_add</i> Sign Up
                 </button>
                 <button
                   v-if="isAuthenticated"
-                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none"
+                  class="flex flex-row items-center justify-start w-full p-4 focus:outline-none hover:text-gray-400 dark:hover:text-gray-600 transition-text-color duration-200 ease-in-out"
                   @click="logout"
                 >
                   <i class="material-icons mr-2">west</i> Log Out

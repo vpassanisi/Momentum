@@ -1,5 +1,8 @@
 <template>
-  <div class="relative border border-blue-500 rounded" @click="handleClick">
+  <div
+    class="relative bg-blue-50 dark:bg-dark-gray-800 border border-blue-50 dark:border-dark-gray-800 hover:border-gray-400 dark:hover:border-gray-400 rounded"
+    @click="handleClick"
+  >
     <slot name="button" />
 
     <transition name="dropdown" @after-enter="isOpen = true">

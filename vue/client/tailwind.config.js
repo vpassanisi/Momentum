@@ -42,7 +42,7 @@ module.exports = {
         button: "background-color, margin",
         borderColor: "border-color",
         nav: "height, padding",
-        bubblemenu: "opacity, visibility",
+        "text-color": "color",
       },
     },
   },
