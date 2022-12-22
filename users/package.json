@@ -16,7 +16,7 @@
     "@types/koa-mongo": "^1.9.0",
     "@types/koa-router": "^7.4.1",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
     "koa-mongo": "^1.9.3",
